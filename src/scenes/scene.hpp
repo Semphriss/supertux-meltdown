@@ -14,41 +14,30 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef _HEADER_STMELTDOWN_GAME_GAMEMANAGER_HPP
-#define _HEADER_STMELTDOWN_GAME_GAMEMANAGER_HPP
+#ifndef _HEADER_STMELTDOWN_SCENES_SCENE_HPP
+#define _HEADER_STMELTDOWN_SCENES_SCENE_HPP
 
-#include <memory>
-#include <vector>
+class DrawingContext;
+class GameManager;
+union SDL_Event;
 
-#include "scenes/scene.hpp"
-#include "video/window.hpp"
-
-class GameManager final
+class Scene
 {
 public:
-  GameManager() = default;
+  Scene() = delete;
+  Scene(GameManager& game_manager);
+  virtual ~Scene() = default;
 
-  int run();
+  virtual void event(const SDL_Event& event) = 0;
+  virtual void update(float dt_sec) = 0;
+  virtual void draw(DrawingContext& context) const = 0;
 
-  void push_scene(std::unique_ptr<Scene> scene);
-  void pop_scene();
-
-  const Window& get_window() const;
-
-private:
-  int run_loops();
-
-  void handle_events();
-  void handle_update();
-  void handle_draw();
+protected:
+  GameManager& m_game_manager;
 
 private:
-  std::unique_ptr<Window> m_window;
-  std::vector<std::unique_ptr<Scene>> m_scenes;
-
-private:
-  GameManager(const GameManager&) = delete;
-  GameManager& operator=(const GameManager&) = delete;
+  Scene(const Scene&) = delete;
+  Scene& operator=(const Scene&) = delete;
 };
 
 #endif

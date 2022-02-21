@@ -14,41 +14,9 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef _HEADER_STMELTDOWN_GAME_GAMEMANAGER_HPP
-#define _HEADER_STMELTDOWN_GAME_GAMEMANAGER_HPP
-
-#include <memory>
-#include <vector>
-
 #include "scenes/scene.hpp"
-#include "video/window.hpp"
 
-class GameManager final
+Scene::Scene(GameManager& game_manager) :
+  m_game_manager(game_manager)
 {
-public:
-  GameManager() = default;
-
-  int run();
-
-  void push_scene(std::unique_ptr<Scene> scene);
-  void pop_scene();
-
-  const Window& get_window() const;
-
-private:
-  int run_loops();
-
-  void handle_events();
-  void handle_update();
-  void handle_draw();
-
-private:
-  std::unique_ptr<Window> m_window;
-  std::vector<std::unique_ptr<Scene>> m_scenes;
-
-private:
-  GameManager(const GameManager&) = delete;
-  GameManager& operator=(const GameManager&) = delete;
-};
-
-#endif
+}

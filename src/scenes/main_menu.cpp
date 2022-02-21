@@ -14,41 +14,48 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef _HEADER_STMELTDOWN_GAME_GAMEMANAGER_HPP
-#define _HEADER_STMELTDOWN_GAME_GAMEMANAGER_HPP
+#include "scenes/main_menu.hpp"
 
-#include <memory>
-#include <vector>
+#include "make_unique.hpp"
 
-#include "scenes/scene.hpp"
-#include "video/window.hpp"
+#include "game/game_manager.hpp"
+#include "video/drawing_context.hpp"
 
-class GameManager final
+MainMenu::MainMenu(GameManager& game_manager) :
+  Scene(game_manager)
 {
-public:
-  GameManager() = default;
+}
 
-  int run();
+void
+MainMenu::event(const SDL_Event& event)
+{
+  switch(event.type)
+  {
+    case SDL_KEYDOWN:
+      switch(event.key.keysym.sym)
+      {
+        case SDLK_ESCAPE:
+          m_game_manager.pop_scene();
+          break;
 
-  void push_scene(std::unique_ptr<Scene> scene);
-  void pop_scene();
+        default:
+          break;
+      }
+      break;
 
-  const Window& get_window() const;
+    default:
+      break;
+  }
+}
 
-private:
-  int run_loops();
+void
+MainMenu::update(float dt_sec)
+{
+}
 
-  void handle_events();
-  void handle_update();
-  void handle_draw();
-
-private:
-  std::unique_ptr<Window> m_window;
-  std::vector<std::unique_ptr<Scene>> m_scenes;
-
-private:
-  GameManager(const GameManager&) = delete;
-  GameManager& operator=(const GameManager&) = delete;
-};
-
-#endif
+void
+MainMenu::draw(DrawingContext& context) const
+{
+  context.draw_filled_rect(m_game_manager.get_window().get_size(), Color(),
+                           Renderer::Blend::NONE, 0);
+}

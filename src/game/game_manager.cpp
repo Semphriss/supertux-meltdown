@@ -16,17 +16,15 @@
 
 #include "game/game_manager.hpp"
 
+#include "make_unique.hpp"
+
 #include "SDL.h"
 
+#include "scenes/main_menu.hpp"
 #include "util/color.hpp"
 #include "util/log.hpp"
 #include "video/drawing_context.hpp"
-
-GameManager::GameManager() :
-  m_window(),
-  m_quit(false)
-{
-}
+#include <memory>
 
 int
 GameManager::run()
@@ -37,6 +35,8 @@ GameManager::run()
   m_window->set_title("SuperTux Meltdown");
   m_window->set_resizable(true);
 
+  push_scene(std::make_unique<MainMenu>(*this));
+
   run_loops();
 
   m_window.reset();
@@ -46,13 +46,39 @@ GameManager::run()
   return 0;
 }
 
+const Window&
+GameManager::get_window() const
+{
+  return *m_window;
+}
+
+void
+GameManager::push_scene(std::unique_ptr<Scene> scene)
+{
+  m_scenes.push_back(std::move(scene));
+}
+
+void
+GameManager::pop_scene()
+{
+  m_scenes.pop_back();
+}
+
 int
 GameManager::run_loops()
 {
-  while(!m_quit)
+  while(!m_scenes.empty())
   {
     handle_events();
+
+    if (m_scenes.empty())
+      break;
+
     handle_update();
+
+    if (m_scenes.empty())
+      break;
+
     handle_draw();
 
     SDL_Delay(1);
@@ -65,12 +91,14 @@ void
 GameManager::handle_events()
 {
   SDL_Event e;
-  while (SDL_PollEvent(&e))
+  while (SDL_PollEvent(&e) && !m_scenes.empty())
   {
+    m_scenes.back()->event(e);
+
     switch (e.type)
     {
       case SDL_QUIT:
-        m_quit = true;
+        m_scenes.clear();
         break;
 
       default:
@@ -82,16 +110,14 @@ GameManager::handle_events()
 void
 GameManager::handle_update()
 {
+  // TODO: Handle time
+  m_scenes.back()->update(0.f);
 }
 
 void
 GameManager::handle_draw()
 {
   DrawingContext context(m_window->get_renderer());
-
-  context.draw_filled_rect(m_window->get_size(), Color(),
-                            Renderer::Blend::NONE, 0);
-
+  m_scenes.back()->draw(context);
   context.render();
 }
-
