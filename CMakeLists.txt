@@ -19,3 +19,9 @@ project(supertux-meltdown)
 cmake_minimum_required(VERSION 3.0)
 
 add_executable(supertux-meltdown ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
+
+# Harbor
+option(HARBOR_BUILD_EXEC OFF)
+option(HARBOR_BUILD_TEST OFF)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/harbor)
+target_link_libraries(supertux-meltdown PUBLIC harbor_lib)

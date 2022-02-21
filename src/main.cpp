@@ -14,10 +14,29 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <iostream>
+#include "SDL.h"
+
+#include "video/window.hpp"
 
 int main()
 {
-  std::cout << "Hello, world!" << std::endl;
+  SDL_Init(SDL_INIT_VIDEO);
+
+  auto w = Window::create_window(Window::VideoSystem::SDL);
+  w->set_visible(true);
+
+  bool quit = false;
+  while (!quit)
+  {
+    SDL_Event e;
+    while (SDL_PollEvent(&e))
+      if (e.type == SDL_QUIT)
+        quit = true;
+
+    SDL_Delay(1);
+  }
+
+  SDL_Quit();
+
   return 0;
 }
