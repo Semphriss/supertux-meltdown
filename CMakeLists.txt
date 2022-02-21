@@ -18,10 +18,21 @@ project(supertux-meltdown)
 
 cmake_minimum_required(VERSION 3.0)
 
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+file(GLOB_RECURSE STM_LIB_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*/*.cpp)
+list(SORT STM_LIB_FILES)
+add_library(supertux-meltdown_lib ${STM_LIB_FILES})
+target_include_directories(supertux-meltdown_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/)
+
 add_executable(supertux-meltdown ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
+target_include_directories(supertux-meltdown PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/)
+target_link_libraries(supertux-meltdown PUBLIC supertux-meltdown_lib)
 
 # Harbor
 option(HARBOR_BUILD_EXEC OFF)
 option(HARBOR_BUILD_TEST OFF)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/harbor)
-target_link_libraries(supertux-meltdown PUBLIC harbor_lib)
+target_link_libraries(supertux-meltdown_lib PUBLIC harbor_lib)

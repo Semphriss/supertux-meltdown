@@ -1,5 +1,5 @@
 //  SuperTux Meltdown - Semphris' take on the popular Linux platformer
-//  Copyright (C) 2022 Semphris <semphris@protonmail.com>
+//  Copyright (C) 2021 Semphris <semphris@protonmail.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -14,9 +14,26 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "game/game_manager.hpp"
+#ifndef _HEADER_STMELTDOWN_GAME_GAMEMANAGER_HPP
+#define _HEADER_STMELTDOWN_GAME_GAMEMANAGER_HPP
 
-int main()
+#include <memory>
+
+#include "video/window.hpp"
+
+class GameManager final
 {
-  GameManager().run();
-}
+public:
+  GameManager() = default;
+
+  int run();
+
+private:
+  std::unique_ptr<Window> m_window;
+
+private:
+  GameManager(const GameManager&) = delete;
+  GameManager& operator=(const GameManager&) = delete;
+};
+
+#endif
