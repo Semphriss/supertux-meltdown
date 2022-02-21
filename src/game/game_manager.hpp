@@ -24,12 +24,20 @@
 class GameManager final
 {
 public:
-  GameManager() = default;
+  GameManager();
 
   int run();
 
 private:
+  int run_loops();
+
+  void handle_events();
+  void handle_update();
+  void handle_draw();
+
+private:
   std::unique_ptr<Window> m_window;
+  bool m_quit;
 
 private:
   GameManager(const GameManager&) = delete;

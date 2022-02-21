@@ -22,6 +22,12 @@
 #include "util/log.hpp"
 #include "video/drawing_context.hpp"
 
+GameManager::GameManager() :
+  m_window(),
+  m_quit(false)
+{
+}
+
 int
 GameManager::run()
 {
@@ -31,30 +37,7 @@ GameManager::run()
   m_window->set_title("SuperTux Meltdown");
   m_window->set_resizable(true);
 
-  bool quit = false;
-  while (!quit)
-  {
-    SDL_Event e;
-    while (SDL_PollEvent(&e))
-    {
-      switch (e.type)
-      {
-        case SDL_QUIT:
-          quit = true;
-          break;
-
-        default:
-          break;
-      }
-    }
-
-    DrawingContext context(m_window->get_renderer());
-    context.draw_filled_rect(m_window->get_size(), Color(),
-                             Renderer::Blend::NONE, 0);
-    context.render();
-
-    SDL_Delay(1);
-  }
+  run_loops();
 
   m_window.reset();
 
@@ -62,3 +45,53 @@ GameManager::run()
 
   return 0;
 }
+
+int
+GameManager::run_loops()
+{
+  while(!m_quit)
+  {
+    handle_events();
+    handle_update();
+    handle_draw();
+
+    SDL_Delay(1);
+  }
+
+  return 0;
+}
+
+void
+GameManager::handle_events()
+{
+  SDL_Event e;
+  while (SDL_PollEvent(&e))
+  {
+    switch (e.type)
+    {
+      case SDL_QUIT:
+        m_quit = true;
+        break;
+
+      default:
+        break;
+    }
+  }
+}
+
+void
+GameManager::handle_update()
+{
+}
+
+void
+GameManager::handle_draw()
+{
+  DrawingContext context(m_window->get_renderer());
+
+  context.draw_filled_rect(m_window->get_size(), Color(),
+                            Renderer::Blend::NONE, 0);
+
+  context.render();
+}
+
