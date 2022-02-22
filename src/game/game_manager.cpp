@@ -21,6 +21,7 @@
 #include "SDL.h"
 
 #include "scenes/main_menu.hpp"
+#include "transitions/transition.hpp"
 #include "util/color.hpp"
 #include "util/log.hpp"
 #include "video/drawing_context.hpp"
@@ -35,7 +36,7 @@ GameManager::run()
   m_window->set_title("SuperTux Meltdown");
   m_window->set_resizable(true);
 
-  push_scene(std::make_unique<MainMenu>(*this));
+  push_scene(std::make_unique<MainMenu>(*this), Transition::Type::DISSOLVE);
 
   m_last_frame = std::chrono::steady_clock::now();
 
@@ -55,30 +56,59 @@ GameManager::get_window() const
 }
 
 void
-GameManager::push_scene(std::unique_ptr<Scene> scene)
+GameManager::push_scene(std::unique_ptr<Scene> scene,
+                        Transition::Type transition, float time)
 {
+  if (m_transition)
+  {
+    log_warn << "Attempt to push scene during a transition" << std::endl;
+    return;
+  }
+
+  auto* from = m_scenes.empty() ? nullptr : m_scenes.back().get();
+  auto* to = scene.get();
+
   m_scenes.push_back(std::move(scene));
+  m_transition = Transition::create_transition(from, to, time, transition);
 }
 
 void
-GameManager::pop_scene()
+GameManager::pop_scene(Transition::Type transition, float time)
 {
+  if (m_transition)
+  {
+    log_warn << "Attempt to pop scene during a transition" << std::endl;
+    return;
+  }
+
+  if (m_scenes.size() < 1)
+  {
+    log_warn << "Cannot pop empty scene stack" << std::endl;
+    return;
+  }
+
+  m_popping_scene = std::move(m_scenes.back());
   m_scenes.pop_back();
+
+  auto* from = m_popping_scene.get();
+  auto* to = m_scenes.empty() ? nullptr : m_scenes.back().get();
+
+  m_transition = Transition::create_transition(from, to, time, transition);
 }
 
 int
 GameManager::run_loops()
 {
-  while(!m_scenes.empty())
+  while(!empty())
   {
     handle_events();
 
-    if (m_scenes.empty())
+    if (empty())
       break;
 
     handle_update();
 
-    if (m_scenes.empty())
+    if (empty())
       break;
 
     handle_draw();
@@ -93,9 +123,16 @@ void
 GameManager::handle_events()
 {
   SDL_Event e;
-  while (SDL_PollEvent(&e) && !m_scenes.empty())
+  while (SDL_PollEvent(&e) && !empty())
   {
-    m_scenes.back()->event(e);
+    if (!m_transition)
+    {
+      m_scenes.back()->event(e);
+    }
+    else if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE)
+    {
+      m_transition = nullptr;
+    }
 
     switch (e.type)
     {
@@ -117,13 +154,36 @@ GameManager::handle_update()
   float dt_sec = static_cast<float>(diff.count()) / 1000000000.f;
   m_last_frame = t;
 
-  m_scenes.back()->update(dt_sec);
+  if(m_transition && m_transition->update(dt_sec))
+  {
+    m_transition = nullptr;
+  }
+
+  if (!m_transition && !m_scenes.empty())
+  {
+    m_scenes.back()->update(dt_sec);
+  }
 }
 
 void
 GameManager::handle_draw()
 {
   DrawingContext context(m_window->get_renderer());
-  m_scenes.back()->draw(context);
+
+  if (m_transition)
+  {
+    m_transition->draw(context);
+  }
+  else
+  {
+    m_scenes.back()->draw(context);
+  }
+
   context.render();
+}
+
+bool
+GameManager::empty() const
+{
+  return m_scenes.empty() && !m_transition;
 }

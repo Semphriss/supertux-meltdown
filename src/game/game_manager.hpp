@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "scenes/scene.hpp"
+#include "transitions/transition.hpp"
 #include "video/window.hpp"
 
 class GameManager final
@@ -31,8 +32,11 @@ public:
 
   int run();
 
-  void push_scene(std::unique_ptr<Scene> scene);
-  void pop_scene();
+  void push_scene(std::unique_ptr<Scene> scene,
+                  Transition::Type transition = Transition::Type::NONE,
+                  float time = .5f);
+  void pop_scene(Transition::Type transition = Transition::Type::NONE,
+                 float time = .5f);
 
   const Window& get_window() const;
 
@@ -43,9 +47,13 @@ private:
   void handle_update();
   void handle_draw();
 
+  bool empty() const;
+
 private:
   std::unique_ptr<Window> m_window;
   std::vector<std::unique_ptr<Scene>> m_scenes;
+  std::unique_ptr<Transition> m_transition;
+  std::unique_ptr<Scene> m_popping_scene;
 
   // steady_clock, because high_resolution_clock is not recommended:
   // https://en.cppreference.com/w/cpp/chrono/high_resolution_clock
