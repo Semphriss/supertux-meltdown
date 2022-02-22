@@ -33,6 +33,10 @@ public:
   virtual void update(float dt_sec) override;
   virtual void draw(DrawingContext& context) const override;
 
+  virtual void enter() override;
+  virtual void leave(bool to_parent) override;
+  virtual bool quit(bool can_abort) override;
+
 private:
   MainMenu(const MainMenu&) = delete;
   MainMenu& operator=(const MainMenu&) = delete;

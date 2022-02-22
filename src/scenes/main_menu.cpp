@@ -61,3 +61,19 @@ MainMenu::draw(DrawingContext& context) const
                            Color(0.7f, 0.9f, 1.0f),
                            Renderer::Blend::NONE, 0);
 }
+
+void
+MainMenu::enter()
+{
+}
+
+void
+MainMenu::leave(bool to_parent)
+{
+}
+
+bool
+MainMenu::quit(bool can_abort)
+{
+  return true;
+}

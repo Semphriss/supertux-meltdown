@@ -32,6 +32,10 @@ public:
   virtual void update(float dt_sec) = 0;
   virtual void draw(DrawingContext& context) const = 0;
 
+  virtual void enter() = 0;
+  virtual void leave(bool to_parent) = 0;
+  virtual bool quit(bool can_abort) = 0;
+
 protected:
   GameManager& m_game_manager;
 

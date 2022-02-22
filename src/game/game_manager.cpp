@@ -70,6 +70,9 @@ GameManager::push_scene(std::unique_ptr<Scene> scene,
 
   m_scenes.push_back(std::move(scene));
   m_transition = Transition::create_transition(from, to, time, transition);
+
+  if (from)
+    from->leave(false);
 }
 
 void
@@ -94,6 +97,8 @@ GameManager::pop_scene(Transition::Type transition, float time)
   auto* to = m_scenes.empty() ? nullptr : m_scenes.back().get();
 
   m_transition = Transition::create_transition(from, to, time, transition);
+
+  from->leave(true);
 }
 
 int
@@ -137,7 +142,17 @@ GameManager::handle_events()
     switch (e.type)
     {
       case SDL_QUIT:
-        m_scenes.clear();
+        for (auto it = m_scenes.rbegin(); it != m_scenes.rend(); it++)
+        {
+          if (!(*it)->quit(true))
+          {
+            break;
+          }
+          else
+          {
+            m_scenes.pop_back();
+          }
+        }
         break;
 
       default:
@@ -157,6 +172,11 @@ GameManager::handle_update()
   if(m_transition && m_transition->update(dt_sec))
   {
     m_transition = nullptr;
+
+    if (!m_scenes.empty())
+    {
+      m_scenes.back()->enter();
+    }
   }
 
   if (!m_transition && !m_scenes.empty())
