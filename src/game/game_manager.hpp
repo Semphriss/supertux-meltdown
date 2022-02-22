@@ -17,6 +17,7 @@
 #ifndef _HEADER_STMELTDOWN_GAME_GAMEMANAGER_HPP
 #define _HEADER_STMELTDOWN_GAME_GAMEMANAGER_HPP
 
+#include <chrono>
 #include <memory>
 #include <vector>
 
@@ -45,6 +46,10 @@ private:
 private:
   std::unique_ptr<Window> m_window;
   std::vector<std::unique_ptr<Scene>> m_scenes;
+
+  // steady_clock, because high_resolution_clock is not recommended:
+  // https://en.cppreference.com/w/cpp/chrono/high_resolution_clock
+  std::chrono::steady_clock::time_point m_last_frame;
 
 private:
   GameManager(const GameManager&) = delete;

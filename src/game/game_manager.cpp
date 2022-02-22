@@ -37,6 +37,8 @@ GameManager::run()
 
   push_scene(std::make_unique<MainMenu>(*this));
 
+  m_last_frame = std::chrono::steady_clock::now();
+
   run_loops();
 
   m_window.reset();
@@ -110,8 +112,12 @@ GameManager::handle_events()
 void
 GameManager::handle_update()
 {
-  // TODO: Handle time
-  m_scenes.back()->update(0.f);
+  auto t = std::chrono::steady_clock::now();
+  auto diff = t - m_last_frame;
+  float dt_sec = static_cast<float>(diff.count()) / 1000000000.f;
+  m_last_frame = t;
+
+  m_scenes.back()->update(dt_sec);
 }
 
 void
