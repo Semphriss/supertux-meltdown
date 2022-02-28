@@ -20,6 +20,7 @@
 
 #include "SDL.h"
 
+#include "game/resource_manager.hpp"
 #include "scenes/main_menu.hpp"
 #include "transitions/transition.hpp"
 #include "util/color.hpp"
@@ -30,7 +31,7 @@
 int
 GameManager::run()
 {
-  SDL_Init(SDL_INIT_VIDEO);
+  ResourceManager::get_resource_manager();
 
   m_window = Window::create_window(Window::VideoSystem::SDL);
   m_window->set_title("SuperTux Meltdown");
@@ -41,10 +42,6 @@ GameManager::run()
   m_last_frame = std::chrono::steady_clock::now();
 
   run_loops();
-
-  m_window.reset();
-
-  SDL_Quit();
 
   return 0;
 }
