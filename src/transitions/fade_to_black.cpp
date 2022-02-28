@@ -1,5 +1,5 @@
 //  SuperTux Meltdown - Semphris' take on the popular Linux platformer
-//  Copyright (C) 2021-2022 Semphris <semphris@protonmail.com>
+//  Copyright (C) 2021-2022 Semphris <semphris@semphris.com>
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
