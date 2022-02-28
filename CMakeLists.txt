@@ -22,6 +22,9 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
+option(STM_INSTALL_LIBRARY "Install the Meltdown library" ${BUILD_SHARED_LIBS})
+
 file(GLOB_RECURSE STM_LIB_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*/*.cpp)
 list(SORT STM_LIB_FILES)
 add_library(supertux-meltdown_lib ${STM_LIB_FILES})
@@ -34,5 +37,12 @@ target_link_libraries(supertux-meltdown PUBLIC supertux-meltdown_lib)
 # Harbor
 option(HARBOR_BUILD_EXEC OFF)
 option(HARBOR_BUILD_TEST OFF)
+option(HARBOR_INSTALL_DATA OFF)
+option(HARBOR_INSTALL_LIB ${BUILD_SHARED_LIBS})
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/harbor)
 target_link_libraries(supertux-meltdown_lib PUBLIC harbor_lib)
+
+install(TARGETS supertux-meltdown)
+if(STM_INSTALL_LIBRARY)
+  install(TARGETS supertux-meltdown_lib)
+endif(STM_INSTALL_LIBRARY)
