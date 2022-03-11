@@ -22,13 +22,13 @@
 class ResourceManager final
 {
 public:
-  static ResourceManager& get_resource_manager();
+  static ResourceManager& get_resource_manager(const char* arg0);
 
 public:
   ~ResourceManager();
 
 private:
-  ResourceManager();
+  ResourceManager(const char* arg0);
 
 private:
   ResourceManager(const ResourceManager&) = delete;

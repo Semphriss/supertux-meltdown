@@ -18,6 +18,7 @@
 
 #include <memory>
 
+#include <physfs.h>
 #include "SDL.h"
 #include "SDL_image.h"
 #include "SDL_ttf.h"
@@ -26,9 +27,9 @@
 #include "video/font.hpp"
 
 ResourceManager&
-ResourceManager::get_resource_manager()
+ResourceManager::get_resource_manager(const char* arg0)
 {
-  static ResourceManager rm;
+  static ResourceManager rm(arg0);
   return rm;
 }
 
@@ -40,10 +41,16 @@ ResourceManager::~ResourceManager()
   SDL_Quit();
 }
 
-ResourceManager::ResourceManager()
+ResourceManager::ResourceManager(const char* arg0)
 {
   log_info << "SDL " << SDL_MAJOR_VERSION << "." << SDL_MINOR_VERSION << "."
            << SDL_PATCHLEVEL << std::endl;
+
+  if (!PHYSFS_init(arg0))
+  {
+    throw std::runtime_error("Could not initialize PhysFS: " + std::string(
+                             PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode())));
+  }
 
   if (SDL_Init(SDL_INIT_VIDEO))
   {

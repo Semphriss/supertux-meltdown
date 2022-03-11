@@ -38,6 +38,9 @@ public:
   virtual bool quit(bool can_abort) override;
 
 private:
+  std::string m_image_path;
+
+private:
   MainMenu(const MainMenu&) = delete;
   MainMenu& operator=(const MainMenu&) = delete;
 };

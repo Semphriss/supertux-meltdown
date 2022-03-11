@@ -16,22 +16,26 @@
 
 #include "game/game_manager.hpp"
 
+#include <memory>
+
 #include "make_unique.hpp"
 
 #include "SDL.h"
 
+#include "fs/file.hpp"
 #include "game/resource_manager.hpp"
 #include "scenes/main_menu.hpp"
 #include "transitions/transition.hpp"
 #include "util/color.hpp"
 #include "util/log.hpp"
 #include "video/drawing_context.hpp"
-#include <memory>
 
 int
-GameManager::run()
+GameManager::run(int argc, char** argv)
 {
-  ResourceManager::get_resource_manager();
+  ResourceManager::get_resource_manager(argv[0]);
+
+  setup_filesystem();
 
   m_window = Window::create_window(Window::VideoSystem::SDL);
   m_window->set_title("SuperTux Meltdown");
@@ -96,6 +100,18 @@ GameManager::pop_scene(Transition::Type transition, float time)
   m_transition = Transition::create_transition(from, to, time, transition);
 
   from->leave(true);
+}
+
+void
+GameManager::setup_filesystem() const
+{
+  auto local_path = File::get_pref_dir("Semphris", "SuperTux Meltdown");
+  auto src_path = File::build_os_path({File::get_base_dir(), "../data"});
+
+  File::mount(local_path);
+  File::mount(src_path);
+
+  File::set_write_dir(local_path);
 }
 
 int

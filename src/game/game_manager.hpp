@@ -30,7 +30,7 @@ class GameManager final
 public:
   GameManager() = default;
 
-  int run();
+  int run(int argc, char** argv);
 
   void push_scene(std::unique_ptr<Scene> scene,
                   Transition::Type transition = Transition::Type::NONE,
@@ -41,6 +41,8 @@ public:
   const Window& get_window() const;
 
 private:
+  void setup_filesystem() const;
+
   int run_loops();
 
   void handle_events();

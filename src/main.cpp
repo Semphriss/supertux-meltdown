@@ -16,7 +16,7 @@
 
 #include "game/game_manager.hpp"
 
-int main()
+int main(int argc, char** argv)
 {
-  GameManager().run();
+  GameManager().run(argc, argv);
 }

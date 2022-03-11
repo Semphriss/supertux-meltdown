@@ -18,12 +18,14 @@
 
 #include "make_unique.hpp"
 
+#include "fs/file.hpp"
 #include "game/game_manager.hpp"
 #include "transitions/transition.hpp"
 #include "video/drawing_context.hpp"
 
 MainMenu::MainMenu(GameManager& game_manager) :
-  Scene(game_manager)
+  Scene(game_manager),
+  m_image_path(File::get_os_path("images/background.png"))
 {
 }
 
@@ -60,6 +62,11 @@ MainMenu::draw(DrawingContext& context) const
   context.draw_filled_rect(m_game_manager.get_window().get_size(),
                            Color(0.7f, 0.9f, 1.0f),
                            Renderer::Blend::NONE, 0);
+
+  auto& w = context.get_renderer().get_window();
+  auto& tex = w.load_texture(m_image_path);
+  context.draw_texture(tex, tex.get_size(), w.get_size(), 0.0f,
+                       Color(1.0f, 1.0f, 1.0f), Renderer::Blend::BLEND, 1);
 }
 
 void

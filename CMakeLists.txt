@@ -46,3 +46,8 @@ install(TARGETS supertux-meltdown)
 if(STM_INSTALL_LIBRARY)
   install(TARGETS supertux-meltdown_lib)
 endif(STM_INSTALL_LIBRARY)
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/mk/clickable/manifest.json.in ${CMAKE_CURRENT_BINARY_DIR}/manifest.json)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/manifest.json DESTINATION .)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/mk/clickable/supertux-meltdown.apparmor DESTINATION .)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/mk/linux/supertux-meltdown.desktop DESTINATION .)
