@@ -36,6 +36,8 @@ public:
   virtual void leave(bool to_parent) = 0;
   virtual bool quit(bool can_abort) = 0;
 
+  virtual void reset_caches() = 0;
+
 protected:
   GameManager& m_game_manager;
 

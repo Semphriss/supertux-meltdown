@@ -25,8 +25,9 @@
 
 MainMenu::MainMenu(GameManager& game_manager) :
   Scene(game_manager),
-  m_image_path(File::get_os_path("images/background.png"))
+  m_image()
 {
+  reset_caches();
 }
 
 void
@@ -63,9 +64,8 @@ MainMenu::draw(DrawingContext& context) const
                            Color(0.7f, 0.9f, 1.0f),
                            Renderer::Blend::NONE, 0);
 
-  auto& w = context.get_renderer().get_window();
-  auto& tex = w.load_texture(m_image_path);
-  context.draw_texture(tex, tex.get_size(), w.get_size(), 0.0f,
+  auto& w = m_game_manager.get_window();
+  context.draw_texture(*m_image, m_image->get_size(), w.get_size(), 0.0f,
                        Color(1.0f, 1.0f, 1.0f), Renderer::Blend::BLEND, 1);
 }
 
@@ -83,4 +83,12 @@ bool
 MainMenu::quit(bool can_abort)
 {
   return true;
+}
+
+void
+MainMenu::reset_caches()
+{
+  auto& w = m_game_manager.get_window();
+
+  m_image = &w.load_texture(File::get_os_path("images/background.png"));
 }

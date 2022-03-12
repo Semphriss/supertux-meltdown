@@ -21,6 +21,8 @@
 
 #include "util/vector.hpp"
 
+class Texture;
+
 class MainMenu final :
   public Scene
 {
@@ -37,8 +39,10 @@ public:
   virtual void leave(bool to_parent) override;
   virtual bool quit(bool can_abort) override;
 
+  virtual void reset_caches() override;
+
 private:
-  std::string m_image_path;
+  Texture* m_image;
 
 private:
   MainMenu(const MainMenu&) = delete;
