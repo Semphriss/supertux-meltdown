@@ -38,10 +38,14 @@ public:
   void pop_scene(Transition::Type transition = Transition::Type::NONE,
                  float time = .5f);
 
-  const Window& get_window() const;
+  void change_video_system(Window::VideoSystem video_system);
+
+  Window& get_window();
 
 private:
   void setup_filesystem() const;
+
+  void advance_video_system();
 
   int run_loops();
 

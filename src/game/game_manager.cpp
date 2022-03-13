@@ -17,6 +17,7 @@
 #include "game/game_manager.hpp"
 
 #include <memory>
+#include <vector>
 
 #include "make_unique.hpp"
 
@@ -29,6 +30,12 @@
 #include "util/color.hpp"
 #include "util/log.hpp"
 #include "video/drawing_context.hpp"
+#include "video/font.hpp"
+
+static std::vector<Window::VideoSystem> SUPPORTED_VIDEO_SYSTEMS = {
+  Window::VideoSystem::SDL,
+  Window::VideoSystem::GL
+};
 
 int
 GameManager::run(int argc, char** argv)
@@ -37,9 +44,7 @@ GameManager::run(int argc, char** argv)
 
   setup_filesystem();
 
-  m_window = Window::create_window(Window::VideoSystem::SDL);
-  m_window->set_title("SuperTux Meltdown");
-  m_window->set_resizable(true);
+  change_video_system(Window::VideoSystem::SDL);
 
   push_scene(std::make_unique<MainMenu>(*this), Transition::Type::DISSOLVE);
 
@@ -50,8 +55,39 @@ GameManager::run(int argc, char** argv)
   return 0;
 }
 
-const Window&
-GameManager::get_window() const
+void
+GameManager::change_video_system(Window::VideoSystem video_system)
+{
+  if (m_window)
+  {
+    auto pos = m_window->get_pos();
+    auto size = m_window->get_size();
+    auto status = m_window->get_status();
+
+    m_window = Window::create_window(video_system);
+    m_window->set_title("SuperTux Meltdown");
+    m_window->set_resizable(true);
+
+    m_window->set_pos(pos);
+    m_window->set_size(size);
+    m_window->set_status(status);
+
+    // Textures are broken now that the video changed
+    for (auto& scene : m_scenes)
+    {
+      scene->reset_caches();
+    }
+  }
+  else
+  {
+    m_window = Window::create_window(video_system);
+    m_window->set_title("SuperTux Meltdown");
+    m_window->set_resizable(true);
+  }
+}
+
+Window&
+GameManager::get_window()
 {
   return *m_window;
 }
@@ -112,6 +148,28 @@ GameManager::setup_filesystem() const
   File::mount(src_path);
 
   File::set_write_dir(local_path);
+}
+
+void
+GameManager::advance_video_system()
+{
+  Window::VideoSystem target_video_system = SUPPORTED_VIDEO_SYSTEMS.back();
+
+  bool is_next = false;
+  for (const auto& vs : SUPPORTED_VIDEO_SYSTEMS)
+  {
+    if (vs == m_window->get_type())
+    {
+      is_next = true;
+    }
+    else if (is_next)
+    {
+      target_video_system = vs;
+      break;
+    }
+  }
+
+  change_video_system(target_video_system);
 }
 
 int
