@@ -142,7 +142,11 @@ void
 GameManager::setup_filesystem() const
 {
   auto local_path = File::get_pref_dir("Semphris", "SuperTux Meltdown");
+#ifdef UBUNTU_TOUCH
+  auto src_path = File::build_os_path({File::get_base_dir(), "data"});
+#else
   auto src_path = File::build_os_path({File::get_base_dir(), "../data"});
+#endif
 
   File::mount(local_path);
   File::mount(src_path);

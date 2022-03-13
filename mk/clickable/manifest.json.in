@@ -1,0 +1,15 @@
+{
+    "name": "supertux-meltdown",
+    "description": "Semphris' take on the popular Linux platformer",
+    "architecture": "@CLICK_ARCH@",
+    "title": "SuperTux Meltdown",
+    "hooks": {
+        "supertux-meltdown": {
+            "apparmor": "supertux-meltdown.apparmor",
+            "desktop":  "supertux-meltdown.desktop"
+        }
+    },
+    "version": "0.0.0",
+    "maintainer": "Semphris <semphris@semphris.com>",
+    "framework" : "@CLICK_FRAMEWORK@"
+}
