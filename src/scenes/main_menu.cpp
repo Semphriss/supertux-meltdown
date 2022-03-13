@@ -47,6 +47,10 @@ MainMenu::event(const SDL_Event& event)
       }
       break;
 
+    case SDL_FINGERDOWN:
+      m_game_manager.pop_scene(Transition::Type::DISSOLVE);
+      break;
+
     default:
       break;
   }
