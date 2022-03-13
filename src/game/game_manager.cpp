@@ -226,6 +226,51 @@ GameManager::handle_events()
         }
         break;
 
+      case SDL_KEYDOWN:
+        switch(e.key.keysym.sym)
+        {
+          case SDLK_F1:
+            // TODO: Open the help menu
+            break;
+
+          case SDLK_F5:
+            Font::flush_fonts();
+            m_window->flush_texture_cache();
+            for (auto& scene : m_scenes)
+            {
+              scene->reset_caches();
+            }
+            break;
+
+          case SDLK_F10:
+            advance_video_system();
+            break;
+
+          case SDLK_F11:
+            m_window->toggle_fullscreen();
+            break;
+
+          case SDLK_F12:
+          {
+            std::time_t t = std::time(0);
+            std::tm* now = std::localtime(&t);
+            std::string name = "screenshot_"
+                             + std::to_string(now->tm_year + 1900) + "-"
+                             + std::to_string(now->tm_mon + 1) + "-"
+                             + std::to_string(now->tm_mday) + "_"
+                             + std::to_string(now->tm_hour) + "-"
+                             + std::to_string(now->tm_min) + "-"
+                             + std::to_string(now->tm_sec) + ".png";
+
+            // TODO: Save screenshot to file
+          }
+            break;
+
+          default:
+            break;
+        }
+        break;
+
       default:
         break;
     }
