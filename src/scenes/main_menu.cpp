@@ -71,6 +71,15 @@ MainMenu::draw(DrawingContext& context) const
   auto& w = m_game_manager.get_window();
   context.draw_texture(*m_image, m_image->get_size(), w.get_size(), 0.0f,
                        Color(1.0f, 1.0f, 1.0f), Renderer::Blend::BLEND, 1);
+
+  auto font = File::get_os_path("fonts/SuperTux-Medium.ttf");
+  context.draw_text("Copyright (c) 2021-2022, Semphris\nThis program comes with"
+                    " ABSOLUTELY NO WARRANTY.\nThis is free software, and you"
+                    " are welcome to redistribute it\nunder certain conditions;"
+                    " see the LICENSE file for details.",
+                    Vector(0.0f, w.get_size().h),
+                    Renderer::TextAlign::BOTTOM_LEFT, font, 12, Color(),
+                    Renderer::Blend::BLEND, 2);
 }
 
 void
