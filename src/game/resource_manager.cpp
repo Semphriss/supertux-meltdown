@@ -39,6 +39,13 @@ ResourceManager::~ResourceManager()
   TTF_Quit();
   IMG_Quit();
   SDL_Quit();
+
+  if (!PHYSFS_deinit())
+  {
+    log_error << "PhysFS failed to unload ("
+              << PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode())
+              << "), game must be closed completely." << std::endl;
+  }
 }
 
 ResourceManager::ResourceManager(const char* arg0)
