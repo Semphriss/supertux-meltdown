@@ -78,8 +78,8 @@ MainMenu::draw(DrawingContext& context) const
                     " are welcome to redistribute it\nunder certain conditions;"
                     " see the LICENSE file for details.",
                     Vector(0.0f, w.get_size().h),
-                    Renderer::TextAlign::BOTTOM_LEFT, font, 12, Color(),
-                    Renderer::Blend::BLEND, 2);
+                    Renderer::TextAlign::BOTTOM_LEFT, font, 12, Color(1,1,1),
+                    Renderer::Blend::BLEND, true, 2);
 }
 
 void
