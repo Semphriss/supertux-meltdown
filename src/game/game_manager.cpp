@@ -185,7 +185,7 @@ GameManager::run_loops()
 
     handle_draw();
 
-    SDL_Delay(1);
+    SDL_Delay(10);
   }
 
   return 0;
