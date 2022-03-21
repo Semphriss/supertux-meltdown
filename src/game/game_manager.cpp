@@ -31,7 +31,6 @@
 #include "util/log.hpp"
 #include "video/drawing_context.hpp"
 #include "video/font.hpp"
-
 static std::vector<Window::VideoSystem> SUPPORTED_VIDEO_SYSTEMS = {
   Window::VideoSystem::SDL,
   Window::VideoSystem::GL
@@ -67,15 +66,15 @@ GameManager::change_video_system(Window::VideoSystem video_system)
     window->set_pos(m_window->get_pos());
     window->set_size(m_window->get_size());
     window->set_status(m_window->get_status());
-
-    // Textures are broken now that the video changed
-    for (auto& scene : m_scenes)
-    {
-      scene->reset_caches();
-    }
   }
 
   m_window = std::move(window);
+
+  // Textures are broken now that the video changed
+  for (auto& scene : m_scenes)
+  {
+    scene->reset_caches();
+  }
 }
 
 Window&
