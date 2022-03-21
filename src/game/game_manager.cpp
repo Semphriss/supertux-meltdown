@@ -31,7 +31,8 @@
 #include "util/log.hpp"
 #include "video/drawing_context.hpp"
 #include "video/font.hpp"
-static std::vector<Window::VideoSystem> SUPPORTED_VIDEO_SYSTEMS = {
+
+static const std::vector<Window::VideoSystem> SUPPORTED_VIDEO_SYSTEMS = {
   Window::VideoSystem::SDL,
   Window::VideoSystem::GL
 };
@@ -148,7 +149,7 @@ GameManager::setup_filesystem() const
 void
 GameManager::advance_video_system()
 {
-  Window::VideoSystem target_video_system = SUPPORTED_VIDEO_SYSTEMS.back();
+  Window::VideoSystem target_video_system = SUPPORTED_VIDEO_SYSTEMS.front();
 
   bool is_next = false;
   for (const auto& vs : SUPPORTED_VIDEO_SYSTEMS)
