@@ -41,6 +41,16 @@ static const std::vector<Window::VideoSystem> SUPPORTED_VIDEO_SYSTEMS = {
   Window::VideoSystem::GL
 };
 
+GameManager::GameManager() :
+  m_window(nullptr),
+  m_scenes(),
+  m_transition(nullptr),
+  m_popping_scene(nullptr),
+  m_last_frame(),
+  m_delay(0.01f)
+{
+}
+
 int
 GameManager::run(int argc, char** argv)
 {
@@ -80,6 +90,12 @@ GameManager::change_video_system(Window::VideoSystem video_system)
   {
     scene->reset_caches();
   }
+}
+
+void
+GameManager::set_delay(float delay)
+{
+  m_delay = delay;
 }
 
 Window&
@@ -189,7 +205,7 @@ GameManager::run_loops()
 
     handle_draw();
 
-    SDL_Delay(10);
+    SDL_Delay(static_cast<Uint32>(m_delay * 1000.0f));
   }
 
   return 0;

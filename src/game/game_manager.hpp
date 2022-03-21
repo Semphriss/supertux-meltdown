@@ -28,7 +28,7 @@
 class GameManager final
 {
 public:
-  GameManager() = default;
+  GameManager();
 
   int run(int argc, char** argv);
 
@@ -39,6 +39,7 @@ public:
                  float time = .5f);
 
   void change_video_system(Window::VideoSystem video_system);
+  void set_delay(float delay);
 
   Window& get_window();
 
@@ -64,6 +65,8 @@ private:
   // steady_clock, because high_resolution_clock is not recommended:
   // https://en.cppreference.com/w/cpp/chrono/high_resolution_clock
   std::chrono::steady_clock::time_point m_last_frame;
+
+  float m_delay;
 
 private:
   GameManager(const GameManager&) = delete;
