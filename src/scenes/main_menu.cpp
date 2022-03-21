@@ -80,6 +80,10 @@ MainMenu::draw(DrawingContext& context) const
                     Vector(0.0f, w.get_size().h),
                     Renderer::TextAlign::BOTTOM_LEFT, font, 12, Color(1,1,1),
                     Renderer::Blend::BLEND, true, 2);
+
+  context.draw_text(Window::get_video_system_tag(w.get_type()), w.get_size(),
+                    Renderer::TextAlign::BOTTOM_RIGHT, font, 12, Color(1,1,1),
+                    Renderer::Blend::BLEND, true, 2);
 }
 
 void
