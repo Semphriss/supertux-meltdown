@@ -32,6 +32,10 @@
 #include "video/drawing_context.hpp"
 #include "video/font.hpp"
 
+#ifndef STM_VER
+#define STM_VER "(unknown version)"
+#endif
+
 static const std::vector<Window::VideoSystem> SUPPORTED_VIDEO_SYSTEMS = {
   Window::VideoSystem::SDL,
   Window::VideoSystem::GL
@@ -59,7 +63,7 @@ void
 GameManager::change_video_system(Window::VideoSystem video_system)
 {
   auto window = Window::create_window(video_system);
-  window->set_title("SuperTux Meltdown");
+  window->set_title("SuperTux Meltdown " STM_VER);
   window->set_resizable(true);
 
   if (m_window)

@@ -14,7 +14,29 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-project(supertux-meltdown)
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/mk/cmake ${CMAKE_MODULE_PATH})
+
+include(GetGitRevisionDescription)
+git_describe(STM_VER)
+
+string(REGEX REPLACE "^v([0-9]+)\\..*" "\\1" STM_VER_MAJOR "${STM_VER}")
+string(REGEX REPLACE "^v[0-9]+\\.([0-9]+).*" "\\1" STM_VER_MINOR "${STM_VER}")
+string(REGEX REPLACE "^v[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" STM_VER_PATCH "${STM_VER}")
+string(REGEX REPLACE "^v[0-9]+\\.[0-9]+\\.[0-9]+-([0-9]+)-.*" "\\1" STM_VER_BUILD "${STM_VER}")
+
+if(STM_VER_BUILD STREQUAL STM_VER)
+  set(VER_SHORT "${STM_VER_MAJOR}.${STM_VER_MINOR}.${STM_VER_PATCH}")
+  set(STM_IS_RELEASE ON)
+else()
+  set(VER_SHORT "${STM_VER_MAJOR}.${STM_VER_MINOR}.${STM_VER_PATCH}.${STM_VER_BUILD}")
+  set(STM_IS_RELEASE OFF)
+endif()
+
+cmake_policy(SET CMP0048 NEW)
+
+project(supertux-meltdown
+          VERSION "${VER_SHORT}"
+          DESCRIPTION "Semphris' take on the popular Linux platformer")
 
 cmake_minimum_required(VERSION 3.0)
 
@@ -29,7 +51,10 @@ file(GLOB_RECURSE STM_LIB_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*/*.cpp)
 list(SORT STM_LIB_FILES)
 add_library(supertux-meltdown_lib ${STM_LIB_FILES})
 target_include_directories(supertux-meltdown_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/)
-target_compile_definitions(supertux-meltdown_lib PUBLIC -DUBUNTU_TOUCH=${UBUNTU_TOUCH})
+target_compile_definitions(supertux-meltdown_lib PUBLIC -DSTM_VER="${STM_VER}")
+if(UBUNTU_TOUCH)
+  target_compile_definitions(supertux-meltdown_lib PUBLIC -DUBUNTU_TOUCH=1)
+endif(UBUNTU_TOUCH)
 
 add_executable(supertux-meltdown ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
 target_include_directories(supertux-meltdown PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/)
