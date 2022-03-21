@@ -42,6 +42,6 @@ Transition::Transition(Scene* from, Scene* to, float time) :
   m_from(from),
   m_to(to),
   m_total_time(time),
-  m_time_elapsed(0.f)
+  m_time_elapsed(0.0f)
 {
 }

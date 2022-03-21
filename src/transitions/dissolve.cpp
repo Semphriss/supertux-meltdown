@@ -56,7 +56,7 @@ Dissolve::draw(DrawingContext& context) const
 
   Size window_size = context.get_renderer().get_window().get_size();
   Rect area(window_size);
-  Color color = Color(0.f, 0.f, 0.f);
+  Color color = Color(0.0f, 0.0f, 0.0f);
   Renderer::Blend blend = Renderer::Blend::BLEND;
   int layer = std::numeric_limits<int>::max();
 
@@ -75,12 +75,12 @@ Dissolve::draw(DrawingContext& context) const
     dc.render(to.get());
     dc.clear();
 
-    Color white(1.f, 1.f, 1.f);
+    Color white(1.0f, 1.0f, 1.0f);
     Color transparent(Color(white, progress));
     context.draw_texture(from, Rect(from->get_size()), Rect(window.get_size()),
-                         0.f, white, Renderer::Blend::BLEND, 0);
+                         0.0f, white, Renderer::Blend::BLEND, 0);
     context.draw_texture(to, Rect(to->get_size()), Rect(window.get_size()),
-                         0.f, transparent, Renderer::Blend::BLEND, 1);
+                         0.0f, transparent, Renderer::Blend::BLEND, 1);
   }
   else if (m_from)
   {
@@ -90,10 +90,10 @@ Dissolve::draw(DrawingContext& context) const
   else if (m_to)
   {
     m_to->draw(context);
-    context.draw_filled_rect(area, Color(color, 1.f - progress), blend, layer);
+    context.draw_filled_rect(area, Color(color, 1.0f - progress), blend, layer);
   }
   else
   {
-    context.draw_filled_rect(area, Color(color, 1.f), blend, layer);
+    context.draw_filled_rect(area, Color(color, 1.0f), blend, layer);
   }
 }

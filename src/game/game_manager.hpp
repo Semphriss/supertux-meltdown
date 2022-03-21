@@ -34,9 +34,9 @@ public:
 
   void push_scene(std::unique_ptr<Scene> scene,
                   Transition::Type transition = Transition::Type::NONE,
-                  float time = .5f);
+                  float time = 0.5f);
   void pop_scene(Transition::Type transition = Transition::Type::NONE,
-                 float time = .5f);
+                 float time = 0.5f);
 
   void change_video_system(Window::VideoSystem video_system);
   void set_delay(float delay);

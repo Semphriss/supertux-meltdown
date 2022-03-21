@@ -298,10 +298,10 @@ GameManager::handle_update()
 {
   auto t = std::chrono::steady_clock::now();
   auto diff = t - m_last_frame;
-  float dt_sec = static_cast<float>(diff.count()) / 1000000000.f;
+  float dt_sec = static_cast<float>(diff.count()) / 1000000000.0f;
   m_last_frame = t;
 
-  if(m_transition && m_transition->update(dt_sec))
+  if (m_transition && m_transition->update(dt_sec))
   {
     m_transition = nullptr;
 

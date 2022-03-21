@@ -38,7 +38,7 @@ FadeToBlack::update(float dt_sec)
 
   float progress = m_time_elapsed / m_total_time;
 
-  if (progress < .5f)
+  if (progress < 0.5f)
   {
     if (m_from)
     {
@@ -71,22 +71,22 @@ FadeToBlack::draw(DrawingContext& context) const
 
   Size window_size = context.get_renderer().get_window().get_size();
   Rect area(Vector(), window_size);
-  Color color = Color(0.f, 0.f, 0.f);
+  Color color = Color();
   Renderer::Blend blend = Renderer::Blend::BLEND;
   int layer = std::numeric_limits<int>::max();
   float alpha;
 
   if (m_from && m_to)
   {
-    if (progress < .5f)
+    if (progress < 0.5f)
     {
       m_from->draw(context);
-      alpha = progress * 2.f;
+      alpha = progress * 2.0f;
     }
     else
     {
       m_to->draw(context);
-      alpha = (1.f - progress) * 2.f;
+      alpha = (1.0f - progress) * 2.0f;
     }
   }
   else if (m_from)
@@ -97,11 +97,11 @@ FadeToBlack::draw(DrawingContext& context) const
   else if (m_to)
   {
     m_to->draw(context);
-    alpha = 1.f - progress;
+    alpha = 1.0f - progress;
   }
   else
   {
-    alpha = 1.f;
+    alpha = 1.0f;
   }
 
   context.draw_filled_rect(area, Color(color, alpha), blend, layer);
