@@ -58,19 +58,15 @@ GameManager::run(int argc, char** argv)
 void
 GameManager::change_video_system(Window::VideoSystem video_system)
 {
+  auto window = Window::create_window(video_system);
+  window->set_title("SuperTux Meltdown");
+  window->set_resizable(true);
+
   if (m_window)
   {
-    auto pos = m_window->get_pos();
-    auto size = m_window->get_size();
-    auto status = m_window->get_status();
-
-    m_window = Window::create_window(video_system);
-    m_window->set_title("SuperTux Meltdown");
-    m_window->set_resizable(true);
-
-    m_window->set_pos(pos);
-    m_window->set_size(size);
-    m_window->set_status(status);
+    window->set_pos(m_window->get_pos());
+    window->set_size(m_window->get_size());
+    window->set_status(m_window->get_status());
 
     // Textures are broken now that the video changed
     for (auto& scene : m_scenes)
@@ -78,12 +74,8 @@ GameManager::change_video_system(Window::VideoSystem video_system)
       scene->reset_caches();
     }
   }
-  else
-  {
-    m_window = Window::create_window(video_system);
-    m_window->set_title("SuperTux Meltdown");
-    m_window->set_resizable(true);
-  }
+
+  m_window = std::move(window);
 }
 
 Window&
