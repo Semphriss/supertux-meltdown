@@ -217,19 +217,37 @@ GameManager::run_loops()
 {
   while(!empty())
   {
-    handle_events();
+    try
+    {
+      handle_events();
 
-    if (empty())
-      break;
+      if (empty())
+        break;
 
-    handle_update();
+      handle_update();
 
-    if (empty())
-      break;
+      if (empty())
+        break;
 
-    handle_draw();
+      handle_draw();
 
-    SDL_Delay(static_cast<Uint32>(m_delay * 1000.0f));
+      SDL_Delay(static_cast<Uint32>(m_delay * 1000.0f));
+    }
+    catch(const std::exception& err)
+    {
+      log_fatal << "Unexpected exception: " << err.what() << std::endl;
+      return 1;
+    }
+    catch(const std::string& msg)
+    {
+      log_fatal << "Unexpected error: " << msg << std::endl;
+      return 1;
+    }
+    catch(...)
+    {
+      log_fatal << "Unexpected unspecified error" << std::endl;
+      return 1;
+    }
   }
 
   return 0;
