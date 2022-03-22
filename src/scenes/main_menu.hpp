@@ -43,6 +43,7 @@ public:
 
 private:
   Texture* m_image;
+  std::string m_font_path;
 
 private:
   MainMenu(const MainMenu&) = delete;

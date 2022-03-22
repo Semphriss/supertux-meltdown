@@ -25,7 +25,8 @@
 
 MainMenu::MainMenu(GameManager& game_manager) :
   Scene(game_manager),
-  m_image()
+  m_image(),
+  m_font_path()
 {
   reset_caches();
 }
@@ -72,17 +73,16 @@ MainMenu::draw(DrawingContext& context) const
   context.draw_texture(*m_image, m_image->get_size(), w.get_size(), 0.0f,
                        Color(1.0f, 1.0f, 1.0f), Renderer::Blend::BLEND, 1);
 
-  auto font = File::get_os_path("fonts/SuperTux-Medium.ttf");
   context.draw_text("Copyright (c) 2021-2022, Semphris\nThis program comes with"
                     " ABSOLUTELY NO WARRANTY.\nThis is free software, and you"
                     " are welcome to redistribute it\nunder certain conditions;"
                     " see the LICENSE file for details.", w.get_size(),
-                    Renderer::TextAlign::BOTTOM_LEFT, font, 12, Color(1,1,1),
-                    Renderer::Blend::BLEND, true, 2);
+                    Renderer::TextAlign::BOTTOM_LEFT, m_font_path, 12,
+                    Color(1.0f, 1.0f, 1.0f), Renderer::Blend::BLEND, true, 2);
 
   context.draw_text(Window::get_video_system_tag(w.get_type()), w.get_size(),
-                    Renderer::TextAlign::BOTTOM_RIGHT, font, 12, Color(1,1,1),
-                    Renderer::Blend::BLEND, true, 2);
+                    Renderer::TextAlign::BOTTOM_RIGHT, m_font_path, 12,
+                    Color(1.0f, 1.0f, 1.0f), Renderer::Blend::BLEND, true, 2);
 }
 
 void
@@ -107,4 +107,5 @@ MainMenu::reset_caches()
   auto& w = m_game_manager.get_window();
 
   m_image = &w.load_texture(File::get_os_path("images/background.png"));
+  m_font_path = File::get_os_path("fonts/SuperTux-Medium.ttf");
 }
