@@ -212,6 +212,96 @@ GameManager::advance_video_system()
   change_video_system(target_video_system);
 }
 
+void
+GameManager::handle_internal_event(const SDL_Event& e)
+{
+  switch (e.type)
+  {
+    case SDL_QUIT:
+      for (auto it = m_scenes.rbegin(); it != m_scenes.rend(); it++)
+      {
+        if (!(*it)->quit(true))
+        {
+          break;
+        }
+        else
+        {
+          m_scenes.pop_back();
+        }
+      }
+      break;
+
+    case SDL_WINDOWEVENT:
+      switch(e.window.event)
+      {
+        case SDL_WINDOWEVENT_RESIZED:
+          // Text rendering uses a cache that varies when the components are
+          // resized; without this line, resizing the screen would grow the
+          // memory by 10's or 100's of megabytes in mere seconds
+          Font::flush_fonts();
+          break;
+      }
+      break;
+
+    case SDL_APP_LOWMEMORY:
+      Font::flush_fonts();
+      m_window->flush_texture_cache();
+      for (auto& scene : m_scenes)
+      {
+        scene->reset_caches();
+      }
+      break;
+
+    case SDL_KEYDOWN:
+      switch(e.key.keysym.sym)
+      {
+        case SDLK_F1:
+          // TODO: Open the help menu
+          break;
+
+        case SDLK_F5:
+          Font::flush_fonts();
+          m_window->flush_texture_cache();
+          for (auto& scene : m_scenes)
+          {
+            scene->reset_caches();
+          }
+          break;
+
+        case SDLK_F10:
+          advance_video_system();
+          break;
+
+        case SDLK_F11:
+          m_window->toggle_fullscreen();
+          break;
+
+        case SDLK_F12:
+        {
+          std::time_t t = std::time(0);
+          std::tm* now = std::localtime(&t);
+          std::string name = "screenshot_"
+                            + std::to_string(now->tm_year + 1900) + "-"
+                            + std::to_string(now->tm_mon + 1) + "-"
+                            + std::to_string(now->tm_mday) + "_"
+                            + std::to_string(now->tm_hour) + "-"
+                            + std::to_string(now->tm_min) + "-"
+                            + std::to_string(now->tm_sec) + ".png";
+
+          // TODO: Save screenshot to file
+        }
+          break;
+
+        default:
+          break;
+      }
+      break;
+
+    default:
+      break;
+  }
+}
+
 int
 GameManager::run_loops()
 {
@@ -268,90 +358,7 @@ GameManager::handle_events()
       m_transition = nullptr;
     }
 
-    switch (e.type)
-    {
-      case SDL_QUIT:
-        for (auto it = m_scenes.rbegin(); it != m_scenes.rend(); it++)
-        {
-          if (!(*it)->quit(true))
-          {
-            break;
-          }
-          else
-          {
-            m_scenes.pop_back();
-          }
-        }
-        break;
-
-      case SDL_WINDOWEVENT:
-        switch(e.window.event)
-        {
-          case SDL_WINDOWEVENT_RESIZED:
-            // Text rendering uses a cache that varies when the components are
-            // resized; without this line, resizing the screen would grow the
-            // memory by 10's or 100's of megabytes in mere seconds
-            Font::flush_fonts();
-            break;
-        }
-
-      case SDL_APP_LOWMEMORY:
-        Font::flush_fonts();
-        m_window->flush_texture_cache();
-        for (auto& scene : m_scenes)
-        {
-          scene->reset_caches();
-        }
-        break;
-
-      case SDL_KEYDOWN:
-        switch(e.key.keysym.sym)
-        {
-          case SDLK_F1:
-            // TODO: Open the help menu
-            break;
-
-          case SDLK_F5:
-            Font::flush_fonts();
-            m_window->flush_texture_cache();
-            for (auto& scene : m_scenes)
-            {
-              scene->reset_caches();
-            }
-            break;
-
-          case SDLK_F10:
-            advance_video_system();
-            break;
-
-          case SDLK_F11:
-            m_window->toggle_fullscreen();
-            break;
-
-          case SDLK_F12:
-          {
-            std::time_t t = std::time(0);
-            std::tm* now = std::localtime(&t);
-            std::string name = "screenshot_"
-                             + std::to_string(now->tm_year + 1900) + "-"
-                             + std::to_string(now->tm_mon + 1) + "-"
-                             + std::to_string(now->tm_mday) + "_"
-                             + std::to_string(now->tm_hour) + "-"
-                             + std::to_string(now->tm_min) + "-"
-                             + std::to_string(now->tm_sec) + ".png";
-
-            // TODO: Save screenshot to file
-          }
-            break;
-
-          default:
-            break;
-        }
-        break;
-
-      default:
-        break;
-    }
+    handle_internal_event(e);
   }
 }
 

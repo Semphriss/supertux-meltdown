@@ -47,6 +47,7 @@ private:
   void setup_filesystem() const;
 
   void advance_video_system();
+  void handle_internal_event(const SDL_Event& e);
 
   int run_loops();
 
