@@ -266,6 +266,26 @@ GameManager::handle_events()
         }
         break;
 
+      case SDL_WINDOWEVENT:
+        switch(e.window.event)
+        {
+          case SDL_WINDOWEVENT_RESIZED:
+            // Text rendering uses a cache that varies when the components are
+            // resized; without this line, resizing the screen would grow the
+            // memory by 10's or 100's of megabytes in mere seconds
+            Font::flush_fonts();
+            break;
+        }
+
+      case SDL_APP_LOWMEMORY:
+        Font::flush_fonts();
+        m_window->flush_texture_cache();
+        for (auto& scene : m_scenes)
+        {
+          scene->reset_caches();
+        }
+        break;
+
       case SDL_KEYDOWN:
         switch(e.key.keysym.sym)
         {

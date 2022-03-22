@@ -76,8 +76,7 @@ MainMenu::draw(DrawingContext& context) const
   context.draw_text("Copyright (c) 2021-2022, Semphris\nThis program comes with"
                     " ABSOLUTELY NO WARRANTY.\nThis is free software, and you"
                     " are welcome to redistribute it\nunder certain conditions;"
-                    " see the LICENSE file for details.",
-                    Vector(0.0f, w.get_size().h),
+                    " see the LICENSE file for details.", w.get_size(),
                     Renderer::TextAlign::BOTTOM_LEFT, font, 12, Color(1,1,1),
                     Renderer::Blend::BLEND, true, 2);
 
