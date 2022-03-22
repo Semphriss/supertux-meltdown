@@ -54,24 +54,35 @@ GameManager::GameManager() :
 int
 GameManager::run(int argc, char** argv)
 {
+  log_debug << "Initializing the game" << std::endl;
   ResourceManager::get_resource_manager(argv[0]);
 
+  log_debug << "Setting up filesystem" << std::endl;
   setup_filesystem();
 
+  log_debug << "Starting video system" << std::endl;
   change_video_system(Window::VideoSystem::SDL);
 
+  log_debug << "Emplacing main menu" << std::endl;
   push_scene(std::make_unique<MainMenu>(*this), Transition::Type::DISSOLVE);
 
   m_last_frame = std::chrono::steady_clock::now();
 
+  log_debug << "Launching main loop" << std::endl;
   run_loops();
 
+  // It is normal to see this message at the initialisation step on certain
+  // platforms which handle the main loop separately, like Emscripten
+  log_debug << "Main loop exited" << std::endl;
   return 0;
 }
 
 void
 GameManager::change_video_system(Window::VideoSystem video_system)
 {
+  log_debug << "Request to change video system to "
+            << Window::get_video_system_tag(video_system) << std::endl;
+
   auto window = Window::create_window(video_system);
   window->set_title("SuperTux Meltdown " STM_VER);
   window->set_resizable(true);
@@ -95,6 +106,8 @@ GameManager::change_video_system(Window::VideoSystem video_system)
 void
 GameManager::set_delay(float delay)
 {
+  log_debug << "Request to change delay to " << delay << std::endl;
+
   m_delay = delay;
 }
 
@@ -108,6 +121,8 @@ void
 GameManager::push_scene(std::unique_ptr<Scene> scene,
                         Transition::Type transition, float time)
 {
+  log_debug << "Request to change push scene" << std::endl;
+
   if (m_transition)
   {
     log_warn << "Attempt to push scene during a transition" << std::endl;
@@ -127,6 +142,8 @@ GameManager::push_scene(std::unique_ptr<Scene> scene,
 void
 GameManager::pop_scene(Transition::Type transition, float time)
 {
+  log_debug << "Request to change pop scene" << std::endl;
+
   if (m_transition)
   {
     log_warn << "Attempt to pop scene during a transition" << std::endl;
@@ -169,6 +186,9 @@ GameManager::setup_filesystem() const
 void
 GameManager::advance_video_system()
 {
+  log_debug << "Request to advance video system (current: "
+            << Window::get_video_system_tag(m_window->get_type()) << std::endl;
+
   Window::VideoSystem target_video_system = SUPPORTED_VIDEO_SYSTEMS.front();
 
   bool is_next = false;
