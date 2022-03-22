@@ -101,6 +101,10 @@ GameManager::change_video_system(Window::VideoSystem video_system)
   {
     scene->reset_caches();
   }
+
+  // Clearing events is necessary, else events will be duplicated
+  SDL_Event e;
+  while (SDL_PollEvent(&e));
 }
 
 void
