@@ -14,22 +14,22 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef _HEADER_STMELTDOWN_SCENES_MAINMENU_HPP
-#define _HEADER_STMELTDOWN_SCENES_MAINMENU_HPP
+#ifndef _HEADER_STMELTDOWN_SCENES_ERRORPANEL_HPP
+#define _HEADER_STMELTDOWN_SCENES_ERRORPANEL_HPP
 
 #include "scenes/scene.hpp"
 
-#include <string>
+#include <memory>
 
 class Texture;
 
-class MainMenu final :
+class ErrorPanel final :
   public Scene
 {
 public:
-  MainMenu() = delete;
-  MainMenu(GameManager& game_manager);
-  virtual ~MainMenu() = default;
+  ErrorPanel() = delete;
+  ErrorPanel(GameManager& game_manager, const Scene& target_scene);
+  virtual ~ErrorPanel() = default;
 
   virtual void event(const SDL_Event& event) override;
   virtual void update(float dt_sec) override;
@@ -43,12 +43,13 @@ public:
   virtual bool recover_from_error(const std::exception& err) override;
 
 private:
-  Texture* m_image;
+  const Scene& m_scene;
+  std::shared_ptr<Texture> m_image;
   std::string m_font_path;
 
 private:
-  MainMenu(const MainMenu&) = delete;
-  MainMenu& operator=(const MainMenu&) = delete;
+  ErrorPanel(const ErrorPanel&) = delete;
+  ErrorPanel& operator=(const ErrorPanel&) = delete;
 };
 
 #endif

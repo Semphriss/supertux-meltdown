@@ -14,7 +14,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "scenes/main_menu.hpp"
+#include "scenes/error_panel.hpp"
 
 #include "make_unique.hpp"
 
@@ -23,8 +23,9 @@
 #include "transitions/transition.hpp"
 #include "video/drawing_context.hpp"
 
-MainMenu::MainMenu(GameManager& game_manager) :
+ErrorPanel::ErrorPanel(GameManager& game_manager, const Scene& target_scene) :
   Scene(game_manager),
+  m_scene(target_scene),
   m_image(),
   m_font_path()
 {
@@ -32,7 +33,7 @@ MainMenu::MainMenu(GameManager& game_manager) :
 }
 
 void
-MainMenu::event(const SDL_Event& event)
+ErrorPanel::event(const SDL_Event& event)
 {
   switch(event.type)
   {
@@ -40,7 +41,7 @@ MainMenu::event(const SDL_Event& event)
       switch(event.key.keysym.sym)
       {
         case SDLK_ESCAPE:
-          m_game_manager.pop_scene(Transition::Type::DISSOLVE);
+          m_game_manager.pop_scene();
           break;
 
         default:
@@ -49,7 +50,20 @@ MainMenu::event(const SDL_Event& event)
       break;
 
     case SDL_FINGERDOWN:
-      m_game_manager.pop_scene(Transition::Type::DISSOLVE);
+      m_game_manager.pop_scene();
+      break;
+
+
+    case SDL_WINDOWEVENT:
+      switch(event.window.event)
+      {
+        case SDL_WINDOWEVENT_RESIZED:
+          reset_caches();
+          break;
+
+        default:
+          break;
+      }
       break;
 
     default:
@@ -58,60 +72,65 @@ MainMenu::event(const SDL_Event& event)
 }
 
 void
-MainMenu::update(float dt_sec)
+ErrorPanel::update(float dt_sec)
 {
 }
 
 void
-MainMenu::draw(DrawingContext& context) const
+ErrorPanel::draw(DrawingContext& context) const
 {
-  context.draw_filled_rect(m_game_manager.get_window().get_size(),
-                           Color(0.7f, 0.9f, 1.0f),
-                           Renderer::Blend::NONE, 0);
-
   auto& w = m_game_manager.get_window();
+
+  Rect rect(w.get_size());
+
+  rect.x1 += 32.f;
+  rect.y1 += 32.f;
+  rect.x2 -= 32.f;
+  rect.y2 -= 32.f;
+
   context.draw_texture(*m_image, m_image->get_size(), w.get_size(), 0.0f,
-                       Color(1.0f, 1.0f, 1.0f), Renderer::Blend::BLEND, 1);
+                       Color(0.2f, 0.2f, 0.2f), Renderer::Blend::BLEND, 1);
 
-  context.draw_text("Copyright (c) 2021-2022, Semphris\nThis program comes with"
-                    " ABSOLUTELY NO WARRANTY.\nThis is free software, and you"
-                    " are welcome to redistribute it\nunder certain conditions;"
-                    " see the LICENSE file for details.", w.get_size(),
-                    Renderer::TextAlign::BOTTOM_LEFT, m_font_path, 12,
-                    Color(1.0f, 1.0f, 1.0f), Renderer::Blend::BLEND, true, 2);
+  context.draw_text("An error occured", rect, Renderer::TextAlign::TOP_MID,
+                    m_font_path, 24, Color(1.0f, 1.0f, 1.0f),
+                    Renderer::Blend::BLEND, true, 2);
 
-  context.draw_text(Window::get_video_system_tag(w.get_type()), w.get_size(),
-                    Renderer::TextAlign::BOTTOM_RIGHT, m_font_path, 12,
+  context.draw_text("Lorem ipsum dolor sit amet consectetur adiscipling elit\nerewr",
+                    rect, Renderer::TextAlign::BOTTOM_MID, m_font_path, 12,
                     Color(1.0f, 1.0f, 1.0f), Renderer::Blend::BLEND, true, 2);
 }
 
 void
-MainMenu::enter()
+ErrorPanel::enter()
 {
 }
 
 void
-MainMenu::leave(bool to_parent)
+ErrorPanel::leave(bool to_parent)
 {
 }
 
 bool
-MainMenu::quit(bool can_abort)
+ErrorPanel::quit(bool can_abort)
 {
   return true;
 }
 
 void
-MainMenu::reset_caches()
+ErrorPanel::reset_caches()
 {
   auto& w = m_game_manager.get_window();
 
-  m_image = &w.load_texture(File::get_os_path("images/background.png"));
+  m_image = w.create_texture(w.get_size());
+  DrawingContext dc(w.get_renderer());
+  m_scene.draw(dc);
+  dc.render(m_image.get());
+
   m_font_path = File::get_os_path("fonts/SuperTux-Medium.ttf");
 }
 
 bool
-MainMenu::recover_from_error(const std::exception& err)
+ErrorPanel::recover_from_error(const std::exception& err)
 {
   return true;
 }

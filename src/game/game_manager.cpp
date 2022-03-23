@@ -25,6 +25,7 @@
 
 #include "fs/file.hpp"
 #include "game/resource_manager.hpp"
+#include "scenes/error_panel.hpp"
 #include "scenes/main_menu.hpp"
 #include "transitions/transition.hpp"
 #include "util/color.hpp"
@@ -78,7 +79,8 @@ GameManager::run(int argc, char** argv)
 }
 
 void
-GameManager::change_video_system(Window::VideoSystem video_system)
+GameManager::change_video_system(Window::VideoSystem video_system,
+                                 bool keep_status)
 {
   log_debug << "Request to change video system to "
             << Window::get_video_system_tag(video_system) << std::endl;
@@ -87,7 +89,7 @@ GameManager::change_video_system(Window::VideoSystem video_system)
   window->set_title("SuperTux Meltdown " STM_VER);
   window->set_resizable(true);
 
-  if (m_window)
+  if (m_window && keep_status)
   {
     window->set_pos(m_window->get_pos());
     window->set_size(m_window->get_size());
@@ -240,6 +242,9 @@ GameManager::handle_internal_event(const SDL_Event& e)
           // memory by 10's or 100's of megabytes in mere seconds
           Font::flush_fonts();
           break;
+
+        default:
+          break;
       }
       break;
 
@@ -302,6 +307,163 @@ GameManager::handle_internal_event(const SDL_Event& e)
   }
 }
 
+bool
+GameManager::try_recover(const std::exception& err)
+{
+  log_debug << "Attempting to recover from error" << std::endl;
+
+  std::string message = "";
+
+  try
+  {
+    log_debug << "Attempting to make scene recover" << std::endl;
+
+    if (!m_scenes.back()->recover_from_error(err))
+      throw "Scene failed to recover from error";
+
+    log_debug << "Scene took action, attempting to run a frame" << std::endl;
+
+    run_single_loop();
+
+    log_debug << "Recover appears successful, resuming normal use" << std::endl;
+
+    if (!dynamic_cast<ErrorPanel*>(m_scenes.back().get()))
+      push_scene(std::make_unique<ErrorPanel>(*this, *m_scenes.back()));
+
+    return true;
+  }
+  catch(const std::exception& err)
+  {
+    message = err.what();
+  }
+  catch(const std::string& msg)
+  {
+    message = msg;
+  }
+  catch(const char* msg)
+  {
+    message = msg;
+  }
+  catch(...)
+  {
+    message = "(unknown error type)";
+  }
+
+  log_debug << "Recover unsuccessful: " << message << std::endl;
+
+  try
+  {
+    log_debug << "Attempting to reset all components" << std::endl;
+
+    change_video_system(m_window->get_type(), false);
+    Font::flush_fonts();
+    for (auto& scene : m_scenes)
+    {
+      scene->reset_caches();
+    }
+
+    log_debug << "All components reset, attempting to run a frame" << std::endl;
+
+    run_single_loop();
+
+    log_debug << "Recover appears successful, resuming normal use" << std::endl;
+
+    if (!dynamic_cast<ErrorPanel*>(m_scenes.back().get()))
+      push_scene(std::make_unique<ErrorPanel>(*this, *m_scenes.back()));
+
+    return true;
+  }
+  catch(const std::exception& err)
+  {
+    message = err.what();
+  }
+  catch(const std::string& msg)
+  {
+    message = msg;
+  }
+  catch(const char* msg)
+  {
+    message = msg;
+  }
+  catch(...)
+  {
+    message = "(unknown error type)";
+  }
+
+  log_debug << "Recover unsuccessful: " << message << std::endl;
+
+  // TODO: Add a function in Scenes to allow them to emergency-save their
+  //       essential data, also try reloading a scene
+
+  // This action is destructive, so must come in last place.
+  try
+  {
+    log_debug << "Attempting to kill topmost scene" << std::endl;
+
+    m_transition = nullptr;
+
+    if (m_popping_scene)
+    {
+      m_popping_scene = nullptr;
+    }
+    else
+    {
+      m_scenes.pop_back();
+    }
+
+    if (m_scenes.empty())
+      throw "No scene left to test, quitting";
+
+    log_debug << "Scene wiped, attempting to run a frame" << std::endl;
+
+    run_single_loop();
+
+    log_debug << "Recover appears successful, resuming normal use" << std::endl;
+
+    if (!dynamic_cast<ErrorPanel*>(m_scenes.back().get()))
+      push_scene(std::make_unique<ErrorPanel>(*this, *m_scenes.back()));
+
+    return true;
+  }
+  catch(const std::exception& err)
+  {
+    message = err.what();
+  }
+  catch(const std::string& msg)
+  {
+    message = msg;
+  }
+  catch(const char* msg)
+  {
+    message = msg;
+  }
+  catch(...)
+  {
+    message = "(unknown error type)";
+  }
+
+  log_debug << "Recover unsuccessful: " << message << std::endl;
+
+  log_fatal << "Could not recover from error." << std::endl;
+  return false;
+}
+
+void
+GameManager::run_single_loop()
+{
+  handle_events();
+
+  if (empty())
+    return;
+
+  handle_update();
+
+  if (empty())
+    return;
+
+  handle_draw();
+}
+
 int
 GameManager::run_loops()
 {
@@ -309,34 +471,36 @@ GameManager::run_loops()
   {
     try
     {
-      handle_events();
-
-      if (empty())
-        break;
-
-      handle_update();
-
-      if (empty())
-        break;
-
-      handle_draw();
-
+      run_single_loop();
       SDL_Delay(static_cast<Uint32>(m_delay * 1000.0f));
     }
     catch(const std::exception& err)
     {
-      log_fatal << "Unexpected exception: " << err.what() << std::endl;
-      return 1;
+      log_error << "Unexpected exception: " << err.what() << std::endl;
+
+      if (!try_recover(err))
+        return 1;
     }
     catch(const std::string& msg)
     {
-      log_fatal << "Unexpected error: " << msg << std::endl;
-      return 1;
+      log_error << "Unexpected error: " << msg << std::endl;
+
+      if (!try_recover(std::runtime_error(msg)))
+        return 1;
+    }
+    catch(const char* msg)
+    {
+      log_error << "Unexpected error: " << msg << std::endl;
+
+      if (!try_recover(std::runtime_error(msg)))
+        return 1;
     }
     catch(...)
     {
-      log_fatal << "Unexpected unspecified error" << std::endl;
-      return 1;
+      log_error << "Unexpected unspecified error" << std::endl;
+
+      if (!try_recover(std::runtime_error("")))
+        return 1;
     }
   }
 

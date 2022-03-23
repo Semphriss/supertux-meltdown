@@ -38,17 +38,19 @@ public:
   void pop_scene(Transition::Type transition = Transition::Type::NONE,
                  float time = 0.5f);
 
-  void change_video_system(Window::VideoSystem video_system);
+  void change_video_system(Window::VideoSystem video_system,
+                           bool keep_status = true);
   void set_delay(float delay);
 
   Window& get_window();
 
 private:
   void setup_filesystem() const;
-
   void advance_video_system();
   void handle_internal_event(const SDL_Event& e);
+  bool try_recover(const std::exception& err);
 
+  void run_single_loop();
   int run_loops();
 
   void handle_events();

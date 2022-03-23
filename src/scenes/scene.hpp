@@ -20,6 +20,9 @@
 class DrawingContext;
 class GameManager;
 union SDL_Event;
+namespace std {
+class exception;
+}
 
 class Scene
 {
@@ -37,6 +40,7 @@ public:
   virtual bool quit(bool can_abort) = 0;
 
   virtual void reset_caches() = 0;
+  virtual bool recover_from_error(const std::exception& err) = 0;
 
 protected:
   GameManager& m_game_manager;
