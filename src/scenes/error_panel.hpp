@@ -28,7 +28,7 @@ class ErrorPanel final :
 {
 public:
   ErrorPanel() = delete;
-  ErrorPanel(GameManager& game_manager, const Scene& target_scene);
+  ErrorPanel(IGameManager& game_manager, const Scene& target_scene);
   virtual ~ErrorPanel() = default;
 
   virtual void event(const SDL_Event& event) override;

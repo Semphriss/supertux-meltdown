@@ -18,7 +18,7 @@
 #define _HEADER_STMELTDOWN_SCENES_SCENE_HPP
 
 class DrawingContext;
-class GameManager;
+class IGameManager;
 union SDL_Event;
 namespace std {
 class exception;
@@ -28,7 +28,7 @@ class Scene
 {
 public:
   Scene() = delete;
-  Scene(GameManager& game_manager);
+  Scene(IGameManager& game_manager);
   virtual ~Scene() = default;
 
   virtual void event(const SDL_Event& event) = 0;
@@ -43,7 +43,7 @@ public:
   virtual bool recover_from_error(const std::exception& err) = 0;
 
 protected:
-  GameManager& m_game_manager;
+  IGameManager& m_game_manager;
 
 private:
   Scene(const Scene&) = delete;

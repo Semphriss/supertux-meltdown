@@ -17,32 +17,33 @@
 #ifndef _HEADER_STMELTDOWN_GAME_GAMEMANAGER_HPP
 #define _HEADER_STMELTDOWN_GAME_GAMEMANAGER_HPP
 
+#include "game/i_game_manager.hpp"
+
 #include <chrono>
-#include <memory>
-#include <vector>
 
-#include "scenes/scene.hpp"
-#include "transitions/transition.hpp"
-#include "video/window.hpp"
-
-class GameManager final
+class GameManager final :
+  public IGameManager
 {
 public:
   GameManager();
+  virtual ~GameManager() override = default;
 
   int run(int argc, char** argv);
 
-  void push_scene(std::unique_ptr<Scene> scene,
-                  Transition::Type transition = Transition::Type::NONE,
-                  float time = 0.5f);
-  void pop_scene(Transition::Type transition = Transition::Type::NONE,
-                 float time = 0.5f);
+  virtual void push_scene(std::unique_ptr<Scene> scene,
+                          Transition::Type transition = Transition::Type::NONE,
+                          float time = 0.5f) override;
+  virtual void pop_scene(Transition::Type transition = Transition::Type::NONE,
+                         float time = 0.5f) override;
 
-  void change_video_system(Window::VideoSystem video_system,
-                           bool keep_status = true);
-  void set_delay(float delay);
+  virtual void change_video_system(Window::VideoSystem video_system,
+                                   bool keep_status = true) override;
+  virtual void set_delay(float delay) override;
 
-  Window& get_window();
+  virtual Window& get_window() override;
+  virtual const SceneStack& get_scene_stack() const override;
+  virtual const Scene* get_popping_scene() const override;
+  virtual const Transition* get_current_transition() const override;
 
 private:
   void setup_filesystem() const;

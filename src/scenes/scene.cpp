@@ -16,7 +16,7 @@
 
 #include "scenes/scene.hpp"
 
-Scene::Scene(GameManager& game_manager) :
+Scene::Scene(IGameManager& game_manager) :
   m_game_manager(game_manager)
 {
 }

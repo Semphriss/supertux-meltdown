@@ -45,3 +45,27 @@ Transition::Transition(Scene* from, Scene* to, float time) :
   m_time_elapsed(0.0f)
 {
 }
+
+Scene*
+Transition::get_origin_scene() const
+{
+  return m_from;
+}
+
+Scene*
+Transition::get_target_scene() const
+{
+  return m_to;
+}
+
+float
+Transition::get_total_time() const
+{
+  return m_total_time;
+}
+
+float
+Transition::get_elapsed_time() const
+{
+  return m_time_elapsed;
+}

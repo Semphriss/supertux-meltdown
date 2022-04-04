@@ -28,7 +28,7 @@ class MainMenu final :
 {
 public:
   MainMenu() = delete;
-  MainMenu(GameManager& game_manager);
+  MainMenu(IGameManager& game_manager);
   virtual ~MainMenu() = default;
 
   virtual void event(const SDL_Event& event) override;

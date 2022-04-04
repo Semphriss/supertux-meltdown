@@ -123,6 +123,24 @@ GameManager::get_window()
   return *m_window;
 }
 
+const IGameManager::SceneStack&
+GameManager::get_scene_stack() const
+{
+  return m_scenes;
+}
+
+const Scene*
+GameManager::get_popping_scene() const
+{
+  return m_popping_scene.get();
+}
+
+const Transition*
+GameManager::get_current_transition() const
+{
+  return m_transition.get();
+}
+
 void
 GameManager::push_scene(std::unique_ptr<Scene> scene,
                         Transition::Type transition, float time)
@@ -143,6 +161,13 @@ GameManager::push_scene(std::unique_ptr<Scene> scene,
 
   if (from)
     from->leave(false);
+
+  // Skip transition if no transition
+  if (!m_transition)
+  {
+    if (to)
+      to->enter();
+  }
 }
 
 void
@@ -171,6 +196,15 @@ GameManager::pop_scene(Transition::Type transition, float time)
   m_transition = Transition::create_transition(from, to, time, transition);
 
   from->leave(true);
+
+  // Skip transition if no transition
+  if (!m_transition)
+  {
+    m_popping_scene = nullptr;
+
+    if (to)
+      to->enter();
+  }
 }
 
 void
@@ -537,6 +571,7 @@ GameManager::handle_update()
   if (m_transition && m_transition->update(dt_sec))
   {
     m_transition = nullptr;
+    m_popping_scene = nullptr;
 
     if (!m_scenes.empty())
     {

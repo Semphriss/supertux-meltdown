@@ -42,6 +42,11 @@ public:
   virtual bool update(float dt_sec) = 0;
   virtual void draw(DrawingContext& context) const = 0;
 
+  Scene* get_origin_scene() const;
+  Scene* get_target_scene() const;
+  float get_total_time() const;
+  float get_elapsed_time() const;
+
 protected:
   Scene* m_from;
   Scene* m_to;

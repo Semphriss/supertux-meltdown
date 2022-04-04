@@ -23,7 +23,7 @@
 #include "transitions/transition.hpp"
 #include "video/drawing_context.hpp"
 
-MainMenu::MainMenu(GameManager& game_manager) :
+MainMenu::MainMenu(IGameManager& game_manager) :
   Scene(game_manager),
   m_image(),
   m_font_path()

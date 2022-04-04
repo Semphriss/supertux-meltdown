@@ -23,7 +23,7 @@
 #include "transitions/transition.hpp"
 #include "video/drawing_context.hpp"
 
-ErrorPanel::ErrorPanel(GameManager& game_manager, const Scene& target_scene) :
+ErrorPanel::ErrorPanel(IGameManager& game_manager, const Scene& target_scene) :
   Scene(game_manager),
   m_scene(target_scene),
   m_image(),
