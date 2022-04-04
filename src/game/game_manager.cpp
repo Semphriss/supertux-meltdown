@@ -79,69 +79,6 @@ GameManager::run(int argc, char** argv)
 }
 
 void
-GameManager::change_video_system(Window::VideoSystem video_system,
-                                 bool keep_status)
-{
-  log_debug << "Request to change video system to "
-            << Window::get_video_system_tag(video_system) << std::endl;
-
-  auto window = Window::create_window(video_system);
-  window->set_title("SuperTux Meltdown " STM_VER);
-  window->set_resizable(true);
-
-  if (m_window && keep_status)
-  {
-    window->set_pos(m_window->get_pos());
-    window->set_size(m_window->get_size());
-    window->set_status(m_window->get_status());
-  }
-
-  m_window = std::move(window);
-
-  // Textures are broken now that the video changed
-  for (auto& scene : m_scenes)
-  {
-    scene->reset_caches();
-  }
-
-  // Clearing events is necessary, else events will be duplicated
-  SDL_Event e;
-  while (SDL_PollEvent(&e));
-}
-
-void
-GameManager::set_delay(float delay)
-{
-  log_debug << "Request to change delay to " << delay << std::endl;
-
-  m_delay = delay;
-}
-
-Window&
-GameManager::get_window()
-{
-  return *m_window;
-}
-
-const IGameManager::SceneStack&
-GameManager::get_scene_stack() const
-{
-  return m_scenes;
-}
-
-const Scene*
-GameManager::get_popping_scene() const
-{
-  return m_popping_scene.get();
-}
-
-const Transition*
-GameManager::get_current_transition() const
-{
-  return m_transition.get();
-}
-
-void
 GameManager::push_scene(std::unique_ptr<Scene> scene,
                         Transition::Type transition, float time)
 {
@@ -205,6 +142,69 @@ GameManager::pop_scene(Transition::Type transition, float time)
     if (to)
       to->enter();
   }
+}
+
+void
+GameManager::change_video_system(Window::VideoSystem video_system,
+                                 bool keep_status)
+{
+  log_debug << "Request to change video system to "
+            << Window::get_video_system_tag(video_system) << std::endl;
+
+  auto window = Window::create_window(video_system);
+  window->set_title("SuperTux Meltdown " STM_VER);
+  window->set_resizable(true);
+
+  if (m_window && keep_status)
+  {
+    window->set_pos(m_window->get_pos());
+    window->set_size(m_window->get_size());
+    window->set_status(m_window->get_status());
+  }
+
+  m_window = std::move(window);
+
+  // Textures are broken now that the video changed
+  for (auto& scene : m_scenes)
+  {
+    scene->reset_caches();
+  }
+
+  // Clearing events is necessary, else events will be duplicated
+  SDL_Event e;
+  while (SDL_PollEvent(&e));
+}
+
+void
+GameManager::set_delay(float delay)
+{
+  log_debug << "Request to change delay to " << delay << std::endl;
+
+  m_delay = delay;
+}
+
+Window&
+GameManager::get_window()
+{
+  return *m_window;
+}
+
+const IGameManager::SceneStack&
+GameManager::get_scene_stack() const
+{
+  return m_scenes;
+}
+
+const Scene*
+GameManager::get_popping_scene() const
+{
+  return m_popping_scene.get();
+}
+
+const Transition*
+GameManager::get_current_transition() const
+{
+  return m_transition.get();
 }
 
 void
