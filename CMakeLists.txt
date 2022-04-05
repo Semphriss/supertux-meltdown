@@ -60,13 +60,23 @@ add_executable(supertux-meltdown ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
 target_include_directories(supertux-meltdown PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/)
 target_link_libraries(supertux-meltdown PUBLIC supertux-meltdown_lib)
 
+file(GLOB_RECURSE STM_TEST_FILES ${CMAKE_CURRENT_SOURCE_DIR}/tests/*/*.cpp)
+list(SORT STM_TEST_FILES)
+set(HARBOR_USER_TEST_FILES ${STM_TEST_FILES} CACHE STRING "" FORCE)
+set(HARBOR_USER_TEST_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/src/ CACHE STRING "" FORCE)
+set(HARBOR_USER_TEST_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/tests/ CACHE STRING "" FORCE)
+set(HARBOR_USER_TEST_LINKS supertux-meltdown_lib CACHE STRING "" FORCE)
+set(HARBOR_USER_TEST_COV supertux-meltdown_lib CACHE STRING "" FORCE)
+
 # Harbor
 option(HARBOR_BUILD_EXEC OFF)
-option(HARBOR_BUILD_TEST OFF)
 option(HARBOR_INSTALL_DATA OFF)
 option(HARBOR_INSTALL_LIB ${BUILD_SHARED_LIBS})
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/harbor)
 target_link_libraries(supertux-meltdown_lib PUBLIC harbor_lib)
+
+# Move run_tests from build/external/harbor/ to just build/
+set_target_properties(run_tests PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
 if(UBUNTU_TOUCH)
   install(TARGETS supertux-meltdown RUNTIME DESTINATION .)
@@ -84,4 +94,3 @@ endif(UBUNTU_TOUCH)
 if(STM_INSTALL_LIBRARY)
   install(TARGETS supertux-meltdown_lib)
 endif(STM_INSTALL_LIBRARY)
-
