@@ -18,5 +18,5 @@
 
 int main(int argc, char** argv)
 {
-  GameManager().run(argc, argv);
+  return GameManager().run(argc, argv);
 }
