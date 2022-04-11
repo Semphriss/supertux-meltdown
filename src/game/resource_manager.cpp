@@ -18,10 +18,16 @@
 
 #include <memory>
 
-#include <physfs.h>
+#include "physfs.h"
+#ifdef EMSCRIPTEN
+#include "SDL2/SDL.h"
+#include "SDL2/SDL_image.h"
+#include "SDL2/SDL_ttf.h"
+#else
 #include "SDL.h"
 #include "SDL_image.h"
 #include "SDL_ttf.h"
+#endif
 
 #include "util/log.hpp"
 #include "video/font.hpp"
@@ -70,7 +76,9 @@ ResourceManager::ResourceManager(const char* arg0)
     log_error << "Could not set antialiasing: " << SDL_GetError() << std::endl;
   }
 
-  if (!IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG | IMG_INIT_TIF | IMG_INIT_WEBP))
+  // FIXME: Tiff and WebP can't seem to be compiled with Emscripten (include
+  // headers tiffio.h and webp/decode.h not found)
+  if (!IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG))
   {
     throw std::runtime_error("Could not initialize SDL_image: " +
                              std::string(IMG_GetError()));

@@ -16,7 +16,10 @@
 
 #include "game/game_manager.hpp"
 
+#include "make_unique.hpp"
+
 int main(int argc, char** argv)
 {
-  return GameManager().run(argc, argv);
+  GameManager::s_main_game_manager = std::make_unique<GameManager>();
+  return GameManager::s_main_game_manager->run(argc, argv);
 }

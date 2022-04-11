@@ -34,11 +34,14 @@ endif()
 
 cmake_policy(SET CMP0048 NEW)
 
-project(supertux-meltdown
-          VERSION "${VER_SHORT}"
-          DESCRIPTION "Semphris' take on the popular Linux platformer")
+project(supertux-meltdown VERSION "${VER_SHORT}")
 
-cmake_minimum_required(VERSION 3.0)
+if(EMSCRIPTEN)
+  # Requires target_link_options
+  cmake_minimum_required(VERSION 3.13)
+else()
+  cmake_minimum_required(VERSION 3.0)
+endif()
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -60,6 +63,19 @@ add_executable(supertux-meltdown ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
 target_include_directories(supertux-meltdown PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/)
 target_link_libraries(supertux-meltdown PUBLIC supertux-meltdown_lib)
 
+if(EMSCRIPTEN)
+  target_link_options(supertux-meltdown PUBLIC -sEXPORTED_FUNCTIONS=['_main','_getExceptionMessage'] PUBLIC -sEXPORTED_RUNTIME_METHODS=['ccall','cwrap'] PUBLIC -sEXTRA_EXPORTED_RUNTIME_METHODS=['ccall','cwrap'])
+  target_link_options(supertux-meltdown PUBLIC --preload-file ${CMAKE_CURRENT_SOURCE_DIR}/data/@/data/
+                                                -sALLOW_MEMORY_GROWTH=1 --use-preload-plugins
+                                                -fsanitize=address)
+
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -sUSE_SDL=2 -sUSE_SDL_IMAGE=2 -sUSE_SDL_TTF=2 -sSDL2_IMAGE_FORMATS='[\"png\",\"jpg\"]' -fexceptions")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -sUSE_SDL=2 -sUSE_SDL_IMAGE=2 -sUSE_SDL_TTF=2 -sSDL2_IMAGE_FORMATS='[\"png\",\"jpg\"]' -fexceptions")
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/mk/emscripten/supertux-meltdown.html ${CMAKE_CURRENT_BINARY_DIR}/supertux-meltdown.html COPYONLY)
+
+  set(HARBOR_BUILD_TEST OFF CACHE BOOL "" FORCE)
+endif()
+
 file(GLOB_RECURSE STM_TEST_FILES ${CMAKE_CURRENT_SOURCE_DIR}/tests/*/*.cpp)
 list(SORT STM_TEST_FILES)
 set(HARBOR_USER_TEST_FILES ${STM_TEST_FILES} CACHE STRING "" FORCE)
@@ -76,7 +92,9 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/harbor)
 target_link_libraries(supertux-meltdown_lib PUBLIC harbor_lib)
 
 # Move run_tests from build/external/harbor/ to just build/
-set_target_properties(run_tests PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+if(HARBOR_BUILD_TEST)
+  set_target_properties(run_tests PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+endif()
 
 if(UBUNTU_TOUCH)
   install(TARGETS supertux-meltdown RUNTIME DESTINATION .)

@@ -21,7 +21,12 @@
 
 #include "make_unique.hpp"
 
+#ifdef EMSCRIPTEN
+#include "emscripten.h"
+#include "SDL2/SDL.h"
+#else
 #include "SDL.h"
+#endif
 
 #include "fs/file.hpp"
 #include "game/resource_manager.hpp"
@@ -42,6 +47,8 @@ static const std::vector<Window::VideoSystem> SUPPORTED_VIDEO_SYSTEMS = {
   Window::VideoSystem::GL
 };
 
+std::unique_ptr<GameManager> GameManager::s_main_game_manager = nullptr;
+
 GameManager::GameManager() :
   m_window(nullptr),
   m_scenes(),
@@ -55,6 +62,8 @@ GameManager::GameManager() :
 int
 GameManager::run(int argc, char** argv)
 {
+  Log::s_level = Log::Level::ALL;
+
   log_debug << "Initializing the game" << std::endl;
   ResourceManager::get_resource_manager(argv[0]);
 
@@ -211,8 +220,10 @@ void
 GameManager::setup_filesystem() const
 {
   auto local_path = File::get_pref_dir("Semphris", "SuperTux Meltdown");
-#ifdef UBUNTU_TOUCH
+#if defined(UBUNTU_TOUCH)
   auto src_path = File::build_os_path({File::get_base_dir(), "data"});
+#elif defined(EMSCRIPTEN)
+  auto src_path = "/data";
 #else
   auto src_path = File::build_os_path({File::get_base_dir(), "../data"});
 #endif
@@ -498,45 +509,55 @@ GameManager::run_single_loop()
   handle_draw();
 }
 
+#ifdef EMSCRIPTEN
+#define HANDLE_ERR(err) if (!s_main_game_manager->try_recover(err)) return;
+#else
+#define HANDLE_ERR(err) if (!try_recover(err)) return 1
+#endif
+
 int
 GameManager::run_loops()
 {
+#ifdef EMSCRIPTEN
+  emscripten_set_main_loop([] {
+#else
   while(!empty())
   {
+#endif
     try
     {
+#ifdef EMSCRIPTEN
+      s_main_game_manager->run_single_loop();
+#else
       run_single_loop();
       SDL_Delay(static_cast<Uint32>(m_delay * 1000.0f));
+#endif
     }
     catch(const std::exception& err)
     {
       log_error << "Unexpected exception: " << err.what() << std::endl;
-
-      if (!try_recover(err))
-        return 1;
+      HANDLE_ERR(err);
     }
     catch(const std::string& msg)
     {
       log_error << "Unexpected error: " << msg << std::endl;
-
-      if (!try_recover(std::runtime_error(msg)))
-        return 1;
+      HANDLE_ERR(std::runtime_error(msg));
     }
     catch(const char* msg)
     {
       log_error << "Unexpected error: " << msg << std::endl;
-
-      if (!try_recover(std::runtime_error(msg)))
-        return 1;
+      HANDLE_ERR(std::runtime_error(msg));
     }
     catch(...)
     {
       log_error << "Unexpected unspecified error" << std::endl;
-
-      if (!try_recover(std::runtime_error("")))
-        return 1;
+      HANDLE_ERR(std::runtime_error(""));
     }
+#ifdef EMSCRIPTEN
+  }, -1, false);
+#else
   }
+#endif
 
   return 0;
 }
@@ -606,4 +627,14 @@ bool
 GameManager::empty() const
 {
   return m_scenes.empty() && !m_transition;
+}
+
+extern "C" {
+
+const char*
+getExceptionMessage(intptr_t address)
+{
+  return reinterpret_cast<std::exception*>(address)->what();
+}
+
 }

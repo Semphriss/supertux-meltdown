@@ -20,10 +20,15 @@
 #include "game/i_game_manager.hpp"
 
 #include <chrono>
+#include <memory>
 
 class GameManager final :
   public IGameManager
 {
+public:
+  // Required by Emscripten
+  static std::unique_ptr<GameManager> s_main_game_manager;
+
 public:
   GameManager();
   virtual ~GameManager() override = default;
@@ -45,7 +50,6 @@ public:
   virtual const Scene* get_popping_scene() const override;
   virtual const Transition* get_current_transition() const override;
 
-private:
   void setup_filesystem() const;
   void advance_video_system();
   void handle_internal_event(const SDL_Event& e);
@@ -76,5 +80,12 @@ private:
   GameManager(const GameManager&) = delete;
   GameManager& operator=(const GameManager&) = delete;
 };
+
+extern "C" {
+
+// Helper functions for Emscripten
+const char* getExceptionMessage(intptr_t address);
+
+}
 
 #endif

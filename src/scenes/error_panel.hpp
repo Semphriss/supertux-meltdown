@@ -19,6 +19,7 @@
 
 #include "scenes/scene.hpp"
 
+#include <string>
 #include <memory>
 
 class Texture;
