@@ -56,8 +56,15 @@ ResourceManager::~ResourceManager()
 
 ResourceManager::ResourceManager(const char* arg0)
 {
-  log_info << "SDL " << SDL_MAJOR_VERSION << "." << SDL_MINOR_VERSION << "."
-           << SDL_PATCHLEVEL << std::endl;
+  log_info << "Compiled against SDL " << SDL_MAJOR_VERSION << "."
+           << SDL_MINOR_VERSION << "." << SDL_PATCHLEVEL << std::endl;
+
+  SDL_version ver;
+  SDL_GetVersion(&ver);
+
+  log_info << "Linked against SDL " << std::to_string(ver.major) << "."
+           << std::to_string(ver.minor) << "." << std::to_string(ver.patch)
+           << std::endl;
 
   if (!PHYSFS_init(arg0))
   {
@@ -73,7 +80,7 @@ ResourceManager::ResourceManager(const char* arg0)
 
   if (SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "2") == SDL_FALSE)
   {
-    log_error << "Could not set antialiasing: " << SDL_GetError() << std::endl;
+    log_warn << "Could not set antialiasing: " << SDL_GetError() << std::endl;
   }
 
   // FIXME: Tiff and WebP can't seem to be compiled with Emscripten (include

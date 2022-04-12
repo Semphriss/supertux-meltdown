@@ -62,8 +62,6 @@ GameManager::GameManager() :
 int
 GameManager::run(int argc, char** argv)
 {
-  Log::s_level = Log::Level::ALL;
-
   log_debug << "Initializing the game" << std::endl;
   ResourceManager::get_resource_manager(argv[0]);
 
@@ -91,7 +89,7 @@ void
 GameManager::push_scene(std::unique_ptr<Scene> scene,
                         Transition::Type transition, float time)
 {
-  log_debug << "Request to change push scene" << std::endl;
+  log_debug << "Request to push scene" << std::endl;
 
   if (m_transition)
   {
@@ -119,7 +117,7 @@ GameManager::push_scene(std::unique_ptr<Scene> scene,
 void
 GameManager::pop_scene(Transition::Type transition, float time)
 {
-  log_debug << "Request to change pop scene" << std::endl;
+  log_debug << "Request to pop scene" << std::endl;
 
   if (m_transition)
   {
