@@ -28,12 +28,11 @@ class GameManager final :
 public:
   // Required by Emscripten
   static std::unique_ptr<GameManager> s_main_game_manager;
+  static int run(int argc, char** argv);
 
 public:
   GameManager();
   virtual ~GameManager() override = default;
-
-  int run(int argc, char** argv);
 
   virtual void push_scene(std::unique_ptr<Scene> scene,
                           Transition::Type transition = Transition::Type::NONE,

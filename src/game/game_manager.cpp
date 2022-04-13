@@ -49,40 +49,41 @@ static const std::vector<Window::VideoSystem> SUPPORTED_VIDEO_SYSTEMS = {
 
 std::unique_ptr<GameManager> GameManager::s_main_game_manager = nullptr;
 
+int
+GameManager::run(int argc, char** argv)
+{
+  s_main_game_manager = std::make_unique<GameManager>();
+  auto& gm = *s_main_game_manager;
+
+  log_debug << "Initializing the game" << std::endl;
+  ResourceManager::get_resource_manager(argv[0]);
+
+  log_debug << "Setting up filesystem" << std::endl;
+  gm.setup_filesystem();
+
+  log_debug << "Starting video system" << std::endl;
+  gm.change_video_system(Window::VideoSystem::SDL);
+
+  log_debug << "Emplacing main menu" << std::endl;
+  gm.push_scene(std::make_unique<MainMenu>(gm), Transition::Type::DISSOLVE);
+
+  log_debug << "Launching main loop" << std::endl;
+  int return_code = gm.run_loops();
+
+  // It is normal to see this message at the initialisation step on certain
+  // platforms which handle the main loop separately, like Emscripten
+  log_debug << "Main loop exited with code " << return_code << std::endl;
+  return return_code;
+}
+
 GameManager::GameManager() :
   m_window(nullptr),
   m_scenes(),
   m_transition(nullptr),
   m_popping_scene(nullptr),
-  m_last_frame(),
+  m_last_frame(std::chrono::steady_clock::now()),
   m_delay(0.01f)
 {
-}
-
-int
-GameManager::run(int argc, char** argv)
-{
-  log_debug << "Initializing the game" << std::endl;
-  ResourceManager::get_resource_manager(argv[0]);
-
-  log_debug << "Setting up filesystem" << std::endl;
-  setup_filesystem();
-
-  log_debug << "Starting video system" << std::endl;
-  change_video_system(Window::VideoSystem::SDL);
-
-  log_debug << "Emplacing main menu" << std::endl;
-  push_scene(std::make_unique<MainMenu>(*this), Transition::Type::DISSOLVE);
-
-  m_last_frame = std::chrono::steady_clock::now();
-
-  log_debug << "Launching main loop" << std::endl;
-  run_loops();
-
-  // It is normal to see this message at the initialisation step on certain
-  // platforms which handle the main loop separately, like Emscripten
-  log_debug << "Main loop exited" << std::endl;
-  return 0;
 }
 
 void
