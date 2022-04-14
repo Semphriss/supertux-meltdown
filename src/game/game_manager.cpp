@@ -31,7 +31,7 @@
 #include "fs/file.hpp"
 #include "game/resource_manager.hpp"
 #include "scenes/error_panel.hpp"
-#include "scenes/main_menu.hpp"
+#include "scenes/level_editor.hpp"
 #include "transitions/transition.hpp"
 #include "util/color.hpp"
 #include "util/log.hpp"
@@ -65,7 +65,7 @@ GameManager::run(int argc, char** argv)
   gm.change_video_system(Window::VideoSystem::SDL);
 
   log_debug << "Emplacing main menu" << std::endl;
-  gm.push_scene(std::make_unique<MainMenu>(gm), Transition::Type::DISSOLVE);
+  gm.push_scene(std::make_unique<LevelEditor>(gm), Transition::Type::DISSOLVE);
 
   log_debug << "Launching main loop" << std::endl;
   int return_code = gm.run_loops();
