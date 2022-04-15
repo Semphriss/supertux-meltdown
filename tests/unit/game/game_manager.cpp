@@ -186,12 +186,14 @@ TEST(GameManager, pop_scene)
     EXPECT_CALL(*mock_scene_1, leave(false)).Times(1);
 
     auto scene_2 = std::make_unique<testing::StrictMock<MockScene>>(gm);
-    auto* mock_scene_2 = scene_1.get();
+    auto* mock_scene_2 = scene_2.get();
     EXPECT_CALL(*mock_scene_2, enter()).Times(1);
     EXPECT_CALL(*mock_scene_2, leave(true)).Times(1);
 
     gm.push_scene(std::move(scene_1));
     gm.push_scene(std::move(scene_2));
+
+    // Time MUST be > 0.0f by default
     gm.pop_scene(static_cast<Transition::Type>(1));
 
     EXPECT_EQ(gm.get_scene_stack().size(), 1);
