@@ -50,8 +50,38 @@ static const std::vector<Window::VideoSystem> SUPPORTED_VIDEO_SYSTEMS = {
 
 std::unique_ptr<GameManager> GameManager::s_main_game_manager = nullptr;
 
+/**
+ * Runs the game like a normal program.
+ *
+ * This function takes care of loading resources, parsing arguments, and running
+ * the main loop. It is meant to be easily callable from a main() function with:
+ *
+ * ```cpp
+ * int main(int argc, char** argv)
+ * {
+ *   return GameManager::run(argc, argv);
+ * }
+ * ```
+ *
+ * @note This function might return before the game ran! On some platforms (like
+ *       WASM, but also potentially others), the main loop is handled by the
+ *       environment rather than by the program itself, which requires the
+ *       survival of the resources (notably, the GameManager object) after
+ *       returning. Internally, the code already handles this by using a
+ *       static class variable that survives the whole execution. If you need to
+ *       add code after calling GameManager::run(), do not assume that the game
+ *       finished running upon the function's return!
+ *
+ * @param argc The number of arguments passed.
+ * @param argv The value of the arguments passed, as an array of null-terminated
+ *             C strings. Although the standart says the array itself must also
+ *             be null-terminated, this function relies only on argc and the
+ *             last NULL argument can be omitted if necessary.
+ * @returns 0 if the program ran successfully; 1 if a fatal error happened.
+ * @author Semphris <semphris@semphris.com>, 2022
+ */
 int
-GameManager::run(int argc, const char** argv)
+GameManager::run(int argc, const char* const* argv)
 {
   s_main_game_manager = std::make_unique<GameManager>();
   auto& gm = *s_main_game_manager;
@@ -77,6 +107,11 @@ GameManager::run(int argc, const char** argv)
   return return_code;
 }
 
+/**
+ * Creates a generic GameManager.
+ *
+ * @author Semphris <semphris@semphris.com>, 2022
+ */
 GameManager::GameManager() :
   m_window(nullptr),
   m_scenes(),
@@ -87,6 +122,25 @@ GameManager::GameManager() :
 {
 }
 
+/**
+ * Pushes a new scene on the scene stack, optionally with a transition.
+ *
+ * If there is already a currently running transition, the call has no effect.
+ *
+ * Internally, all changes are effective immediately: Upon returning, if
+ * there wasn't an active transition, it is guaranteed that the entering scene
+ * will be at the top of the stack and, if the value of @p transition is
+ * Transition::Type::NONE, no transition will be created and the scene becomes
+ * the active scene, effective immediately.
+ *
+ * If @p transition is NOT Transition::Type::NONE but @p time is 0, a transition
+ * will be created and will finish on the next update call.
+ *
+ * @param scene The scene to be pushed on top of the stack.
+ * @param transition The scene to be pushed on top of the stack.
+ * @param time The time the transition should take.
+ * @author Semphris <semphris@semphris.com>, 2022
+ */
 void
 GameManager::push_scene(std::unique_ptr<Scene> scene,
                         Transition::Type transition, float time)
@@ -116,6 +170,24 @@ GameManager::push_scene(std::unique_ptr<Scene> scene,
   }
 }
 
+/**
+ * Pops the topmost scene from the scene stack, optionally with a transition.
+ *
+ * If there is already a currently running transition, the call has no effect.
+ *
+ * Internally, all changes are effective immediately: Upon returning, if
+ * there wasn't an active transition, it is guaranteed that the leaving scene
+ * will be out of the stack and, if the value of @p transition is
+ * Transition::Type::NONE, no transition will be created and the scene is
+ * destroyed.
+ *
+ * If @p transition is NOT Transition::Type::NONE but @p time is 0, a transition
+ * will be created and will finish on the next update call.
+ *
+ * @param transition The scene to be pushed on top of the stack.
+ * @param time The time the transition should take.
+ * @author Semphris <semphris@semphris.com>, 2022
+ */
 void
 GameManager::pop_scene(Transition::Type transition, float time)
 {
@@ -153,6 +225,20 @@ GameManager::pop_scene(Transition::Type transition, float time)
   }
 }
 
+/**
+ * Changes the window, using the specified video system.
+ *
+ * Calling this function invalidates all textures loaded from file or created
+ * dynamically through the window; this function takes care of calling
+ * Scene::reset_caches() on scenes, but if some resources are located outside
+ * of scenes, they must be taken care of manually.
+ *
+ * @param video_system The type of video system to use when creating the window.
+ * @param keep_status If true, copies the basic status of the old window to the
+ *                    new window (size, position, etc). This parameter has no
+ *                    effect if there is no old window (m_window is null).
+ * @author Semphris <semphris@semphris.com>, 2022
+ */
 void
 GameManager::change_video_system(Window::VideoSystem video_system,
                                  bool keep_status)
@@ -184,6 +270,21 @@ GameManager::change_video_system(Window::VideoSystem video_system,
   while (SDL_PollEvent(&e));
 }
 
+/**
+ * Changes the delay between frames (inverse of the FPS).
+ *
+ * This function will probably receive severe improvements in the future; see
+ * the todo's below.
+ *
+ * @todo Add a function to set time multiplier for update()
+ * @todo Change the function to take an FPS value instead of a delay value?
+ * @todo Add a way to sync the main loop with the refresh rate of the screen.
+ *
+ * @param delay The new delay between frames. This may differ from the values
+ *              sent to Scene::update(), since it uses a timer to calculate the
+ *              actual delays accurately.
+ * @author Semphris <semphris@semphris.com>, 2022
+ */
 void
 GameManager::set_delay(float delay)
 {
@@ -192,30 +293,63 @@ GameManager::set_delay(float delay)
   m_delay = delay;
 }
 
+/**
+ * Returns the window used by the GameManager.
+ *
+ * @returns The window object.
+ * @author Semphris <semphris@semphris.com>, 2022
+ */
 Window&
 GameManager::get_window()
 {
   return *m_window;
 }
 
+/**
+ * Returns the scene stack used by the GameManager.
+ *
+ * @returns The scene stack.
+ * @author Semphris <semphris@semphris.com>, 2022
+ */
 const IGameManager::SceneStack&
 GameManager::get_scene_stack() const
 {
   return m_scenes;
 }
 
+/**
+ * Returns the currently popping scene, if any.
+ *
+ * @returns The currently popping scene, or null if there isn't any.
+ * @author Semphris <semphris@semphris.com>, 2022
+ */
 const Scene*
 GameManager::get_popping_scene() const
 {
   return m_popping_scene.get();
 }
 
+/**
+ * Returns the current transition, if any.
+ *
+ * @returns The current transition, or null if there isn't any. A transition is
+ *          popping if GameManager::get_popping_scene() is non-null or pushing
+ *          if GameManager::get_popping_scene() is null.
+ * @author Semphris <semphris@semphris.com>, 2022
+ */
 const Transition*
 GameManager::get_current_transition() const
 {
   return m_transition.get();
 }
 
+/**
+ * Sets up the filesystem to be used by the game.
+ *
+ * @todo Move that code into some module dedicated to cross-platform support.
+ *
+ * @author Semphris <semphris@semphris.com>, 2022
+ */
 void
 GameManager::setup_filesystem() const
 {
@@ -236,6 +370,15 @@ GameManager::setup_filesystem() const
   File::set_write_dir(local_path);
 }
 
+/**
+ * Changes the video system to the next one from a hardcoded list of video
+ * systems.
+ *
+ * Internally, it uses SUPPORTED_VIDEO_SYSTEMS as a list and
+ * GameManager::change_video_system() to update the video system.
+ *
+ * @author Semphris <semphris@semphris.com>, 2022
+ */
 void
 GameManager::advance_video_system()
 {
@@ -261,6 +404,29 @@ GameManager::advance_video_system()
   change_video_system(target_video_system);
 }
 
+/**
+ * Handle events for game-wide generic commands, such as flushing the cache or
+ * changing the video system.
+ *
+ * This function SHOULD NOT be called externally; instead, use the wanted
+ * functions directly.
+ *
+ * @todo Add some function for clearing caches...
+ *
+ * List of such events (please check the code to ensure this is up-to-date):
+ * - F5: Flush all known caches
+ * - F10: Change the video system to the next available one
+ *   (see GameManager::advance_video_system)
+ * - F11: Toggle fullscreen
+ *
+ * Also handles some internal controls:
+ * - Quitting the game
+ * - Flushing caches when windows are resized (for text rendering; see the code)
+ * - Flushing caches when OS reports low memory
+ *
+ * @param e The event to be handled.
+ * @author Semphris <semphris@semphris.com>, 2022
+ */
 void
 GameManager::handle_internal_event(const SDL_Event& e)
 {
@@ -308,7 +474,7 @@ GameManager::handle_internal_event(const SDL_Event& e)
       switch(e.key.keysym.sym)
       {
         case SDLK_F1:
-          // TODO: Open the help menu
+          /** @todo F1 should open some help menu */
           break;
 
         case SDLK_F5:
@@ -340,7 +506,7 @@ GameManager::handle_internal_event(const SDL_Event& e)
                             + std::to_string(now->tm_min) + "-"
                             + std::to_string(now->tm_sec) + ".png";
 
-          // TODO: Save screenshot to file
+          /** @todo F12 should save a screenshot to file */
         }
           break;
 
@@ -354,6 +520,25 @@ GameManager::handle_internal_event(const SDL_Event& e)
   }
 }
 
+/**
+ * Try to recover from an uncaught exception.
+ *
+ * This function SHOULD NOT be called externally; it is public for testing
+ * purposes only. Handle your exceptions yourself!
+ *
+ * This works by attempting to apply a series of common fixes and by saving as
+ * much data as possible. The point is to avoid crashes or loss of data as much
+ * as possible.
+ *
+ * Calling this function (which should always be done from GameManager!) allows
+ * the program to take any action it sees fit to recover the program, including
+ * destructive actions (if it can avoid a crash); do not rely on it, ever.
+ *
+ * @param err The event to be handled.
+ * @returns true if recovery was successful and execution can resume; false is
+ *          recovery was unsuccessful and program should crash.
+ * @author Semphris <semphris@semphris.com>, 2022
+ */
 bool
 GameManager::try_recover(const std::exception& err)
 {
@@ -439,8 +624,8 @@ GameManager::try_recover(const std::exception& err)
 
   log_debug << "Recover unsuccessful: " << message << std::endl;
 
-  // TODO: Add a function in Scenes to allow them to emergency-save their
-  //       essential data, also try reloading a scene
+  /** @todo Add a function in Scenes to allow them to emergency-save their
+            essential data, also try reloading a scene */
 
   // This action is destructive, so must come in last place.
   try
@@ -495,6 +680,18 @@ GameManager::try_recover(const std::exception& err)
   return false;
 }
 
+/**
+ * Runs a single frame from the main loop.
+ *
+ * This function SHOULD NOT be called externally; is it public for testing
+ * purposes only. The main loop will take care of calling this by itself!
+ *
+ * This simply executes the event() - update() - draw() routine. Note that there
+ * is no guarantee about the order in which they are called, or their frequency;
+ * scenes can observe update() - event() - draw() - draw() - event() - draw()...
+ *
+ * @author Semphris <semphris@semphris.com>, 2022
+ */
 void
 GameManager::run_single_loop()
 {
@@ -517,6 +714,24 @@ GameManager::run_single_loop()
 #define HANDLE_ERR(err) if (!try_recover(err)) return 1
 #endif
 
+/**
+ * Runs the main loop.
+ *
+ * This function SHOULD NOT be called externally; is it public for testing
+ * purposes only. The main loop is already running!
+ *
+ * For most platforms, this is simply a `while` loop which repeatedly calls
+ * GameManager::run_single_loop(), checking for quitting conditions and catching
+ * uncaught errors. For certain platforms, like WASM, the main loop is not
+ * handled by the C++ code; this function only establishes the main loop
+ * through the external means relevant to the platform and may return
+ * immediately.
+ *
+ * @returns 0 if the game finished executing OR, on some platforms, if the main
+ *          loop was set; 1 if a fatal error occured and couldn't be recovered
+ *          from.
+ * @author Semphris <semphris@semphris.com>, 2022
+ */
 int
 GameManager::run_loops()
 {
@@ -564,6 +779,14 @@ GameManager::run_loops()
   return 0;
 }
 
+/**
+ * Takes care of the event phase from the main loop.
+ *
+ * This function SHOULD NOT be called externally; is it public for testing
+ * purposes only. This will be called automatically by the main loop.
+ *
+ * @author Semphris <semphris@semphris.com>, 2022
+ */
 void
 GameManager::handle_events()
 {
@@ -583,6 +806,14 @@ GameManager::handle_events()
   }
 }
 
+/**
+ * Takes care of the update phase from the main loop.
+ *
+ * This function SHOULD NOT be called externally; is it public for testing
+ * purposes only. This will be called automatically by the main loop.
+ *
+ * @author Semphris <semphris@semphris.com>, 2022
+ */
 void
 GameManager::handle_update()
 {
@@ -608,6 +839,14 @@ GameManager::handle_update()
   }
 }
 
+/**
+ * Takes care of the drawing phase from the main loop.
+ *
+ * This function SHOULD NOT be called externally; is it public for testing
+ * purposes only. This will be called automatically by the main loop.
+ *
+ * @author Semphris <semphris@semphris.com>, 2022
+ */
 void
 GameManager::handle_draw()
 {
@@ -625,6 +864,13 @@ GameManager::handle_draw()
   context.render();
 }
 
+/**
+ * Determines if the game has finished running.
+ *
+ * @returns true if the game finished running, e. g. the scene stack is empty
+ *          and there are no active transitions.
+ * @author Semphris <semphris@semphris.com>, 2022
+ */
 bool
 GameManager::empty() const
 {
@@ -633,6 +879,16 @@ GameManager::empty() const
 
 extern "C" {
 
+/**
+ * Helper function for Emscripten: Allows getting the message of an exception
+ * at a specific address in memory.
+ *
+ * @note This is for use with the Emscripten int-based exception handler ONLY;
+ *       passing other values to this function may result in undefined behavior.
+ *
+ * @returns The message from the exception.
+ * @author Semphris <semphris@semphris.com>, 2022
+ */
 const char*
 getExceptionMessage(intptr_t address)
 {

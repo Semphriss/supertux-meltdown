@@ -38,11 +38,13 @@ public:
   virtual void update(float dt_sec) override;
   virtual void draw(DrawingContext& context) const override;
 
-  /** \addtogroup GameObjectIdentifiers @{ */
+  /** \addtogroup GameObjectIdentifiers
+   * @{
+   */
 
   virtual std::string get_classname() const override;
 
-  /** } */
+  /** @} */
 
   void set_tile(const Vector& pos, const TileID& tile);
   void set_tiles(const Vector& pos, const TileRange<TileID>& tiles);

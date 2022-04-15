@@ -28,7 +28,7 @@ class GameManager final :
 public:
   // Required by Emscripten
   static std::unique_ptr<GameManager> s_main_game_manager;
-  static int run(int argc, const char** argv);
+  static int run(int argc, const char* const* argv);
 
 public:
   GameManager();

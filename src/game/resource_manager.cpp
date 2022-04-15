@@ -83,8 +83,8 @@ ResourceManager::ResourceManager(const char* arg0)
     log_warn << "Could not set antialiasing: " << SDL_GetError() << std::endl;
   }
 
-  // FIXME: Tiff and WebP can't seem to be compiled with Emscripten (include
-  // headers tiffio.h and webp/decode.h not found)
+  /** @bug Tiff and WebP can't seem to be compiled with Emscripten (include
+      headers tiffio.h and webp/decode.h not found) */
   if (!IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG))
   {
     throw std::runtime_error("Could not initialize SDL_image: " +
