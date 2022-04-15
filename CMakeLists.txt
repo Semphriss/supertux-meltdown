@@ -88,6 +88,8 @@ set(HARBOR_USER_TEST_COV supertux-meltdown_lib CACHE STRING "" FORCE)
 option(HARBOR_BUILD_EXEC OFF)
 option(HARBOR_INSTALL_DATA OFF)
 option(HARBOR_INSTALL_LIB ${BUILD_SHARED_LIBS})
+option(HARBOR_USE_SCRIPTING_LUA OFF)
+set(HARBOR_USER_TEST_SKIP_HARBOR ON CACHE BOOL "" FORCE)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/harbor)
 target_link_libraries(supertux-meltdown_lib PUBLIC harbor_lib)
 
