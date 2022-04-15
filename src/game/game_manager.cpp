@@ -16,6 +16,7 @@
 
 #include "game/game_manager.hpp"
 
+#include <ctime>
 #include <memory>
 #include <vector>
 
@@ -223,6 +224,8 @@ GameManager::setup_filesystem() const
   auto src_path = File::build_os_path({File::get_base_dir(), "data"});
 #elif defined(EMSCRIPTEN)
   auto src_path = "/data";
+#elif defined(_MSC_VER)
+  auto src_path = File::build_os_path({File::get_base_dir(), "..\\..\\data"});
 #else
   auto src_path = File::build_os_path({File::get_base_dir(), "../data"});
 #endif
