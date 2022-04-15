@@ -1,0 +1,96 @@
+name: Build
+
+on:
+  push:
+    branches: 
+    - master
+    tags:
+    - '*'
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        build_type: [Debug, Release]
+        dependencies_from: [source, package]
+        exclude:
+        - os: windows-latest
+          dependencies_from: package
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - name: Fetch repository
+      uses: actions/checkout@v2
+      if: matrix.dependencies_from != 'source'
+      with:
+        fetch-depth: 0
+        submodules: true
+
+    - name: Fetch repository with submodules
+      uses: actions/checkout@v2
+      if: matrix.dependencies_from == 'source'
+      with:
+        fetch-depth: 0
+        submodules: recursive
+
+    - name: Install tools (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install -y build-essential cmake git libgl1-mesa-dev
+
+    - name: Install tools (MacOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        brew install cmake
+
+    - name: Install dependencies (Linux)
+      working-directory: external/harbor
+      if: matrix.os == 'ubuntu-latest' && matrix.dependencies_from == 'package'
+      run: |
+        sudo apt-get install -y libgtest-dev libphysfs-dev libsdl2-dev \
+                                libsdl2-image-dev libsdl2-ttf-dev \
+                                libsquirrel-dev
+        # FIXME: Squirrel and Googletest aren't detected by CMake
+        git submodule update --init --recursive external/squirrel external/gtest
+
+    - name: Install dependencies (MacOS)
+      working-directory: external/harbor
+      if: matrix.os == 'macos-latest' && matrix.dependencies_from == 'package'
+      run: |
+        brew install googletest physfs sdl2 sdl2_image sdl2_ttf squirrel
+        # FIXME: Squirrel and Googletest aren't detected by CMake
+        git submodule update --init --recursive external/squirrel external/gtest
+
+    - name: Configure
+      working-directory: ${{ github.workspace }}
+      run: |
+        cmake --version
+        # FIXME: MSVC fails because it tries to run tests at build time (?)
+        cmake ${{ startsWith(matrix.os, 'windows') && '-G "MinGW Makefiles"' ||
+              '' }} -B build/ -S . -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_TYPE }}
+
+    - name: Build
+      working-directory: ${{ github.workspace }}/build
+      run: cmake --build . --config ${{ matrix.BUILD_TYPE }} --verbose
+
+    - name: Test
+      working-directory: ${{ github.workspace }}/build
+      run: ctest -C ${{ matrix.BUILD_TYPE }} --verbose
+
+    - name: Package
+      working-directory: ${{ github.workspace }}/build
+      run: cpack -G ZIP --verbose
+
+    - name: Upload
+      uses: actions/upload-artifact@v3.0.0
+      with:
+        name: ${{ matrix.os }}.zip
+        path: ${{ github.workspace }}/build/*.zip
+        if-no-files-found: error
