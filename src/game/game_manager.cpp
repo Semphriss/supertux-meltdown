@@ -51,7 +51,7 @@ static const std::vector<Window::VideoSystem> SUPPORTED_VIDEO_SYSTEMS = {
 std::unique_ptr<GameManager> GameManager::s_main_game_manager = nullptr;
 
 int
-GameManager::run(int argc, char** argv)
+GameManager::run(int argc, const char** argv)
 {
   s_main_game_manager = std::make_unique<GameManager>();
   auto& gm = *s_main_game_manager;
