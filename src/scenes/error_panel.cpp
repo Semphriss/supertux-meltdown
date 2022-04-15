@@ -95,9 +95,10 @@ ErrorPanel::draw(DrawingContext& context) const
                     m_font_path, 24, Color(1.0f, 1.0f, 1.0f),
                     Renderer::Blend::BLEND, true, 2);
 
-  context.draw_text("Lorem ipsum dolor sit amet consectetur adiscipling elit\nerewr",
-                    rect, Renderer::TextAlign::BOTTOM_MID, m_font_path, 12,
-                    Color(1.0f, 1.0f, 1.0f), Renderer::Blend::BLEND, true, 2);
+  context.draw_text("Please save your work as soon as possible and restart the "
+                    "game.", rect, Renderer::TextAlign::BOTTOM_MID, m_font_path,
+                    12, Color(1.0f, 1.0f, 1.0f), Renderer::Blend::BLEND, true,
+                    2);
 }
 
 void

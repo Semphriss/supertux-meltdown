@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-parse=(src tests tools CHANGELOG.md CMakeLists.txt COMPILING.md CONTRIBUTING.md\
-  LICENSE README.md ROADMAP.md .gitignore)
-ignore=(data external mk clickable.json .gitmodules)
+parse=(src tests tools docs CHANGELOG.md COMPILING.md CONTRIBUTING.md LICENSE \
+       README.md ROADMAP.md .gitignore)
+ignore=(data external mk clickable.json .gitmodules Doxyfile CMakeLists.txt)
 
 if ! ls src/ > /dev/null 2>&1; then
   echo "Please set your current directory to the root of the repository."
