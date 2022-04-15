@@ -91,8 +91,9 @@ option(HARBOR_INSTALL_LIB ${BUILD_SHARED_LIBS})
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/harbor)
 target_link_libraries(supertux-meltdown_lib PUBLIC harbor_lib)
 
-# Move run_tests from build/external/harbor/ to just build/
+# Move run_tests from build/external/harbor/ to just build/ (and enable CTest)
 if(HARBOR_BUILD_TEST)
+  enable_testing()
   set_target_properties(run_tests PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 endif()
 
