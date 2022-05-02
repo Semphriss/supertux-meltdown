@@ -1,0 +1,26 @@
+# Build Files
+build/
+build.*/
+
+# Utilities
+*.diff
+*.patch
+*.tmp
+
+# IDE files
+.vscode/
+language.settings.xml
+*.vs/
+.cache/
+compile_commands.json
+
+# OS Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.directory
+*~
