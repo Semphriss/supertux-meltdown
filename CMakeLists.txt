@@ -18,4 +18,10 @@ project(STMELTDOWN)
 
 cmake_minimum_required(VERSION 3.0)
 
-add_executable(stmeltdown src/main.cpp)
+file(GLOB_RECURSE STM_FILES src/*/*.cpp)
+add_executable(stmeltdown src/main.cpp ${STM_FILES})
+target_include_directories(stmeltdown PUBLIC src/)
+
+find_package(SDL2 REQUIRED)
+target_link_libraries(stmeltdown PUBLIC ${SDL2_LIBRARIES})
+target_include_directories(stmeltdown PUBLIC ${SDL2_INCLUDE_DIRS})
