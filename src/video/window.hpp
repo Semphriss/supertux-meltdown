@@ -19,14 +19,19 @@
 
 #include "SDL2/SDL.h"
 
+#include "video/renderer.hpp"
+
 class Window final
 {
 public:
   Window();
   ~Window();
 
+  SDL_Window* get_sdl_window() const;
+
 private:
-  SDL_Window* m_window;
+  SDL_Window* m_sdl_window;
+  Renderer m_renderer;
 
 private:
   Window(const Window&) = delete;
