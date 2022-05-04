@@ -14,23 +14,26 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "video/window.hpp"
+#ifndef HEADER_STM_VIDEO_RENDERER_HPP
+#define HEADER_STM_VIDEO_RENDERER_HPP
 
-Window::Window() :
-  m_sdl_window(SDL_CreateWindow("", SDL_WINDOWPOS_UNDEFINED,
-                                SDL_WINDOWPOS_UNDEFINED, 640, 400, 0)),
-  m_renderer(*this)
-{
-}
+#include "SDL2/SDL.h"
 
-Window::~Window()
-{
-  if (m_sdl_window)
-    SDL_DestroyWindow(m_sdl_window);
-}
+class Window;
 
-SDL_Window*
-Window::get_sdl_window() const
+class Renderer final
 {
-  return m_sdl_window;
-}
+public:
+  Renderer(const Window& window);
+  ~Renderer();
+
+private:
+  SDL_Renderer* m_sdl_renderer;
+  bool m_drawing;
+
+private:
+  Renderer(const Renderer&) = delete;
+  Renderer& operator=(const Renderer&) = delete;
+};
+
+#endif
