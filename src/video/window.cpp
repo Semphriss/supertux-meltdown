@@ -14,43 +14,16 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "SDL2/SDL.h"
-
-#include <iostream>
-
 #include "video/window.hpp"
 
-int main()
+Window::Window() :
+  m_window(SDL_CreateWindow("", SDL_WINDOWPOS_UNDEFINED,
+                            SDL_WINDOWPOS_UNDEFINED, 640, 400, 0))
 {
-  if (SDL_Init(SDL_INIT_VIDEO))
-  {
-    std::cerr << "Could not init SDL: " << SDL_GetError() << std::endl;
-    return 1;
-  }
+}
 
-  // Scope ensures all SDL-dependant objects (window, renderer, etc.) are
-  // destroyed before de-initing libraries
-  {
-    Window w;
-
-    bool quit = false;
-    while(!quit)
-    {
-      SDL_Event e;
-      while (SDL_PollEvent(&e))
-      {
-        if (e.type == SDL_QUIT)
-        {
-          quit = true;
-          break;
-        }
-      }
-
-      SDL_Delay(10);
-    }
-  }
-
-  SDL_Quit();
-
-  return 0;
+Window::~Window()
+{
+  if (m_window)
+    SDL_DestroyWindow(m_window);
 }
