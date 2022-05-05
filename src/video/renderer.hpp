@@ -21,17 +21,28 @@
 
 class Color;
 class Rect;
+class Vector;
 class Window;
 
 class Renderer final
 {
+public:
+  enum class Blend {
+    NONE = SDL_BLENDMODE_NONE,
+    BLEND = SDL_BLENDMODE_BLEND,
+    ADD = SDL_BLENDMODE_ADD,
+    MODULATE = SDL_BLENDMODE_MOD
+  };
+
 public:
   Renderer(const Window& window);
   ~Renderer();
 
   void flush();
 
-  void draw_filled_rect(const Rect& rect, const Color& color);
+  void draw_filled_rect(const Rect& rect, const Color& color, Blend blend);
+  void draw_line(const Vector& p1, const Vector& p2, const Color& color,
+                 Blend blend);
 
 private:
   SDL_Renderer* m_sdl_renderer;

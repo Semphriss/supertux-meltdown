@@ -50,7 +50,7 @@ int main()
       }
 
       r.draw_filled_rect(Rect(0.0f, 0.0f, 640.0f, 400.0f),
-                        Color(0.1f, 0.2f, 0.4f));
+                        Color(0.1f, 0.2f, 0.4f), Renderer::Blend::BLEND);
       r.flush();
 
       SDL_Delay(10);
