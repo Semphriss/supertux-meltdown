@@ -20,6 +20,7 @@
 
 #include "util/color.hpp"
 #include "util/rect.hpp"
+#include "util/vector.hpp"
 #include "video/window.hpp"
 
 Renderer::Renderer(const Window& window) :
@@ -42,7 +43,7 @@ Renderer::flush()
 }
 
 void
-Renderer::draw_filled_rect(const Rect& rect, const Color& color)
+Renderer::draw_filled_rect(const Rect& rect, const Color& color, Blend blend)
 {
   SDL_SetRenderDrawColor(m_sdl_renderer,
                          static_cast<Uint8>(color.r * 255.f),
@@ -50,10 +51,28 @@ Renderer::draw_filled_rect(const Rect& rect, const Color& color)
                          static_cast<Uint8>(color.b * 255.f),
                          static_cast<Uint8>(color.a * 255.f));
 
+  SDL_SetRenderDrawBlendMode(m_sdl_renderer, static_cast<SDL_BlendMode>(blend));
+
   SDL_FRect sdl_rect;
   sdl_rect.x = rect.x1;
   sdl_rect.y = rect.y1;
   sdl_rect.w = rect.width();
   sdl_rect.h = rect.height();
+
   SDL_RenderFillRectF(m_sdl_renderer, &sdl_rect);
+}
+
+void
+Renderer::draw_line(const Vector& p1, const Vector& p2, const Color& color,
+                    Blend blend)
+{
+  SDL_SetRenderDrawColor(m_sdl_renderer,
+                         static_cast<Uint8>(color.r * 255.f),
+                         static_cast<Uint8>(color.g * 255.f),
+                         static_cast<Uint8>(color.b * 255.f),
+                         static_cast<Uint8>(color.a * 255.f));
+
+  SDL_SetRenderDrawBlendMode(m_sdl_renderer, static_cast<SDL_BlendMode>(blend));
+
+  SDL_RenderDrawLineF(m_sdl_renderer, p1.x, p1.y, p2.x, p2.y);
 }
