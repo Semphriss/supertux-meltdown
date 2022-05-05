@@ -27,6 +27,8 @@ public:
   Window();
   ~Window();
 
+  Renderer& get_renderer();
+
   SDL_Window* get_sdl_window() const;
 
 private:
