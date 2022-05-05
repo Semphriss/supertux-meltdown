@@ -18,6 +18,8 @@
 
 #include <iostream>
 
+#include "util/color.hpp"
+#include "util/rect.hpp"
 #include "video/window.hpp"
 
 int main()
@@ -32,6 +34,7 @@ int main()
   // destroyed before de-initing libraries
   {
     Window w;
+    Renderer& r = w.get_renderer();
 
     bool quit = false;
     while(!quit)
@@ -45,6 +48,10 @@ int main()
           break;
         }
       }
+
+      r.draw_filled_rect(Rect(0.0f, 0.0f, 640.0f, 400.0f),
+                        Color(0.1f, 0.2f, 0.4f));
+      r.flush();
 
       SDL_Delay(10);
     }

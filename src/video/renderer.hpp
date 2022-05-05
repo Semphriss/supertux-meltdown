@@ -19,6 +19,8 @@
 
 #include "SDL2/SDL.h"
 
+class Color;
+class Rect;
 class Window;
 
 class Renderer final
@@ -27,9 +29,12 @@ public:
   Renderer(const Window& window);
   ~Renderer();
 
+  void flush();
+
+  void draw_filled_rect(const Rect& rect, const Color& color);
+
 private:
   SDL_Renderer* m_sdl_renderer;
-  bool m_drawing;
 
 private:
   Renderer(const Renderer&) = delete;

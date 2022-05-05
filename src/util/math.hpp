@@ -14,29 +14,15 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "video/window.hpp"
+#ifndef HEADER_STM_UTIL_MATH_HPP
+#define HEADER_STM_UTIL_MATH_HPP
 
-Window::Window() :
-  m_sdl_window(SDL_CreateWindow("", SDL_WINDOWPOS_UNDEFINED,
-                                SDL_WINDOWPOS_UNDEFINED, 640, 400, 0)),
-  m_renderer(*this)
+class Math final
 {
-}
+public:
+  template<typename T> static T clamp(const T& val, const T& min, const T& max);
+};
 
-Window::~Window()
-{
-  if (m_sdl_window)
-    SDL_DestroyWindow(m_sdl_window);
-}
+#include "util/math.cpp"
 
-Renderer&
-Window::get_renderer()
-{
-  return m_renderer;
-}
-
-SDL_Window*
-Window::get_sdl_window() const
-{
-  return m_sdl_window;
-}
+#endif
