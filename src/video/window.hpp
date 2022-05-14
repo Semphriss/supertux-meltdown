@@ -19,6 +19,7 @@
 
 #include "SDL2/SDL.h"
 
+#include "util/size.hpp"
 #include "video/renderer.hpp"
 
 class Window final
@@ -28,6 +29,8 @@ public:
   ~Window();
 
   Renderer& get_renderer();
+
+  Size get_size() const;
 
   SDL_Window* get_sdl_window() const;
 

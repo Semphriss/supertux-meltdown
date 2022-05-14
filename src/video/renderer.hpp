@@ -21,6 +21,7 @@
 
 class Color;
 class Rect;
+class Texture;
 class Vector;
 class Window;
 
@@ -43,6 +44,10 @@ public:
   void draw_filled_rect(const Rect& rect, const Color& color, Blend blend);
   void draw_line(const Vector& p1, const Vector& p2, const Color& color,
                  Blend blend);
+  void draw_texture(const Texture& texture, const Rect& src, const Rect& dst,
+                    const Color& color, Blend blend);
+
+  SDL_Renderer* get_sdl_renderer() const;
 
 private:
   SDL_Renderer* m_sdl_renderer;

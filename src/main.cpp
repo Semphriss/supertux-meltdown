@@ -15,11 +15,13 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "SDL2/SDL.h"
+#include "SDL2/SDL_image.h"
 
 #include <iostream>
 
 #include "util/color.hpp"
 #include "util/rect.hpp"
+#include "video/texture.hpp"
 #include "video/window.hpp"
 
 int main()
@@ -30,11 +32,18 @@ int main()
     return 1;
   }
 
+  if (!IMG_Init(IMG_INIT_PNG))
+  {
+    std::cerr << "Could not init SDL_image: " << IMG_GetError() << std::endl;
+    return 1;
+  }
+
   // Scope ensures all SDL-dependant objects (window, renderer, etc.) are
   // destroyed before de-initing libraries
   {
     Window w;
     Renderer& r = w.get_renderer();
+    Texture t(r, "../data/images/background.png");
 
     bool quit = false;
     while(!quit)
@@ -49,14 +58,15 @@ int main()
         }
       }
 
-      r.draw_filled_rect(Rect(0.0f, 0.0f, 640.0f, 400.0f),
-                        Color(0.1f, 0.2f, 0.4f), Renderer::Blend::BLEND);
+      r.draw_texture(t, t.get_size(), w.get_size(), Color(1.0f, 1.0f, 1.0f),
+                    Renderer::Blend::BLEND);
       r.flush();
 
       SDL_Delay(10);
     }
   }
 
+  IMG_Quit();
   SDL_Quit();
 
   return 0;

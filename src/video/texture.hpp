@@ -14,37 +14,38 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "video/window.hpp"
+#ifndef HEADER_STM_VIDEO_TEXTURE_HPP
+#define HEADER_STM_VIDEO_TEXTURE_HPP
 
-Window::Window() :
-  m_sdl_window(SDL_CreateWindow("", SDL_WINDOWPOS_UNDEFINED,
-                                SDL_WINDOWPOS_UNDEFINED, 640, 400, 0)),
-  m_renderer(*this)
-{
-}
+#include <string>
 
-Window::~Window()
-{
-  if (m_sdl_window)
-    SDL_DestroyWindow(m_sdl_window);
-}
+#include "SDL2/SDL.h"
 
-Renderer&
-Window::get_renderer()
-{
-  return m_renderer;
-}
+#include "util/size.hpp"
 
-Size
-Window::get_size() const
-{
-  int w, h;
-  SDL_GetWindowSize(m_sdl_window, &w, &h);
-  return Size(static_cast<float>(w), static_cast<float>(h));
-}
+class Renderer;
 
-SDL_Window*
-Window::get_sdl_window() const
+class Texture final
 {
-  return m_sdl_window;
-}
+public:
+  Texture(Renderer& renderer, const std::string file);
+  Texture(Renderer& renderer, const Size& size);
+  ~Texture();
+
+  SDL_Texture* get_sdl_texture() const;
+  Size get_size() const;
+
+  const Renderer& get_renderer() const;
+
+private:
+  Renderer& m_renderer;
+  SDL_Texture* m_sdl_texture;
+  bool m_drawable;
+  Size m_cached_size;
+
+private:
+  Texture(const Texture&) = delete;
+  Texture& operator=(const Texture&) = delete;
+};
+
+#endif
