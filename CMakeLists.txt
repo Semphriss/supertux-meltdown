@@ -22,6 +22,12 @@ file(GLOB_RECURSE STM_FILES src/*/*.cpp)
 add_executable(stmeltdown src/main.cpp ${STM_FILES})
 target_include_directories(stmeltdown PUBLIC src/)
 
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/mk/cmake)
+
 find_package(SDL2 REQUIRED)
 target_link_libraries(stmeltdown PUBLIC ${SDL2_LIBRARIES})
 target_include_directories(stmeltdown PUBLIC ${SDL2_INCLUDE_DIRS})
+
+find_package(SDL2_image REQUIRED)
+target_link_libraries(stmeltdown PUBLIC ${SDL2_IMAGE_LIBRARIES})
+target_include_directories(stmeltdown PUBLIC ${SDL2_IMAGE_INCLUDE_DIRS})

@@ -21,6 +21,7 @@
 #include "util/color.hpp"
 #include "util/rect.hpp"
 #include "util/vector.hpp"
+#include "video/texture.hpp"
 #include "video/window.hpp"
 
 Renderer::Renderer(const Window& window) :
@@ -75,4 +76,41 @@ Renderer::draw_line(const Vector& p1, const Vector& p2, const Color& color,
   SDL_SetRenderDrawBlendMode(m_sdl_renderer, static_cast<SDL_BlendMode>(blend));
 
   SDL_RenderDrawLineF(m_sdl_renderer, p1.x, p1.y, p2.x, p2.y);
+}
+
+void
+Renderer::draw_texture(const Texture& texture, const Rect& src, const Rect& dst,
+                       const Color& color, Blend blend)
+{
+  SDL_SetTextureColorMod(texture.get_sdl_texture(),
+                         static_cast<Uint8>(color.r * 255.f),
+                         static_cast<Uint8>(color.g * 255.f),
+                         static_cast<Uint8>(color.b * 255.f));
+
+  SDL_SetTextureAlphaMod(texture.get_sdl_texture(),
+                         static_cast<Uint8>(color.a * 255.f));
+
+  SDL_SetTextureBlendMode(texture.get_sdl_texture(),
+                          static_cast<SDL_BlendMode>(blend));
+
+  SDL_Rect s;
+  SDL_FRect d;
+  s.x = static_cast<int>(src.x1);
+  s.y = static_cast<int>(src.y1);
+  s.w = static_cast<int>(src.width());
+  s.h = static_cast<int>(src.height());
+  d.x = dst.x1;
+  d.y = dst.y1;
+  d.w = dst.width();
+  d.h = dst.height();
+
+  // TODO: Add support for angle, center point and flip
+  SDL_RenderCopyExF(m_sdl_renderer, texture.get_sdl_texture(), &s, &d, 0.0f,
+                    NULL, SDL_FLIP_NONE);
+}
+
+SDL_Renderer*
+Renderer::get_sdl_renderer() const
+{
+  return m_sdl_renderer;
 }
