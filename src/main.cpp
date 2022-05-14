@@ -14,11 +14,11 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <iostream>
+
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_image.h"
 #include "SDL2/SDL_ttf.h"
-
-#include <iostream>
 
 #include "util/color.hpp"
 #include "util/rect.hpp"
@@ -48,8 +48,7 @@ int main()
     return 1;
   }
 
-  // Scope ensures all SDL-dependant objects (window, renderer, etc.) are
-  // destroyed before de-initing libraries
+  try
   {
     Window w;
     Renderer& r = w.get_renderer();
@@ -85,6 +84,22 @@ int main()
 
       SDL_Delay(10);
     }
+  }
+  catch(const std::exception& e)
+  {
+    std::cerr << "Fatal error: " << e.what() << std::endl;
+  }
+  catch(const std::string& s)
+  {
+    std::cerr << "Fatal error: " << s << std::endl;
+  }
+  catch(const char* s)
+  {
+    std::cerr << "Fatal error: " << s << std::endl;
+  }
+  catch(...)
+  {
+    std::cerr << "Fatal error (unknown type)" << std::endl;
   }
 
   TTF_Quit();

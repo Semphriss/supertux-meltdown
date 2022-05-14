@@ -21,8 +21,33 @@
 #include "video/renderer.hpp"
 
 Texture::Texture(Renderer& renderer, const std::string file) :
-  Texture(renderer, IMG_Load(file.c_str()), true)
+  m_renderer(renderer),
+  m_sdl_texture(),
+  m_drawable(false),
+  m_cached_size()
 {
+  SDL_Surface* surface = IMG_Load(file.c_str());
+
+  if (!surface)
+  {
+    throw std::runtime_error("Can't load image '" + file + "':"
+                             + std::string(SDL_GetError()));
+  }
+
+  m_sdl_texture = SDL_CreateTextureFromSurface(renderer.get_sdl_renderer(),
+                                               surface);
+  SDL_FreeSurface(surface);
+
+  if (!m_sdl_texture)
+  {
+    throw std::runtime_error("Can't create texture from image '" + file + "':"
+                             + std::string(SDL_GetError()));
+  }
+
+  int w, h;
+  SDL_QueryTexture(m_sdl_texture, nullptr, nullptr, &w, &h);
+  m_cached_size.w = static_cast<float>(w);
+  m_cached_size.h = static_cast<float>(h);
 }
 
 Texture::Texture(Renderer& renderer, const Size& size) :
@@ -34,22 +59,41 @@ Texture::Texture(Renderer& renderer, const Size& size) :
   m_drawable(true),
   m_cached_size(size)
 {
+  if (!m_sdl_texture)
+  {
+    throw std::runtime_error("Can't create texture:"
+                             + std::string(SDL_GetError()));
+  }
 }
 
 Texture::Texture(Renderer& renderer, SDL_Surface* surface, bool free_surface) :
   m_renderer(renderer),
-  m_sdl_texture(SDL_CreateTextureFromSurface(renderer.get_sdl_renderer(),
-                                             surface)),
+  m_sdl_texture(),
   m_drawable(false),
   m_cached_size()
 {
+  if (!surface)
+  {
+    throw std::runtime_error("Can't create texture from null surface:"
+                             + std::string(SDL_GetError()));
+  }
+
+  m_sdl_texture = SDL_CreateTextureFromSurface(renderer.get_sdl_renderer(),
+                                               surface);
+
+  if (free_surface)
+    SDL_FreeSurface(surface);
+
+  if (!m_sdl_texture)
+  {
+    throw std::runtime_error("Can't create texture from surface:"
+                             + std::string(SDL_GetError()));
+  }
+
   int w, h;
   SDL_QueryTexture(m_sdl_texture, nullptr, nullptr, &w, &h);
   m_cached_size.w = static_cast<float>(w);
   m_cached_size.h = static_cast<float>(h);
-
-  if (free_surface)
-    SDL_FreeSurface(surface);
 }
 
 Texture::~Texture()

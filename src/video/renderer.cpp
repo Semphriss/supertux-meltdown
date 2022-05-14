@@ -27,6 +27,11 @@
 Renderer::Renderer(const Window& window) :
   m_sdl_renderer(SDL_CreateRenderer(window.get_sdl_window(), -1, 0))
 {
+  if (!m_sdl_renderer)
+  {
+    throw std::runtime_error("Can't create renderer:"
+                             + std::string(SDL_GetError()));
+  }
 }
 
 Renderer::~Renderer()

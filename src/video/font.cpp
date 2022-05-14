@@ -21,6 +21,11 @@
 Font::Font(const std::string file, int size) :
   m_font(TTF_OpenFont(file.c_str(), size))
 {
+  if (!m_font)
+  {
+    throw std::runtime_error("Can't load font '" + file + "':"
+                             + std::string(SDL_GetError()));
+  }
 }
 
 Font::~Font()
