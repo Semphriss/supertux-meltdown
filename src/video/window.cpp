@@ -21,6 +21,11 @@ Window::Window() :
                                 SDL_WINDOWPOS_UNDEFINED, 640, 400, 0)),
   m_renderer(*this)
 {
+  if (!m_sdl_window)
+  {
+    throw std::runtime_error("Can't create window:"
+                             + std::string(SDL_GetError()));
+  }
 }
 
 Window::~Window()
