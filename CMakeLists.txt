@@ -31,3 +31,7 @@ target_include_directories(stmeltdown PUBLIC ${SDL2_INCLUDE_DIRS})
 find_package(SDL2_image REQUIRED)
 target_link_libraries(stmeltdown PUBLIC ${SDL2_IMAGE_LIBRARIES})
 target_include_directories(stmeltdown PUBLIC ${SDL2_IMAGE_INCLUDE_DIRS})
+
+find_package(SDL2_ttf REQUIRED)
+target_link_libraries(stmeltdown PUBLIC ${SDL2_TTF_LIBRARIES})
+target_include_directories(stmeltdown PUBLIC ${SDL2_TTF_INCLUDE_DIRS})

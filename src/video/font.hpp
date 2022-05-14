@@ -14,39 +14,32 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef HEADER_STM_VIDEO_TEXTURE_HPP
-#define HEADER_STM_VIDEO_TEXTURE_HPP
+#ifndef HEADER_STM_VIDEO_FONT_HPP
+#define HEADER_STM_VIDEO_FONT_HPP
 
+#include <memory>
 #include <string>
 
-#include "SDL2/SDL.h"
+#include "SDL2/SDL_ttf.h"
 
-#include "util/size.hpp"
+#include "video/texture.hpp"
 
-class Renderer;
-
-class Texture final
+class Font final
 {
 public:
-  Texture(Renderer& renderer, const std::string file);
-  Texture(Renderer& renderer, const Size& size);
-  Texture(Renderer& renderer, SDL_Surface* surface, bool free_surface);
-  ~Texture();
+  Font(const std::string file, int size);
+  ~Font();
 
-  SDL_Texture* get_sdl_texture() const;
-  Size get_size() const;
-
-  const Renderer& get_renderer() const;
+  std::unique_ptr<Texture> draw_text(Renderer& renderer,
+                                     const std::string& text,
+                                     float width) const;
 
 private:
-  Renderer& m_renderer;
-  SDL_Texture* m_sdl_texture;
-  bool m_drawable;
-  Size m_cached_size;
+  TTF_Font* m_font;
 
 private:
-  Texture(const Texture&) = delete;
-  Texture& operator=(const Texture&) = delete;
+  Font(const Font&) = delete;
+  Font& operator=(const Font&) = delete;
 };
 
 #endif

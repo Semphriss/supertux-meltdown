@@ -16,11 +16,15 @@
 
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_image.h"
+#include "SDL2/SDL_ttf.h"
 
 #include <iostream>
 
 #include "util/color.hpp"
 #include "util/rect.hpp"
+#include "util/size.hpp"
+#include "util/vector.hpp"
+#include "video/font.hpp"
 #include "video/texture.hpp"
 #include "video/window.hpp"
 
@@ -38,12 +42,21 @@ int main()
     return 1;
   }
 
+  if (TTF_Init())
+  {
+    std::cerr << "Could not init SDL_ttf: " << TTF_GetError() << std::endl;
+    return 1;
+  }
+
   // Scope ensures all SDL-dependant objects (window, renderer, etc.) are
   // destroyed before de-initing libraries
   {
     Window w;
     Renderer& r = w.get_renderer();
     Texture t(r, "../data/images/background.png");
+    Font f("../data/fonts/SuperTux-Medium.ttf", 16);
+
+    auto ft = f.draw_text(r, "Lorem ipsum dolor", 150.0f);
 
     bool quit = false;
     while(!quit)
@@ -58,14 +71,23 @@ int main()
         }
       }
 
-      r.draw_texture(t, t.get_size(), w.get_size(), Color(1.0f, 1.0f, 1.0f),
+      auto window_size = w.get_size();
+
+      r.draw_texture(t, t.get_size(), window_size, Color(1.0f, 1.0f, 1.0f),
                     Renderer::Blend::BLEND);
+
+      Rect font_rect(Vector(0.0f, window_size.h - ft->get_size().h),
+                    ft->get_size());
+      r.draw_texture(*ft, ft->get_size(), font_rect, Color(0.0f, 0.0f, 0.0f),
+                    Renderer::Blend::BLEND);
+
       r.flush();
 
       SDL_Delay(10);
     }
   }
 
+  TTF_Quit();
   IMG_Quit();
   SDL_Quit();
 
