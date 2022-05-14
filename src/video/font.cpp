@@ -14,39 +14,32 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef HEADER_STM_VIDEO_TEXTURE_HPP
-#define HEADER_STM_VIDEO_TEXTURE_HPP
+#include "video/font.hpp"
 
-#include <string>
+#include <memory>
 
-#include "SDL2/SDL.h"
-
-#include "util/size.hpp"
-
-class Renderer;
-
-class Texture final
+Font::Font(const std::string file, int size) :
+  m_font(TTF_OpenFont(file.c_str(), size))
 {
-public:
-  Texture(Renderer& renderer, const std::string file);
-  Texture(Renderer& renderer, const Size& size);
-  Texture(Renderer& renderer, SDL_Surface* surface, bool free_surface);
-  ~Texture();
+}
 
-  SDL_Texture* get_sdl_texture() const;
-  Size get_size() const;
+Font::~Font()
+{
+  TTF_CloseFont(m_font);
+}
 
-  const Renderer& get_renderer() const;
+std::unique_ptr<Texture>
+Font::draw_text(Renderer& renderer, const std::string& text, float width) const
+{
+  SDL_Color white;
+  white.r = 255;
+  white.g = 255;
+  white.b = 255;
+  white.a = 255;
 
-private:
-  Renderer& m_renderer;
-  SDL_Texture* m_sdl_texture;
-  bool m_drawable;
-  Size m_cached_size;
+  SDL_Surface* s = TTF_RenderText_Blended_Wrapped(m_font, text.c_str(), white,
+                                                  static_cast<int>(width));
+  auto t = std::make_unique<Texture>(renderer, s, true);
 
-private:
-  Texture(const Texture&) = delete;
-  Texture& operator=(const Texture&) = delete;
-};
-
-#endif
+  return std::move(t);
+}
