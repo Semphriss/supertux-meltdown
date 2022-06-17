@@ -24,8 +24,7 @@
 #include "util/rect.hpp"
 #include "util/size.hpp"
 #include "util/vector.hpp"
-#include "video/font.hpp"
-#include "video/texture.hpp"
+#include "video/drawing_context.hpp"
 #include "video/window.hpp"
 
 int main()
@@ -52,10 +51,7 @@ int main()
   {
     Window w;
     Renderer& r = w.get_renderer();
-    Texture t(r, "../data/images/background.png");
-    Font f("../data/fonts/SuperTux-Medium.ttf", 16);
-
-    auto ft = f.draw_text(r, "Lorem ipsum dolor", 150.0f);
+    DrawingContext dc;
 
     bool quit = false;
     while(!quit)
@@ -72,15 +68,14 @@ int main()
 
       auto window_size = w.get_size();
 
-      r.draw_texture(t, t.get_size(), window_size, Color(1.0f, 1.0f, 1.0f),
-                    Renderer::Blend::BLEND);
+      dc.draw_texture("../data/images/background.png", {}, window_size,
+                      Color(1.0f, 1.0f, 1.0f), Blend::BLEND);
+      dc.draw_text("Lorem ipsum dolor", "../data/fonts/SuperTux-Medium.ttf", 16,
+                   TextAlign::BOT_RIGHT, Rect(0.0f, 300.0f, 150.0f, 400.0f),
+                   Color(0.0f, 0.0f, 0.0f), Blend::BLEND);
 
-      Rect font_rect(Vector(0.0f, window_size.h - ft->get_size().h),
-                    ft->get_size());
-      r.draw_texture(*ft, ft->get_size(), font_rect, Color(0.0f, 0.0f, 0.0f),
-                    Renderer::Blend::BLEND);
-
-      r.flush();
+      dc.render(r);
+      dc.clear();
 
       SDL_Delay(10);
     }
