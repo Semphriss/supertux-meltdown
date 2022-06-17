@@ -17,24 +17,27 @@
 #ifndef HEADER_STM_VIDEO_RENDERER_HPP
 #define HEADER_STM_VIDEO_RENDERER_HPP
 
+#include <vector>
+
 #include "SDL2/SDL.h"
 
 class Color;
+class DrawingContext;
 class Rect;
 class Texture;
 class Vector;
 class Window;
 
+enum class Blend
+{
+  NONE = SDL_BLENDMODE_NONE,
+  BLEND = SDL_BLENDMODE_BLEND,
+  ADD = SDL_BLENDMODE_ADD,
+  MODULATE = SDL_BLENDMODE_MOD
+};
+
 class Renderer final
 {
-public:
-  enum class Blend {
-    NONE = SDL_BLENDMODE_NONE,
-    BLEND = SDL_BLENDMODE_BLEND,
-    ADD = SDL_BLENDMODE_ADD,
-    MODULATE = SDL_BLENDMODE_MOD
-  };
-
 public:
   Renderer(const Window& window);
   ~Renderer();
@@ -49,8 +52,11 @@ public:
 
   SDL_Renderer* get_sdl_renderer() const;
 
+  void bind_lifetime(DrawingContext& context);
+
 private:
   SDL_Renderer* m_sdl_renderer;
+  std::vector<DrawingContext*> m_bound_contexts;
 
 private:
   Renderer(const Renderer&) = delete;

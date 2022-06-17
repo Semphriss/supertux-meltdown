@@ -21,6 +21,7 @@
 #include "util/color.hpp"
 #include "util/rect.hpp"
 #include "util/vector.hpp"
+#include "video/drawing_context.hpp"
 #include "video/texture.hpp"
 #include "video/window.hpp"
 
@@ -38,6 +39,11 @@ Renderer::~Renderer()
 {
   if (m_sdl_renderer)
     SDL_DestroyRenderer(m_sdl_renderer);
+
+  for (auto* context : m_bound_contexts)
+  {
+    context->unbind(this);
+  }
 }
 
 void
@@ -118,4 +124,10 @@ SDL_Renderer*
 Renderer::get_sdl_renderer() const
 {
   return m_sdl_renderer;
+}
+
+void
+Renderer::bind_lifetime(DrawingContext& context)
+{
+  m_bound_contexts.push_back(&context);
 }
