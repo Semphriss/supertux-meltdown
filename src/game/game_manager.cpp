@@ -16,6 +16,7 @@
 
 #include "game/game_manager.hpp"
 
+#include <chrono>
 #include <iostream>
 #include <memory>
 
@@ -58,6 +59,7 @@ GameManager::run(int argc, char** argv)
     Window w;
     Renderer& r = w.get_renderer();
     DrawingContext dc;
+    auto last_time = std::chrono::steady_clock::now();
 
     auto& controller = m_scene_manager.get_controller();
     m_scene_manager.push_scene(std::make_unique<MainMenu>(controller));
@@ -78,6 +80,18 @@ GameManager::run(int argc, char** argv)
 
       if (m_scene_manager.empty())
         break;
+
+      // https://en.cppreference.com/w/cpp/chrono/steady_clock says:
+      //   "This clock [...] is most suitable for measuring intervals."
+      // std::chrono::high_resolution_clock is merely an alias to another clock,
+      // which may or may not be steady_clock, and which can have huge jumps if
+      // the user changes their computer time, including back in time. See the
+      // notes: https://en.cppreference.com/w/cpp/chrono/high_resolution_clock
+      auto time = std::chrono::steady_clock::now();
+      float diff = static_cast<float>((time - last_time).count())
+                    * static_cast<float>(decltype(time)::period::num)
+                    / static_cast<float>(decltype(time)::period::den);
+      last_time = time;
 
       m_scene_manager.update(0.01f);
 
