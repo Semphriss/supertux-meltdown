@@ -15,11 +15,14 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <iostream>
+#include <memory>
 
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_image.h"
 #include "SDL2/SDL_ttf.h"
 
+#include "scenes/main_menu.hpp"
+#include "scenes/scene.hpp"
 #include "util/color.hpp"
 #include "util/rect.hpp"
 #include "util/size.hpp"
@@ -52,27 +55,30 @@ int main()
     Window w;
     Renderer& r = w.get_renderer();
     DrawingContext dc;
+    std::unique_ptr<Scene> scene = std::make_unique<MainMenu>();
 
-    bool quit = false;
-    while(!quit)
+    while(scene)
     {
       SDL_Event e;
       while (SDL_PollEvent(&e))
       {
+        scene->event(e);
+
         if (e.type == SDL_QUIT)
         {
-          quit = true;
+          scene = nullptr;
           break;
         }
       }
 
-      auto window_size = w.get_size();
+      if (!scene)
+        break;
 
-      dc.draw_texture("../data/images/background.png", {}, window_size,
-                      Color(1.0f, 1.0f, 1.0f), Blend::BLEND);
-      dc.draw_text("Lorem ipsum dolor", "../data/fonts/SuperTux-Medium.ttf", 16,
-                   TextAlign::BOT_RIGHT, Rect(0.0f, 300.0f, 150.0f, 400.0f),
-                   Color(0.0f, 0.0f, 0.0f), Blend::BLEND);
+      scene->update(0.01f);
+
+      dc.target_size = w.get_size();
+
+      scene->draw(dc);
 
       dc.render(r);
       dc.clear();

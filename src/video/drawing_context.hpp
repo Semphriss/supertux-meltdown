@@ -185,6 +185,9 @@ public:
 
   RenderCache& get_render_cache(Renderer* renderer);
 
+public:
+  Size target_size;
+
 private:
   std::vector<std::unique_ptr<Request>> m_requests;
   std::unordered_map<Renderer*, std::unique_ptr<RenderCache>> m_renderer_caches;
