@@ -14,9 +14,25 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "game/game_manager.hpp"
+#ifndef HEADER_STM_GAME_GAMEMANAGER_HPP
+#define HEADER_STM_GAME_GAMEMANAGER_HPP
 
-int main(int argc, char** argv)
+#include "game/scene_manager.hpp"
+
+class GameManager final
 {
-  return GameManager().run(argc, argv);
-}
+public:
+  GameManager();
+  ~GameManager() = default;
+
+  int run(int argc, char** argv);
+
+private:
+  SceneManager m_scene_manager;
+
+private:
+  GameManager(const GameManager&) = delete;
+  GameManager& operator=(const GameManager&) = delete;
+};
+
+#endif
