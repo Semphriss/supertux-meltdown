@@ -14,9 +14,23 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "game/game_manager.hpp"
+#include "game/scene_controller.hpp"
 
-int main(int argc, char** argv)
+#include "game/scene_manager.hpp"
+
+DefaultSceneController::DefaultSceneController(SceneManager& scene_manager) :
+  m_scene_manager(scene_manager)
 {
-  return GameManager().run(argc, argv);
+}
+
+void
+DefaultSceneController::push_scene(std::unique_ptr<Scene> scene)
+{
+  m_scene_manager.push_scene(std::move(scene));
+}
+
+void
+DefaultSceneController::pop_scene()
+{
+  m_scene_manager.pop_scene();
 }

@@ -17,18 +17,25 @@
 #ifndef HEADER_STM_SCENES_SCENE_HPP
 #define HEADER_STM_SCENES_SCENE_HPP
 
+#include <memory>
+
+#include "game/scene_controller.hpp"
+
 class DrawingContext;
 union SDL_Event;
 
 class Scene
 {
 public:
-  Scene() = default;
+  Scene(SceneController& scene_controller);
   virtual ~Scene() = default;
 
   virtual void event(const SDL_Event& event) = 0;
   virtual void update(float dt_sec) = 0;
   virtual void draw(DrawingContext& context) const = 0;
+
+protected:
+  SceneController& m_scene_controller;
 
 private:
   Scene(const Scene&) = delete;

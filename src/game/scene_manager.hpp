@@ -14,27 +14,43 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef HEADER_STM_SCENES_MAINMENU_HPP
-#define HEADER_STM_SCENES_MAINMENU_HPP
-
-#include "scenes/scene.hpp"
+#ifndef HEADER_STM_GAME_SCENEMANAGER_HPP
+#define HEADER_STM_GAME_SCENEMANAGER_HPP
 
 #include <memory>
+#include <vector>
 
-class MainMenu final :
-  public Scene
+#include "game/scene_controller.hpp"
+#include "scenes/scene.hpp"
+
+class GameManager;
+
+class SceneManager final
 {
 public:
-  MainMenu(SceneController& scene_controller);
-  virtual ~MainMenu() override = default;
+  SceneManager(GameManager* game_manager);
+  ~SceneManager() = default;
 
-  virtual void event(const SDL_Event& event) override;
-  virtual void update(float dt_sec) override;
-  virtual void draw(DrawingContext& context) const override;
+  void push_scene(std::unique_ptr<Scene> scene);
+  void pop_scene();
+
+  SceneController& get_controller();
+  const std::vector<std::unique_ptr<Scene>>& get_scene_stack() const;
+  bool empty() const;
+  void quit();
+
+  void event(const SDL_Event& event);
+  void update(float dt_sec);
+  void draw(DrawingContext& context) const;
 
 private:
-  MainMenu(const MainMenu&) = delete;
-  MainMenu& operator=(const MainMenu&) = delete;
+  DefaultSceneController m_controller;
+  GameManager* const m_game_manager;
+  std::vector<std::unique_ptr<Scene>> m_scenes;
+
+private:
+  SceneManager(const SceneManager&) = delete;
+  SceneManager& operator=(const SceneManager&) = delete;
 };
 
 #endif

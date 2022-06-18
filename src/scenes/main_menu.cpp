@@ -20,7 +20,8 @@
 
 #include "video/drawing_context.hpp"
 
-MainMenu::MainMenu()
+MainMenu::MainMenu(SceneController& scene_controller) :
+  Scene(scene_controller)
 {
 }
 

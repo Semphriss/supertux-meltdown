@@ -14,9 +14,9 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "game/game_manager.hpp"
+#include "scenes/scene.hpp"
 
-int main(int argc, char** argv)
+Scene::Scene(SceneController& scene_controller) :
+  m_scene_controller(scene_controller)
 {
-  return GameManager().run(argc, argv);
 }
