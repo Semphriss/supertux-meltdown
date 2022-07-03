@@ -174,7 +174,7 @@ Vector&
 Vector::operator%=(const Vector& v)
 {
   x = std::fmod(x, v.x);
-  y = std::fmod(x, v.y);
+  y = std::fmod(y, v.y);
   return *this;
 }
 
@@ -182,7 +182,7 @@ Vector&
 Vector::operator%=(float f)
 {
   x = std::fmod(x, f);
-  y = std::fmod(x, f);
+  y = std::fmod(y, f);
   return *this;
 }
 

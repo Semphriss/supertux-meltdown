@@ -19,19 +19,28 @@ project(STMELTDOWN)
 cmake_minimum_required(VERSION 3.0)
 
 file(GLOB_RECURSE STM_FILES src/*/*.cpp)
-add_executable(stmeltdown src/main.cpp ${STM_FILES})
+add_library(stmeltdown_lib ${STM_FILES})
+target_include_directories(stmeltdown_lib PUBLIC src/)
+
+add_executable(stmeltdown src/main.cpp)
+target_link_libraries(stmeltdown PUBLIC stmeltdown_lib)
 target_include_directories(stmeltdown PUBLIC src/)
+
+file(GLOB_RECURSE STM_TEST_FILES tests/*/*.cpp)
+add_executable(test_stm tests/tests.cpp ${STM_TEST_FILES})
+target_link_libraries(test_stm PUBLIC stmeltdown_lib)
+target_include_directories(test_stm PUBLIC src/ tests/)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/mk/cmake)
 
 find_package(SDL2 REQUIRED)
-target_link_libraries(stmeltdown PUBLIC ${SDL2_LIBRARIES})
-target_include_directories(stmeltdown PUBLIC ${SDL2_INCLUDE_DIRS})
+target_link_libraries(stmeltdown_lib PUBLIC ${SDL2_LIBRARIES})
+target_include_directories(stmeltdown_lib PUBLIC ${SDL2_INCLUDE_DIRS})
 
 find_package(SDL2_image REQUIRED)
-target_link_libraries(stmeltdown PUBLIC ${SDL2_IMAGE_LIBRARIES})
-target_include_directories(stmeltdown PUBLIC ${SDL2_IMAGE_INCLUDE_DIRS})
+target_link_libraries(stmeltdown_lib PUBLIC ${SDL2_IMAGE_LIBRARIES})
+target_include_directories(stmeltdown_lib PUBLIC ${SDL2_IMAGE_INCLUDE_DIRS})
 
 find_package(SDL2_ttf REQUIRED)
-target_link_libraries(stmeltdown PUBLIC ${SDL2_TTF_LIBRARIES})
-target_include_directories(stmeltdown PUBLIC ${SDL2_TTF_INCLUDE_DIRS})
+target_link_libraries(stmeltdown_lib PUBLIC ${SDL2_TTF_LIBRARIES})
+target_include_directories(stmeltdown_lib PUBLIC ${SDL2_TTF_INCLUDE_DIRS})
