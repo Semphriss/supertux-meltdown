@@ -91,13 +91,14 @@ DrawingContext::TextureRequest::draw(Renderer& renderer) const
 DrawingContext::TextRequest::TextRequest(const std::string& text,
                                          const Font& font, const Rect& dst,
                                          TextAlign align, const Color& color,
-                                         Blend blend) :
+                                         Blend blend, bool outline) :
   m_text(text),
   m_font(font),
   m_dst(dst),
   m_align(align),
   m_color(color),
-  m_blend(blend)
+  m_blend(blend),
+  m_outline(outline)
 {
 }
 
@@ -147,6 +148,22 @@ DrawingContext::TextRequest::draw(Renderer& renderer) const
   }
 
   dst.move(move);
+
+  if (m_outline)
+  {
+    for (int x = -1; x <= 1; x++)
+    {
+      for (int y = -1; y <= 1; y++)
+      {
+        renderer.draw_texture(*texture, texture_size, dst.moved(Vector(x, y)),
+                              Color(), m_blend);
+      }
+    }
+
+    renderer.draw_texture(*texture, texture_size,
+                          dst.moved(Vector(-2.0f, -2.0f)), Color(Color(), 0.5f),
+                          m_blend);
+  }
 
   renderer.draw_texture(*texture, texture_size, dst, m_color, m_blend);
 }
@@ -198,7 +215,7 @@ DrawingContext::draw_texture(const std::string& texture, const Rect& src,
 void
 DrawingContext::draw_text(const std::string& text, const std::string& font,
                           int size, TextAlign align, const Rect& dst,
-                          const Color& color, Blend blend)
+                          const Color& color, Blend blend, bool outline)
 {
   std::string key = font + " (" + std::to_string(size) + ")";
 
@@ -212,7 +229,7 @@ DrawingContext::draw_text(const std::string& text, const std::string& font,
   auto& font_cache = *(it->second);
 
   auto req = std::make_unique<TextRequest>(text, font_cache, dst, align, color,
-                                           blend);
+                                           blend, outline);
 
   m_requests.push_back(std::move(req));
 }

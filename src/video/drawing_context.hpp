@@ -145,7 +145,7 @@ private:
   {
   public:
     TextRequest(const std::string& text, const Font& font, const Rect& dst,
-                TextAlign align, const Color& color, Blend blend);
+                TextAlign align, const Color& color, Blend blend, bool outline);
     virtual ~TextRequest() = default;
 
     virtual void draw(Renderer& renderer) const override;
@@ -157,6 +157,7 @@ private:
     const TextAlign m_align;
     const Color m_color;
     const Blend m_blend;
+    const bool m_outline;
 
   private:
     TextRequest(const TextRequest&) = delete;
@@ -177,7 +178,7 @@ public:
                     const Rect& dst, const Color& color, Blend blend);
   void draw_text(const std::string& text, const std::string& font, int size,
                  TextAlign align, const Rect& dst, const Color& color,
-                 Blend blend);
+                 Blend blend, bool outline = true);
 
   // This function is usually called from the dtor of the Renderer, but can
   // safely be called at any time.

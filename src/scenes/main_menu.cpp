@@ -41,9 +41,13 @@ MainMenu::draw(DrawingContext& context) const
   context.draw_texture("../data/images/background.png", {}, context.target_size,
                        Color(1.0f, 1.0f, 1.0f), Blend::BLEND);
 
-  Rect dst(0.0f, context.target_size.h - 100.0f, 150.0f, context.target_size.h);
+  Rect dst(context.target_size);
 
-  context.draw_text("Lorem ipsum dolor", "../data/fonts/SuperTux-Medium.ttf",
-                    16, TextAlign::BOT_RIGHT, dst, Color(0.0f, 0.0f, 0.0f),
+  context.draw_text("Copyright (c) 2022 Semphris <semphris@semphris.com>\n"
+                    "This game comes with ABSOLUTELY NO WARRANTY. This is free "
+                    "software, and you are welcome to redistribute it under "
+                    "certain conditions; see the license file for details.",
+                    "../data/fonts/SuperTux-Medium.ttf", 12,
+                    TextAlign::BOT_RIGHT, dst, Color(1.0f, 1.0f, 1.0f),
                     Blend::BLEND);
 }
