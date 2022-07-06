@@ -19,6 +19,7 @@
 #include "util/vector.hpp"
 
 #include <cmath>
+#include <sstream>
 
 #include "util/size.hpp"
 
@@ -238,7 +239,7 @@ TEST(Vector__operator_modulo_equals__vector)
   //     return *this;
   //
   // Notice the 'x' on the second line. Thanks to this test, I realised
-  // something was wrong, and I fixed the issue.
+  // something was wrong.
 
   Vector v1(143.0f, -756.0f);
   v1 %= Vector(12.0f, 54.0f);
@@ -272,4 +273,13 @@ TEST(Vector__operator_not_equals)
   EXPECT(!(Vector(8764.0e7f, -1e10f) != Vector(8764.0e7f, -1e10f)));
   EXPECT((Vector(1.0f, 2.0f) != Vector(1.0f, 1.0f)));
   EXPECT((Vector(2.0f, 1.0f) != Vector(1.0f, 1.0f)));
+}
+
+TEST(Vector__operator_printstream)
+{
+  // There is no guarantee regarding what it will print, only that it won't
+  // throw.
+  std::stringstream s;
+  s << Vector() << Vector(8764.0e-7f, -1e10f)
+    << Vector(0.0f / 0.0f, -1e10f * 1e10f);
 }
