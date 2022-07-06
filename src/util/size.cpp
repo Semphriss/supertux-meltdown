@@ -69,6 +69,40 @@ Size::ceil() const
 }
 
 Size
+Size::operator-() const
+{
+  return Size(-w, -h);
+}
+
+Size
+Size::operator+(const Size& s) const
+{
+  return Size(w + s.w, h + s.h);
+}
+
+Size&
+Size::operator+=(const Size& s)
+{
+  w += s.w;
+  h += s.h;
+  return *this;
+}
+
+Size
+Size::operator-(const Size& s) const
+{
+  return Size(w - s.w, h - s.h);
+}
+
+Size&
+Size::operator-=(const Size& s)
+{
+  w -= s.w;
+  h -= s.h;
+  return *this;
+}
+
+Size
 Size::operator*(float f) const
 {
   return Size(w * f, h * f);
@@ -125,30 +159,30 @@ Size::operator/=(const Size& s)
 }
 
 Size
-Size::operator+(const Size& s) const
+Size::operator%(const Size& v) const
 {
-  return Size(w + s.w, h + s.h);
-}
-
-Size&
-Size::operator+=(const Size& s)
-{
-  w += s.w;
-  h += s.h;
-  return *this;
+  return Size(std::fmod(w, v.w), std::fmod(h, v.h));
 }
 
 Size
-Size::operator-(const Size& s) const
+Size::operator%(float f) const
 {
-  return Size(w - s.w, h - s.h);
+  return Size(std::fmod(w, f), std::fmod(h, f));
 }
 
 Size&
-Size::operator-=(const Size& s)
+Size::operator%=(const Size& v)
 {
-  w -= s.w;
-  h -= s.h;
+  w = std::fmod(w, v.w);
+  h = std::fmod(h, v.h);
+  return *this;
+}
+
+Size&
+Size::operator%=(float f)
+{
+  w = std::fmod(w, f);
+  h = std::fmod(h, f);
   return *this;
 }
 
