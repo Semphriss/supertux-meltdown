@@ -24,7 +24,7 @@
 #include "SDL2/SDL_image.h"
 #include "SDL2/SDL_ttf.h"
 
-#include "scenes/main_menu.hpp"
+#include "scenes/tilemap_editor.hpp"
 #include "video/drawing_context.hpp"
 #include "video/window.hpp"
 
@@ -62,7 +62,7 @@ GameManager::run(int argc, char** argv)
     auto last_time = std::chrono::steady_clock::now();
 
     auto& controller = m_scene_manager.get_controller();
-    m_scene_manager.push_scene(std::make_unique<MainMenu>(controller));
+    m_scene_manager.push_scene(std::make_unique<TilemapEditor>(controller));
 
     while(!m_scene_manager.empty())
     {
