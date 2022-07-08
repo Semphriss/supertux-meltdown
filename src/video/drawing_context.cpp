@@ -15,7 +15,9 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "video/drawing_context.hpp"
+
 #include <memory>
+#include <stdexcept>
 #include <string>
 
 DrawingContext::RenderCache::RenderCache(Renderer& renderer) :
@@ -168,6 +170,49 @@ DrawingContext::TextRequest::draw(Renderer& renderer) const
   renderer.draw_texture(*texture, texture_size, dst, m_color, m_blend);
 }
 
+DrawingContext::Transform::Transform() :
+  m_offset(0.0f, 0.0f)
+{
+}
+
+void
+DrawingContext::Transform::move(const Vector& offset)
+{
+  m_offset += offset;
+}
+
+DrawingContext::DrawingContext() :
+  m_requests(),
+  m_renderer_caches(),
+  m_font_cache(),
+  m_transforms()
+{
+  m_transforms.push_back(Transform());
+}
+
+void
+DrawingContext::push_transform()
+{
+  m_transforms.push_back(m_transforms.back());
+}
+
+void
+DrawingContext::pop_transform()
+{
+  if (m_transforms.size() <= 1)
+  {
+    throw std::runtime_error("Can't pop last transform!");
+  }
+
+  m_transforms.pop_back();
+}
+
+DrawingContext::Transform&
+DrawingContext::get_transform()
+{
+  return m_transforms.back();
+}
+
 void
 DrawingContext::render(Renderer& renderer)
 {
@@ -188,7 +233,7 @@ void
 DrawingContext::draw_filled_rect(const Rect& rect, const Color& color,
                                  Blend blend)
 {
-  auto req = std::make_unique<RectRequest>(rect, color, blend);
+  auto req = std::make_unique<RectRequest>(rect + get_transform().m_offset, color, blend);
 
   m_requests.push_back(std::move(req));
 }
@@ -197,7 +242,7 @@ void
 DrawingContext::draw_line(const Vector& p1, const Vector& p2,
                           const Color& color, Blend blend)
 {
-  auto req = std::make_unique<LineRequest>(p1, p2, color, blend);
+  auto req = std::make_unique<LineRequest>(p1 + get_transform().m_offset, p2 + get_transform().m_offset, color, blend);
 
   m_requests.push_back(std::move(req));
 }
@@ -206,7 +251,7 @@ void
 DrawingContext::draw_texture(const std::string& texture, const Rect& src,
                              const Rect& dst, const Color& color, Blend blend)
 {
-  auto req = std::make_unique<TextureRequest>(texture, src, dst, color, blend,
+  auto req = std::make_unique<TextureRequest>(texture, src, dst + get_transform().m_offset, color, blend,
                                               *this);
 
   m_requests.push_back(std::move(req));
@@ -228,7 +273,7 @@ DrawingContext::draw_text(const std::string& text, const std::string& font,
 
   auto& font_cache = *(it->second);
 
-  auto req = std::make_unique<TextRequest>(text, font_cache, dst, align, color,
+  auto req = std::make_unique<TextRequest>(text, font_cache, dst + get_transform().m_offset, align, color,
                                            blend, outline);
 
   m_requests.push_back(std::move(req));

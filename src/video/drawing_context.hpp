@@ -164,9 +164,30 @@ private:
     TextRequest& operator=(const TextRequest&) = delete;
   };
 
+  class Transform final
+  {
+    friend class DrawingContext;
+
+  public:
+    Transform();
+    Transform(const Transform&) = default;
+
+    void move(const Vector& offset);
+
+    // Accessors are voluntarily omitted; any code may change those values at
+    // any time for any reason, so nothing can be inferred from their values.
+
+  private:
+    Vector m_offset;
+  };
+
 public:
-  DrawingContext() = default;
+  DrawingContext();
   ~DrawingContext() = default;
+
+  void push_transform();
+  void pop_transform();
+  Transform& get_transform();
 
   void render(Renderer& renderer);
   void clear();
@@ -193,6 +214,7 @@ private:
   std::vector<std::unique_ptr<Request>> m_requests;
   std::unordered_map<Renderer*, std::unique_ptr<RenderCache>> m_renderer_caches;
   std::unordered_map<std::string, std::unique_ptr<Font>> m_font_cache;
+  std::vector<Transform> m_transforms;
 
 private:
   DrawingContext(const DrawingContext&) = delete;
