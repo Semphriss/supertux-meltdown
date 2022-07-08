@@ -18,6 +18,7 @@
 
 #include <memory>
 
+#include "util/math.hpp"
 #include "video/drawing_context.hpp"
 
 static const std::vector<std::string> g_tiles = {
@@ -32,7 +33,9 @@ TilemapEditor::TilemapEditor(SceneController& scene_controller) :
   Scene(scene_controller),
   m_tilemap(),
   m_camera(0.0f, 0.0f),
-  m_moving_camera(false)
+  m_moving_camera(false),
+  m_zoom(1.0f),
+  m_mouse_pos()
 {
   m_tilemap.resize(5);
 
@@ -56,8 +59,8 @@ TilemapEditor::event(const SDL_Event& event)
             if (x - m_camera.x < 0 || y - m_camera.y < 0)
               return;
 
-            int tile_x = (x - m_camera.x) / 32;
-            int tile_y = (y - m_camera.y) / 32;
+            int tile_x = (x - m_camera.x) / (32 * m_zoom);
+            int tile_y = (y - m_camera.y) / (32 * m_zoom);
 
             if (tile_y < m_tilemap.size() && tile_x < m_tilemap.at(tile_y).size())
             {
@@ -88,9 +91,19 @@ TilemapEditor::event(const SDL_Event& event)
       break;
 
     case SDL_MOUSEMOTION:
+      m_mouse_pos = Vector(event.motion.x, event.motion.y);
       if (m_moving_camera)
       {
         m_camera += Vector(event.motion.xrel, event.motion.yrel);
+      }
+      break;
+
+    case SDL_MOUSEWHEEL:
+      {
+        float m_old_zoom = m_zoom;
+        m_zoom += static_cast<float>(event.wheel.y) / 8.0f;
+        m_zoom = Math::clamp(m_zoom, 0.5f, 2.0f);
+        m_camera = m_mouse_pos - (m_mouse_pos - m_camera) * m_zoom / m_old_zoom;
       }
       break;
 
@@ -113,6 +126,7 @@ TilemapEditor::draw(DrawingContext& context) const
 
   context.push_transform();
   context.get_transform().move(m_camera);
+  context.get_transform().scale(Size(m_zoom, m_zoom));
 
   if (m_tilemap.size() == 0 || m_tilemap.at(0).size() == 0)
     return;
