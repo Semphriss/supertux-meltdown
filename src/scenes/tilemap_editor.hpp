@@ -38,6 +38,8 @@ private:
   std::vector<std::vector<int>> m_tilemap;
   Vector m_camera;
   bool m_moving_camera;
+  float m_zoom;
+  Vector m_mouse_pos;
 
 private:
   TilemapEditor(const TilemapEditor&) = delete;
