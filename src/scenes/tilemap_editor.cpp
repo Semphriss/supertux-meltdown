@@ -30,7 +30,9 @@ static const Size g_tile_size(32.0f, 32.0f);
 
 TilemapEditor::TilemapEditor(SceneController& scene_controller) :
   Scene(scene_controller),
-  m_tilemap()
+  m_tilemap(),
+  m_camera(0.0f, 0.0f),
+  m_moving_camera(false)
 {
   m_tilemap.resize(5);
 
@@ -44,23 +46,58 @@ TilemapEditor::event(const SDL_Event& event)
   switch (event.type)
   {
     case SDL_MOUSEBUTTONDOWN:
+      switch (event.button.button)
       {
-        int x = event.button.x;
-        int y = event.button.y;
+        case SDL_BUTTON_LEFT:
+          {
+            int x = event.button.x;
+            int y = event.button.y;
 
-        int tile_x = x / 32;
-        int tile_y = y / 32;
+            if (x - m_camera.x < 0 || y - m_camera.y < 0)
+              return;
 
-        if (tile_y < m_tilemap.size() && tile_x < m_tilemap.at(tile_y).size())
-        {
-          ++m_tilemap.at(tile_y).at(tile_x) %= g_tiles.size();
-        }
+            int tile_x = (x - m_camera.x) / 32;
+            int tile_y = (y - m_camera.y) / 32;
+
+            if (tile_y < m_tilemap.size() && tile_x < m_tilemap.at(tile_y).size())
+            {
+              ++m_tilemap.at(tile_y).at(tile_x) %= g_tiles.size();
+            }
+          }
+          break;
+
+        case SDL_BUTTON_RIGHT:
+          m_moving_camera = true;
+          break;
+
+        default:
+          break;
+      }
+      break;
+
+    case SDL_MOUSEBUTTONUP:
+      switch (event.button.button)
+      {
+        case SDL_BUTTON_RIGHT:
+          m_moving_camera = false;
+          break;
+
+        default:
+          break;
+      }
+      break;
+
+    case SDL_MOUSEMOTION:
+      if (m_moving_camera)
+      {
+        m_camera += Vector(event.motion.xrel, event.motion.yrel);
       }
       break;
 
     default:
       break;
   }
+  
 }
 
 void
@@ -74,11 +111,14 @@ TilemapEditor::draw(DrawingContext& context) const
   context.draw_filled_rect(context.target_size, Color(0.1f, 0.2f, 0.4f),
                            Blend::NONE);
 
+  context.push_transform();
+  context.get_transform().move(m_camera);
+
   if (m_tilemap.size() == 0 || m_tilemap.at(0).size() == 0)
     return;
 
   // Tiles
-  for (int y = 0.0f; y < 5.0f; y++)
+  for (int y = 0.0f; y < m_tilemap.size(); y++)
   {
     for (float x = 0.0f; x < m_tilemap.at(y).size(); x++)
     {
@@ -104,4 +144,6 @@ TilemapEditor::draw(DrawingContext& context) const
     context.draw_line(Vector(0.0f, y * 32.0f), Vector(10.0f * 32.0f, y * 32.0f),
                       Color(1.0f, 1.0f, 1.0f, 0.5f), Blend::BLEND);
   }
+
+  context.pop_transform();
 }

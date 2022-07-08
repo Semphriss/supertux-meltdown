@@ -21,6 +21,8 @@
 
 #include <vector>
 
+#include "util/vector.hpp"
+
 class TilemapEditor final :
   public Scene
 {
@@ -34,6 +36,8 @@ public:
 
 private:
   std::vector<std::vector<int>> m_tilemap;
+  Vector m_camera;
+  bool m_moving_camera;
 
 private:
   TilemapEditor(const TilemapEditor&) = delete;
