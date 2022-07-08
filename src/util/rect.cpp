@@ -195,6 +195,30 @@ Rect::set_y2(float y2)
   return *this;
 }
 
+Rect&
+Rect::resize(const Size& s)
+{
+  x2 = x1 + s.w;
+  y2 = y1 + s.h;
+  return *this;
+}
+
+Rect&
+Rect::scale(const Size& s)
+{
+  x2 = (x2 - x1) * s.w + x1;
+  y2 = (y2 - y1) * s.h + y1;
+  return *this;
+}
+
+Rect&
+Rect::scale(float f)
+{
+  x2 = (x2 - x1) * f + x1;
+  y2 = (y2 - y1) * f + y1;
+  return *this;
+}
+
 Rect
 Rect::moved(const Vector& v) const
 {
@@ -243,6 +267,24 @@ Rect
 Rect::with_y2(float y2) const
 {
   return Rect(*this).set_y2(y2);
+}
+
+Rect
+Rect::resized(const Size& s) const
+{
+  return Rect(top_lft(), s);
+}
+
+Rect
+Rect::scaled(const Size& s) const
+{
+  return Rect(top_lft(), size() * s);
+}
+
+Rect
+Rect::scaled(float f) const
+{
+  return Rect(top_lft(), size() * f);
 }
 
 bool
@@ -353,14 +395,16 @@ Rect::operator-=(const Size& s)
 Rect
 Rect::operator*(const Size& s) const
 {
-  return Rect(Vector(x1, y1), size() * s);
+  return Rect(Vector(x1, y1) * s.vector(), size() * s);
 }
 
 Rect&
 Rect::operator*=(const Size& s)
 {
-  x2 = (x2 - x1) * s.w + x1;
-  y2 = (y2 - y1) * s.h + y1;
+  x1 *= s.w;
+  y1 *= s.h;
+  x2 *= s.w;
+  y2 *= s.h;
   return *this;
 }
 

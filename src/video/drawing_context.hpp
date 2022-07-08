@@ -173,12 +173,14 @@ private:
     Transform(const Transform&) = default;
 
     void move(const Vector& offset);
+    void scale(const Size& scale);
 
     // Accessors are voluntarily omitted; any code may change those values at
     // any time for any reason, so nothing can be inferred from their values.
 
   private:
     Vector m_offset;
+    Size m_scale;
   };
 
 public:

@@ -171,14 +171,21 @@ DrawingContext::TextRequest::draw(Renderer& renderer) const
 }
 
 DrawingContext::Transform::Transform() :
-  m_offset(0.0f, 0.0f)
+  m_offset(0.0f, 0.0f),
+  m_scale(1.0f, 1.0f)
 {
 }
 
 void
 DrawingContext::Transform::move(const Vector& offset)
 {
-  m_offset += offset;
+  m_offset += offset * m_scale.vector();
+}
+
+void
+DrawingContext::Transform::scale(const Size& scale)
+{
+  m_scale *= scale;
 }
 
 DrawingContext::DrawingContext() :
@@ -233,16 +240,19 @@ void
 DrawingContext::draw_filled_rect(const Rect& rect, const Color& color,
                                  Blend blend)
 {
-  auto req = std::make_unique<RectRequest>(rect + get_transform().m_offset, color, blend);
+  Rect rect_ = rect * get_transform().m_scale + get_transform().m_offset;
+  auto req = std::make_unique<RectRequest>(rect_, color, blend);
 
   m_requests.push_back(std::move(req));
 }
 
-void 
+void
 DrawingContext::draw_line(const Vector& p1, const Vector& p2,
                           const Color& color, Blend blend)
 {
-  auto req = std::make_unique<LineRequest>(p1 + get_transform().m_offset, p2 + get_transform().m_offset, color, blend);
+  Vector p1_ = p1 * get_transform().m_scale.vector() + get_transform().m_offset;
+  Vector p2_ = p2 * get_transform().m_scale.vector() + get_transform().m_offset;
+  auto req = std::make_unique<LineRequest>(p1_, p2_, color, blend);
 
   m_requests.push_back(std::move(req));
 }
@@ -251,7 +261,8 @@ void
 DrawingContext::draw_texture(const std::string& texture, const Rect& src,
                              const Rect& dst, const Color& color, Blend blend)
 {
-  auto req = std::make_unique<TextureRequest>(texture, src, dst + get_transform().m_offset, color, blend,
+  Rect dst_ = dst * get_transform().m_scale + get_transform().m_offset;
+  auto req = std::make_unique<TextureRequest>(texture, src, dst_, color, blend,
                                               *this);
 
   m_requests.push_back(std::move(req));
@@ -273,7 +284,8 @@ DrawingContext::draw_text(const std::string& text, const std::string& font,
 
   auto& font_cache = *(it->second);
 
-  auto req = std::make_unique<TextRequest>(text, font_cache, dst + get_transform().m_offset, align, color,
+  Rect dst_ = dst * get_transform().m_scale + get_transform().m_offset;
+  auto req = std::make_unique<TextRequest>(text, font_cache, dst_, align, color,
                                            blend, outline);
 
   m_requests.push_back(std::move(req));

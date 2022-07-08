@@ -51,6 +51,9 @@ public:
   Rect& set_x2(float x2);
   Rect& set_y1(float y1);
   Rect& set_y2(float y2);
+  Rect& resize(const Size& s);
+  Rect& scale(const Size& s);
+  Rect& scale(float f);
 
   Rect moved(const Vector& v) const;
   Rect clipped(const Rect& rect) const;
@@ -60,6 +63,9 @@ public:
   Rect with_x2(float x2) const;
   Rect with_y1(float y1) const;
   Rect with_y2(float y2) const;
+  Rect resized(const Size& s) const;
+  Rect scaled(const Size& s) const;
+  Rect scaled(float f) const;
 
   bool contains(const Vector& point) const;
   std::pair<Vector, Vector> clip_line(const Vector& p1, const Vector& p2) const;
