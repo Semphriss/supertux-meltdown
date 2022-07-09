@@ -16,7 +16,11 @@
 
 #include "scenes/tilemap_editor.hpp"
 
+#include <fstream>
+#include <iostream>
 #include <memory>
+#include <stdexcept>
+#include <string>
 
 #include "util/math.hpp"
 #include "video/drawing_context.hpp"
@@ -62,7 +66,8 @@ TilemapEditor::event(const SDL_Event& event)
             int tile_x = (x - m_camera.x) / (32 * m_zoom);
             int tile_y = (y - m_camera.y) / (32 * m_zoom);
 
-            if (tile_y < m_tilemap.size() && tile_x < m_tilemap.at(tile_y).size())
+            if (tile_y < m_tilemap.size()
+                && tile_x < m_tilemap.at(tile_y).size())
             {
               ++m_tilemap.at(tile_y).at(tile_x) %= g_tiles.size();
             }
@@ -104,6 +109,36 @@ TilemapEditor::event(const SDL_Event& event)
         m_zoom += static_cast<float>(event.wheel.y) / 8.0f;
         m_zoom = Math::clamp(m_zoom, 0.5f, 2.0f);
         m_camera = m_mouse_pos - (m_mouse_pos - m_camera) * m_zoom / m_old_zoom;
+      }
+      break;
+
+    case SDL_KEYDOWN:
+      if (event.key.keysym.mod & KMOD_CTRL)
+      {
+        switch (event.key.keysym.sym)
+        {
+          case SDLK_s:
+            try
+            {
+              save("../data/levels/level.bin");
+            }
+            catch (const std::exception& e)
+            {
+              std::cerr << e.what() << std::endl;
+            }
+            break;
+
+          case SDLK_o:
+            try
+            {
+              load("../data/levels/level.bin");
+            }
+            catch (const std::exception& e)
+            {
+              std::cerr << e.what() << std::endl;
+            }
+            break;
+        }
       }
       break;
 
@@ -160,4 +195,81 @@ TilemapEditor::draw(DrawingContext& context) const
   }
 
   context.pop_transform();
+
+  context.draw_text("Press Ctrl+S to save and Ctrl+O to load",
+                    "../data/fonts/SuperTux-Medium.ttf", 12,
+                    TextAlign::TOP_LEFT, Rect(context.target_size).grown(-8.0f),
+                    Color(1.0f, 1.0f, 1.0f), Blend::BLEND);
+}
+
+void
+TilemapEditor::load(const std::string& file)
+{
+  std::ifstream input(file, std::ios::binary);
+  std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(input), {});
+
+  if (buffer.size() < 8)
+  {
+    throw std::runtime_error("Can't load file " + file + ": no dimensions");
+  }
+
+  auto w = ((buffer[0] * 256 + buffer[1]) * 256 + buffer[2]) * 256 + buffer[3];
+  auto h = ((buffer[4] * 256 + buffer[5]) * 256 + buffer[6]) * 256 + buffer[7];
+
+  if (buffer.size() < 8 + w * h)
+  {
+    throw std::runtime_error("Can't load file " + file + ": wrong size ("
+                              + std::to_string(w) + "x" + std::to_string(h)
+                              + " != " + std::to_string(buffer.size() - 8));
+  }
+
+  m_tilemap.clear();
+  m_tilemap.resize(h);
+
+  for (int y = 0; y < h; y++)
+  {
+    m_tilemap.at(y).resize(w);
+
+    for (int x = 0; x < w; x++)
+    {
+      int tile = buffer[y * w + x + 8];
+
+      if (tile >= g_tiles.size())
+      {
+        throw std::runtime_error("Can't load file " + file + ": tile overflow "
+                                + std::to_string(tile) + " at location "
+                                + std::to_string(x) + "x" + std::to_string(y));
+      }
+
+      m_tilemap.at(y).at(x) = tile;
+    }
+  }
+}
+
+void
+TilemapEditor::save(const std::string& file) const
+{
+  std::ofstream output(file, std::ios::binary);
+
+  auto h = m_tilemap.size(), w = h ? m_tilemap.at(0).size() : 0;
+  char buffer[w * h + 8];
+
+  buffer[0] = (w / 16777216) % 256;
+  buffer[1] = (w / 65536) % 256;
+  buffer[2] = (w / 255) % 256;
+  buffer[3] = w % 256;
+  buffer[4] = (h / 16777216) % 256;
+  buffer[5] = (h / 65536) % 256;
+  buffer[6] = (h / 255) % 256;
+  buffer[7] = h % 256;
+
+  for (int y = 0; y < h; y++)
+  {
+    for (int x = 0; x < w; x++)
+    {
+      buffer[y * w + x + 8] = m_tilemap.at(y).at(x);
+    }
+  }
+
+  output.write(buffer, w * h + 8);
 }
