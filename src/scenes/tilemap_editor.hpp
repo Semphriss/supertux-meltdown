@@ -34,6 +34,9 @@ public:
   virtual void update(float dt_sec) override;
   virtual void draw(DrawingContext& context) const override;
 
+  void load(const std::string& file);
+  void save(const std::string& file) const;
+
 private:
   std::vector<std::vector<int>> m_tilemap;
   Vector m_camera;
