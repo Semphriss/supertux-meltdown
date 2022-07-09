@@ -31,6 +31,8 @@ static const std::vector<std::string> g_tiles = {
   "../data/images/tiles/brick.png"
 };
 
+static const int g_tile_null = 0;
+
 static const Size g_tile_size(32.0f, 32.0f);
 
 TilemapEditor::TilemapEditor(SceneController& scene_controller) :
@@ -44,7 +46,7 @@ TilemapEditor::TilemapEditor(SceneController& scene_controller) :
   m_tilemap.resize(5);
 
   for (auto& row : m_tilemap)
-    row.resize(10);
+    row.resize(10, g_tile_null);
 }
 
 void
@@ -57,14 +59,11 @@ TilemapEditor::event(const SDL_Event& event)
       {
         case SDL_BUTTON_LEFT:
           {
-            int x = event.button.x;
-            int y = event.button.y;
+            float x = static_cast<float>(event.button.x);
+            float y = static_cast<float>(event.button.y);
 
-            if (x - m_camera.x < 0 || y - m_camera.y < 0)
-              return;
-
-            int tile_x = (x - m_camera.x) / (32 * m_zoom);
-            int tile_y = (y - m_camera.y) / (32 * m_zoom);
+            int tile_x = std::floor((x - m_camera.x) / (32.0f * m_zoom));
+            int tile_y = std::floor((y - m_camera.y) / (32.0f * m_zoom));
 
             if (tile_y < m_tilemap.size()
                 && tile_x < m_tilemap.at(tile_y).size())
