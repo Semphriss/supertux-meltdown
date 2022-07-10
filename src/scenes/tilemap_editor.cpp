@@ -41,7 +41,8 @@ TilemapEditor::TilemapEditor(SceneController& scene_controller) :
   m_camera(0.0f, 0.0f),
   m_moving_camera(false),
   m_zoom(1.0f),
-  m_mouse_pos()
+  m_mouse_pos(),
+  m_tilemap_offset(0.0f, 0.0f)
 {
   m_tilemap.resize(5);
 
@@ -65,11 +66,12 @@ TilemapEditor::event(const SDL_Event& event)
             int tile_x = std::floor((x - m_camera.x) / (32.0f * m_zoom));
             int tile_y = std::floor((y - m_camera.y) / (32.0f * m_zoom));
 
-            if (tile_y < m_tilemap.size()
-                && tile_x < m_tilemap.at(tile_y).size())
-            {
-              ++m_tilemap.at(tile_y).at(tile_x) %= g_tiles.size();
-            }
+            resize_tilemap_to(Vector(tile_x, tile_y));
+
+            tile_x += m_tilemap_offset.x;
+            tile_y += m_tilemap_offset.y;
+
+            ++m_tilemap.at(tile_y).at(tile_x) %= g_tiles.size();
           }
           break;
 
@@ -165,6 +167,8 @@ TilemapEditor::draw(DrawingContext& context) const
   if (m_tilemap.size() == 0 || m_tilemap.at(0).size() == 0)
     return;
 
+  context.get_transform().move(-m_tilemap_offset * g_tile_size.vector());
+
   // Tiles
   for (int y = 0.0f; y < m_tilemap.size(); y++)
   {
@@ -181,16 +185,19 @@ TilemapEditor::draw(DrawingContext& context) const
   }
 
   // Grid
-  for (float x = 0.0f; x <= m_tilemap.at(0).size(); x++)
+  if (m_tilemap.size() > 0)
   {
-    context.draw_line(Vector(x * 32.0f, 0.0f), Vector(x * 32.0f, 5.0f * 32.0f),
-                      Color(1.0f, 1.0f, 1.0f, 0.5f), Blend::BLEND);
-  }
+    for (float x = 0.0f; x <= m_tilemap.at(0).size(); x++)
+    {
+      context.draw_line(Vector(x * 32.0f, 0.0f), Vector(x * 32.0f, m_tilemap.size() * 32.0f),
+                        Color(1.0f, 1.0f, 1.0f, 0.5f), Blend::BLEND);
+    }
 
-  for (int y = 0.0f; y <= m_tilemap.size(); y++)
-  {
-    context.draw_line(Vector(0.0f, y * 32.0f), Vector(10.0f * 32.0f, y * 32.0f),
-                      Color(1.0f, 1.0f, 1.0f, 0.5f), Blend::BLEND);
+    for (int y = 0.0f; y <= m_tilemap.size(); y++)
+    {
+      context.draw_line(Vector(0.0f, y * 32.0f), Vector(m_tilemap.at(0).size() * 32.0f, y * 32.0f),
+                        Color(1.0f, 1.0f, 1.0f, 0.5f), Blend::BLEND);
+    }
   }
 
   context.pop_transform();
@@ -271,4 +278,61 @@ TilemapEditor::save(const std::string& file) const
   }
 
   output.write(buffer, w * h + 8);
+}
+
+void
+TilemapEditor::resize_tilemap_to(const Vector& tilemap_point)
+{
+  int x = static_cast<int>(tilemap_point.x + m_tilemap_offset.x);
+  int y = static_cast<int>(tilemap_point.y + m_tilemap_offset.y);
+
+  int width = (m_tilemap.size() > 0) ? m_tilemap.at(0).size() : 1;
+
+  if (y < 0)
+  {
+    m_tilemap.resize(m_tilemap.size() - y);
+
+    for (int i = m_tilemap.size() - 1; i >= -y; i--)
+    {
+      m_tilemap.at(i) = std::move(m_tilemap.at(i + y));
+    }
+  }
+  else if (y >= m_tilemap.size())
+  {
+    m_tilemap.resize(y + 1);
+  }
+
+  if (x < 0)
+  {
+    for (auto& row : m_tilemap)
+    {
+      row.resize(width - x, g_tile_null);
+
+      for (int i = row.size() - 1; i >= -x; i--)
+      {
+        row.at(i) = std::move(row.at(i + x));
+      }
+
+      for (int i = 0; i < -x; i++)
+      {
+        row.at(i) = g_tile_null;
+      }
+    }
+  }
+  else if (x >= width)
+  {
+    for (auto& row : m_tilemap)
+    {
+      row.resize(x + 1, g_tile_null);
+    }
+  }
+  else
+  {
+    for (auto& row : m_tilemap)
+    {
+      row.resize(width, g_tile_null);
+    }
+  }
+
+  m_tilemap_offset += Vector((x < 0) ? -x : 0, (y < 0) ? -y : 0);
 }
