@@ -37,12 +37,15 @@ public:
   void load(const std::string& file);
   void save(const std::string& file) const;
 
+  void resize_tilemap_to(const Vector& tilemap_point);
+
 private:
   std::vector<std::vector<int>> m_tilemap;
   Vector m_camera;
   bool m_moving_camera;
   float m_zoom;
   Vector m_mouse_pos;
+  Vector m_tilemap_offset;
 
 private:
   TilemapEditor(const TilemapEditor&) = delete;
