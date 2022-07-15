@@ -6,6 +6,7 @@ build.*/
 *.diff
 *.patch
 *.tmp
+*.bak
 
 # IDE files
 .vscode/
