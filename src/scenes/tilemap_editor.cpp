@@ -121,7 +121,7 @@ TilemapEditor::event(const SDL_Event& event)
           case SDLK_s:
             try
             {
-              save("../data/levels/level.bin");
+              save("../data/levels/level.bmp");
             }
             catch (const std::exception& e)
             {
@@ -132,7 +132,7 @@ TilemapEditor::event(const SDL_Event& event)
           case SDLK_o:
             try
             {
-              load("../data/levels/level.bin");
+              load("../data/levels/level.bmp");
             }
             catch (const std::exception& e)
             {
@@ -211,23 +211,26 @@ TilemapEditor::draw(DrawingContext& context) const
 void
 TilemapEditor::load(const std::string& file)
 {
-  std::ifstream input(file, std::ios::binary);
-  std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(input), {});
+  auto* surface = SDL_LoadBMP(file.c_str());
 
-  if (buffer.size() < 8)
+  if (!surface)
   {
-    throw std::runtime_error("Can't load file " + file + ": no dimensions");
+    throw std::runtime_error("Can't open BMP at '" + file + "': "
+                            + std::string(SDL_GetError()));
   }
 
-  auto w = ((buffer[0] * 256 + buffer[1]) * 256 + buffer[2]) * 256 + buffer[3];
-  auto h = ((buffer[4] * 256 + buffer[5]) * 256 + buffer[6]) * 256 + buffer[7];
+  auto* data = SDL_ConvertSurfaceFormat(surface, SDL_PIXELFORMAT_ARGB8888, 0);
+  SDL_FreeSurface(surface);
 
-  if (buffer.size() < 8 + w * h)
+  if (!data)
   {
-    throw std::runtime_error("Can't load file " + file + ": wrong size ("
-                              + std::to_string(w) + "x" + std::to_string(h)
-                              + " != " + std::to_string(buffer.size() - 8));
+    throw std::runtime_error("Can't convert '" + file + "' to ARGB8888: "
+                            + std::string(SDL_GetError()));
   }
+
+  auto w = data->w;
+  auto h = data->h;
+  auto bpp = data->format->BytesPerPixel;
 
   m_tilemap.clear();
   m_tilemap.resize(h);
@@ -238,7 +241,8 @@ TilemapEditor::load(const std::string& file)
 
     for (int x = 0; x < w; x++)
     {
-      int tile = buffer[y * w + x + 8];
+      int tile = *((Uint32*) ((Uint8*) data->pixels + y * data->pitch
+                  + x * bpp)) ^ 0xff000000;
 
       if (tile >= g_tiles.size())
       {
@@ -250,34 +254,37 @@ TilemapEditor::load(const std::string& file)
       m_tilemap.at(y).at(x) = tile;
     }
   }
+
+  SDL_FreeSurface(data);
 }
 
 void
 TilemapEditor::save(const std::string& file) const
 {
-  std::ofstream output(file, std::ios::binary);
-
   auto h = m_tilemap.size(), w = h ? m_tilemap.at(0).size() : 0;
-  char buffer[w * h + 8];
+  auto* surface = SDL_CreateRGBSurfaceWithFormat(0, w, h, 32,
+                                                 SDL_PIXELFORMAT_ARGB8888);
 
-  buffer[0] = (w / 16777216) % 256;
-  buffer[1] = (w / 65536) % 256;
-  buffer[2] = (w / 255) % 256;
-  buffer[3] = w % 256;
-  buffer[4] = (h / 16777216) % 256;
-  buffer[5] = (h / 65536) % 256;
-  buffer[6] = (h / 255) % 256;
-  buffer[7] = h % 256;
+  if (!surface)
+  {
+    throw std::runtime_error("Can't create image surface: '"
+                             + std::string(SDL_GetError()));
+  }
+
+  auto bpp = surface->format->BytesPerPixel;
 
   for (int y = 0; y < h; y++)
   {
     for (int x = 0; x < w; x++)
     {
-      buffer[y * w + x + 8] = m_tilemap.at(y).at(x);
+      auto* p = (Uint32 *) ((Uint8 *) surface->pixels + y * surface->pitch
+                                          + x * surface->format->BytesPerPixel);
+      *p = m_tilemap.at(y).at(x) ^ 0xff000000;
     }
   }
 
-  output.write(buffer, w * h + 8);
+  SDL_SaveBMP(surface, file.c_str());
+  SDL_FreeSurface(surface);
 }
 
 void
