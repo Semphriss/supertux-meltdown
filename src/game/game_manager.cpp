@@ -33,6 +33,10 @@ GameManager::GameManager() :
 {
 }
 
+#ifndef STM_VERSION
+#define STM_VERSION "unknown"
+#endif
+
 int
 GameManager::run(int argc, char** argv)
 {
@@ -52,6 +56,31 @@ GameManager::run(int argc, char** argv)
   {
     std::cerr << "Could not init SDL_ttf: " << TTF_GetError() << std::endl;
     return 1;
+  }
+
+  for (int i = 1; i < argc; i++)
+  {
+    std::string arg(argv[i]);
+
+    if (arg == "--help")
+    {
+      std::cout << "Usage: stmeltdown [OPTIONS...]\n\n"
+                << "Options:\n"
+                << "  --help          Show this help text and exit\n"
+                << "  --version       Show version info and exit\n"
+                << std::flush;
+      return 0;
+    }
+    else if (arg == "--version")
+    {
+      std::cout << "stmeltdown " STM_VERSION << std::endl;
+      return 0;
+    }
+    else
+    {
+      std::cout << "Unknown option '" << arg << "'" << std::endl;
+      return 1;
+    }
   }
 
   try
