@@ -44,18 +44,18 @@ static std::string str_time(float t)
   return oss.str();
 }
 
-std::vector<std::pair<std::string, void(*)()>>&
+std::map<std::string, void(*)()>&
 g_tests(const std::string& name, void (*func)())
 {
-  static std::vector<std::pair<std::string, void(*)()>> tests;
+  static std::map<std::string, void(*)()> tests;
 
   if (func)
-    tests.push_back(std::make_pair(name, func));
+    tests.emplace(std::make_pair(name, func));
 
   return tests;
 }
 
-int main(int argc, char** argv)
+int run_tests(int argc, char** argv)
 {
   std::string color_pass = "\033[32m",
               color_fail = "\033[31m",
@@ -85,7 +85,7 @@ int main(int argc, char** argv)
     {
       fail_fast = true;
     }
-    else
+    else if (arg != "--test")
     {
       std::cerr << "Unrecognized option: " << arg << std::endl;
       return 2;
