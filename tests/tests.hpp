@@ -18,18 +18,21 @@
 #define HEADER_STM_TESTS
 
 #include <functional>
+#include <map>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
 
-std::vector<std::pair<std::string, void(*)()>>&
+std::map<std::string, void(*)()>&
 g_tests(const std::string& name = "", void (*func)() = nullptr);
+
+int run_tests(int argc, char** argv);
 
 #define TEST(func)                                                             \
   void func();                                                                 \
-  static auto g_test_##func = g_tests(#func, func);                            \
+  static auto& g_test_##func = g_tests(#func, func);                           \
   void func()
 
 class AssertFail :
@@ -53,12 +56,14 @@ private:
   const int m_line;
 };
 
+#define ASSERT_FAIL(msg) throw AssertFail(msg, __FILE__, __LINE__)
+
 #define EXPECT(condition)                                                      \
   {                                                                            \
     auto stm_condition = condition;                                            \
     if (!stm_condition)                                                        \
     {                                                                          \
-      throw AssertFail("Expected " #condition, __FILE__, __LINE__);            \
+      ASSERT_FAIL("Expected " #condition);                                     \
     }                                                                          \
   }
 
@@ -70,7 +75,7 @@ private:
     {                                                                          \
       std::stringstream s;                                                     \
       s << "Expected " #have " to be " << stm_need << ", got " << stm_have;    \
-      throw AssertFail(s.str(), __FILE__, __LINE__);                           \
+      ASSERT_FAIL(s.str());                                                    \
     }                                                                          \
   }
 
@@ -83,7 +88,7 @@ private:
     {                                                                          \
       std::stringstream s;                                                     \
       s << "Expected " #have " to be " << stm_need << ", got " << stm_have;    \
-      throw AssertFail(s.str(), __FILE__, __LINE__);                           \
+      ASSERT_FAIL(s.str());                                                    \
     }                                                                          \
   }
 #define EXPECT_FLT_EQ(have, need) EXPECT_FLT_EQ_PRECISION(have, need, 0.001f)

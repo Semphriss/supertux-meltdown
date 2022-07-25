@@ -24,6 +24,7 @@
 #include "SDL2/SDL_image.h"
 #include "SDL2/SDL_ttf.h"
 
+#include "tests.hpp"
 #include "scenes/tilemap_editor.hpp"
 #include "video/drawing_context.hpp"
 #include "video/window.hpp"
@@ -67,8 +68,14 @@ GameManager::run(int argc, char** argv)
       std::cout << "Usage: stmeltdown [OPTIONS...]\n\n"
                 << "Options:\n"
                 << "  --help          Show this help text and exit\n"
+                << "  --test          Run the test suite\n"
                 << "  --version       Show version info and exit\n"
                 << std::flush;
+      return 0;
+    }
+    else if (arg == "--test")
+    {
+      run_tests(argc, argv);
       return 0;
     }
     else if (arg == "--version")
