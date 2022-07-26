@@ -22,6 +22,17 @@ file(GLOB_RECURSE STM_FILES src/*.cpp tests/*.cpp)
 add_executable(stmeltdown ${STM_FILES})
 target_include_directories(stmeltdown PUBLIC src/ tests/)
 
+# This presumes Git exists and is in the PATH, which may or may not be true
+execute_process(COMMAND git describe --tags --always
+                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                OUTPUT_VARIABLE STM_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE
+                ERROR_QUIET RESULT_VARIABLE GIT_SUCCESS)
+if (NOT ("${GIT_SUCCESS}" STREQUAL "0"))
+  message(WARNING "Could not run git, returned: ${GIT_SUCCESS}")
+else()
+  target_compile_definitions(stmeltdown PUBLIC -DSTM_VERSION="${STM_VERSION}")
+endif()
+
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/mk/cmake)
 
 find_package(SDL2 REQUIRED)
