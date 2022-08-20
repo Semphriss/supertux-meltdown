@@ -59,6 +59,8 @@ GameManager::run(int argc, char** argv)
     return 1;
   }
 
+  SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "2");
+
   for (int i = 1; i < argc; i++)
   {
     std::string arg(argv[i]);

@@ -146,7 +146,6 @@ TilemapEditor::event(const SDL_Event& event)
     default:
       break;
   }
-  
 }
 
 void
@@ -189,13 +188,15 @@ TilemapEditor::draw(DrawingContext& context) const
   {
     for (float x = 0.0f; x <= m_tilemap.at(0).size(); x++)
     {
-      context.draw_line(Vector(x * 32.0f, 0.0f), Vector(x * 32.0f, m_tilemap.size() * 32.0f),
+      context.draw_line(Vector(x * 32.0f, 0.0f),
+                        Vector(x * 32.0f, m_tilemap.size() * 32.0f),
                         Color(1.0f, 1.0f, 1.0f, 0.5f), Blend::BLEND);
     }
 
     for (int y = 0.0f; y <= m_tilemap.size(); y++)
     {
-      context.draw_line(Vector(0.0f, y * 32.0f), Vector(m_tilemap.at(0).size() * 32.0f, y * 32.0f),
+      context.draw_line(Vector(0.0f, y * 32.0f),
+                        Vector(m_tilemap.at(0).size() * 32.0f, y * 32.0f),
                         Color(1.0f, 1.0f, 1.0f, 0.5f), Blend::BLEND);
     }
   }
