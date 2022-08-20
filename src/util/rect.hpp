@@ -54,6 +54,7 @@ public:
   Rect& resize(const Size& s);
   Rect& scale(const Size& s);
   Rect& scale(float f);
+  Rect& flip(bool h, bool v);
 
   Rect moved(const Vector& v) const;
   Rect clipped(const Rect& rect) const;
@@ -66,10 +67,15 @@ public:
   Rect resized(const Size& s) const;
   Rect scaled(const Size& s) const;
   Rect scaled(float f) const;
+  Rect flipped(bool h, bool v) const;
 
   bool contains(const Vector& point) const;
   std::pair<Vector, Vector> clip_line(const Vector& p1, const Vector& p2) const;
 
+  Rect operator*(float f) const;
+  Rect& operator*=(float f);
+  Rect operator/(float f) const;
+  Rect& operator/=(float f);
   Rect operator+(const Size& s) const;
   Rect& operator+=(const Size& s);
   Rect operator-(const Size& s) const;

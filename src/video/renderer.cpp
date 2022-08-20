@@ -110,14 +110,22 @@ Renderer::draw_texture(const Texture& texture, const Rect& src, const Rect& dst,
   s.y = static_cast<int>(src.y1);
   s.w = static_cast<int>(src.width());
   s.h = static_cast<int>(src.height());
-  d.x = dst.x1;
-  d.y = dst.y1;
-  d.w = dst.width();
-  d.h = dst.height();
+  d.x = std::min(dst.x1, dst.x2);
+  d.y = std::min(dst.y1, dst.y2);
+  d.w = std::abs(dst.width());
+  d.h = std::abs(dst.height());
+
+  int flip = SDL_FLIP_NONE;
+
+  if ((src.width() < 0) != (dst.width() < 0))
+    flip |= SDL_FLIP_HORIZONTAL;
+
+  if ((src.height() < 0) != (dst.height() < 0))
+    flip |= SDL_FLIP_VERTICAL;
 
   // TODO: Add support for angle, center point and flip
   SDL_RenderCopyExF(m_sdl_renderer, texture.get_sdl_texture(), &s, &d, 0.0f,
-                    NULL, SDL_FLIP_NONE);
+                    NULL, static_cast<SDL_RendererFlip>(flip));
 }
 
 SDL_Renderer*

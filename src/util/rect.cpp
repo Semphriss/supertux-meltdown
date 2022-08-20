@@ -219,6 +219,22 @@ Rect::scale(float f)
   return *this;
 }
 
+Rect&
+Rect::flip(bool h, bool v)
+{
+  if (h)
+  {
+    std::swap(x1, x2);
+  }
+
+  if (v)
+  {
+    std::swap(y1, y2);
+  }
+
+  return *this;
+}
+
 Rect
 Rect::moved(const Vector& v) const
 {
@@ -285,6 +301,13 @@ Rect
 Rect::scaled(float f) const
 {
   return Rect(top_lft(), size() * f);
+}
+
+Rect
+Rect::flipped(bool h, bool v) const
+{
+  return Rect(top_lft() + Vector(size() * Size(h, v)),
+              size() * Size(1 - h * 2, 1 - v * 2));
 }
 
 bool
@@ -362,6 +385,38 @@ Rect::clip_line(const Vector& p1, const Vector& p2) const
 
     return { r1, r2 };
   }
+}
+
+Rect
+Rect::operator*(float f) const
+{
+  return Rect(top_lft() * f, size() * f);
+}
+
+Rect&
+Rect::operator*=(float f)
+{
+  x1 *= f;
+  y1 *= f;
+  x2 *= f;
+  y2 *= f;
+  return *this;
+}
+
+Rect
+Rect::operator/(float f) const
+{
+  return Rect(top_lft() / f, size() / f);
+}
+
+Rect&
+Rect::operator/=(float f)
+{
+  x1 /= f;
+  y1 /= f;
+  x2 /= f;
+  y2 /= f;
+  return *this;
 }
 
 Rect
