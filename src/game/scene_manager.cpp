@@ -16,6 +16,8 @@
 
 #include "game/scene_manager.hpp"
 
+#include "game/game_manager.hpp"
+
 SceneManager::SceneManager(GameManager* game_manager) :
   m_controller(*this),
   m_game_manager(game_manager),
@@ -78,4 +80,11 @@ SceneManager::draw(DrawingContext& context) const
 {
   if (!m_scenes.empty())
     m_scenes.back()->draw(context);
+}
+
+
+std::string
+SceneManager::fetch_data_folder() const
+{
+  return m_game_manager->get_data_folder();
 }

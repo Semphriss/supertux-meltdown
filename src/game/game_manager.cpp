@@ -30,7 +30,8 @@
 #include "video/window.hpp"
 
 GameManager::GameManager() :
-  m_scene_manager(this)
+  m_scene_manager(this),
+  m_data_folder("../data")
 {
 }
 
@@ -65,10 +66,21 @@ GameManager::run(int argc, char** argv)
   {
     std::string arg(argv[i]);
 
-    if (arg == "--help")
+    if (arg == "--data")
+    {
+      if (++i >= argc)
+      {
+        std::cerr << "Missing path after '--data'" << std::endl;
+        return 1;
+      }
+
+      m_data_folder = std::string(argv[i]);
+    }
+    else if (arg == "--help")
     {
       std::cout << "Usage: stmeltdown [OPTIONS...]\n\n"
                 << "Options:\n"
+                << "  --data [PATH]   Change the data folder\n"
                 << "  --help          Show this help text and exit\n"
                 << "  --test          Run the test suite\n"
                 << "  --version       Show version info and exit\n"
@@ -87,7 +99,7 @@ GameManager::run(int argc, char** argv)
     }
     else
     {
-      std::cout << "Unknown option '" << arg << "'" << std::endl;
+      std::cerr << "Unknown option '" << arg << "'" << std::endl;
       return 1;
     }
   }
@@ -168,4 +180,10 @@ GameManager::run(int argc, char** argv)
   SDL_Quit();
 
   return 0;
+}
+
+std::string
+GameManager::get_data_folder()
+{
+  return m_data_folder;
 }

@@ -33,6 +33,7 @@ public:
 
   virtual void push_scene(std::unique_ptr<Scene> scene) = 0;
   virtual void pop_scene() = 0;
+  virtual std::string get_data_folder() = 0;
 
 private:
   SceneController(const SceneController&) = delete;
@@ -48,6 +49,7 @@ public:
 
   virtual void push_scene(std::unique_ptr<Scene> scene) override;
   virtual void pop_scene() override;
+  virtual std::string get_data_folder() override;
 
 private:
   SceneManager& m_scene_manager;

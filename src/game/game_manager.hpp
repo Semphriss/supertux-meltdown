@@ -27,8 +27,11 @@ public:
 
   int run(int argc, char** argv);
 
+  std::string get_data_folder();
+
 private:
   SceneManager m_scene_manager;
+  std::string m_data_folder;
 
 private:
   GameManager(const GameManager&) = delete;

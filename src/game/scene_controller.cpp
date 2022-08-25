@@ -34,3 +34,9 @@ DefaultSceneController::pop_scene()
 {
   m_scene_manager.pop_scene();
 }
+
+std::string
+DefaultSceneController::get_data_folder()
+{
+  return m_scene_manager.fetch_data_folder();
+}

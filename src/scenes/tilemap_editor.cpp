@@ -27,8 +27,8 @@
 
 static const std::vector<std::string> g_tiles = {
   "",
-  "../data/images/tiles/block.png",
-  "../data/images/tiles/brick.png"
+  "/images/tiles/block.png",
+  "/images/tiles/brick.png"
 };
 
 static const int g_tile_null = 0;
@@ -121,7 +121,7 @@ TilemapEditor::event(const SDL_Event& event)
           case SDLK_s:
             try
             {
-              save("../data/levels/level.bmp");
+              save(m_scene_controller.get_data_folder() + "/levels/level.bmp");
             }
             catch (const std::exception& e)
             {
@@ -132,7 +132,7 @@ TilemapEditor::event(const SDL_Event& event)
           case SDLK_o:
             try
             {
-              load("../data/levels/level.bmp");
+              load(m_scene_controller.get_data_folder() + "/levels/level.bmp");
             }
             catch (const std::exception& e)
             {
@@ -178,8 +178,11 @@ TilemapEditor::draw(DrawingContext& context) const
 
       Rect tile_rect(Vector(g_tile_size) * Vector(x, y), g_tile_size);
 
-      context.draw_texture(g_tiles[m_tilemap.at(y).at(x)], {}, tile_rect,
-                           Color(1.0f, 1.0f, 1.0f), Blend::BLEND);
+      std::string texture = m_scene_controller.get_data_folder()
+                          + g_tiles[m_tilemap.at(y).at(x)];
+
+      context.draw_texture(texture, {}, tile_rect, Color(1.0f, 1.0f, 1.0f),
+                           Blend::BLEND);
     }
   }
 
@@ -204,7 +207,8 @@ TilemapEditor::draw(DrawingContext& context) const
   context.pop_transform();
 
   context.draw_text("Press Ctrl+S to save and Ctrl+O to load",
-                    "../data/fonts/SuperTux-Medium.ttf", 12,
+                    m_scene_controller.get_data_folder()
+                     + "/fonts/SuperTux-Medium.ttf", 12,
                     TextAlign::TOP_LEFT, Rect(context.target_size).grown(-8.0f),
                     Color(1.0f, 1.0f, 1.0f), Blend::BLEND);
 }
