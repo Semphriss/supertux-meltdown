@@ -20,17 +20,43 @@
 #include "SDL2/SDL.h"
 
 #include "util/size.hpp"
+#include "util/vector.hpp"
 #include "video/renderer.hpp"
 
 class Window final
 {
 public:
+  enum class Status {
+    NORMAL,
+    MINIMIZED,
+    MAXIMIZED,
+    FULLSCREEN,
+    FULLSCREEN_DESKTOP
+  };
+
+public:
   Window();
   ~Window();
 
-  Renderer& get_renderer();
-
+  bool get_bordered() const;
+  float get_opacity() const;
+  Vector get_pos() const;
+  bool get_resizable() const;
   Size get_size() const;
+  Status get_status() const;
+  std::string get_title() const;
+  bool get_visible() const;
+
+  void set_bordered(bool bordered);
+  void set_opacity(float opacity);
+  void set_pos(Vector pos);
+  void set_resizable(bool resizable);
+  void set_size(const Size& size);
+  void set_status(Status status);
+  void set_title(const std::string& title);
+  void set_visible(bool visible);
+
+  Renderer& get_renderer();
 
   SDL_Window* get_sdl_window() const;
 

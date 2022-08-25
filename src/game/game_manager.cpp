@@ -29,15 +29,15 @@
 #include "video/drawing_context.hpp"
 #include "video/window.hpp"
 
+#ifndef STM_VERSION
+#define STM_VERSION "unknown"
+#endif
+
 GameManager::GameManager() :
   m_scene_manager(this),
   m_data_folder("../data")
 {
 }
-
-#ifndef STM_VERSION
-#define STM_VERSION "unknown"
-#endif
 
 int
 GameManager::run(int argc, char** argv)
@@ -110,6 +110,8 @@ GameManager::run(int argc, char** argv)
     Renderer& r = w.get_renderer();
     DrawingContext dc;
     auto last_time = std::chrono::steady_clock::now();
+
+    w.set_title("SuperTux Meltdown " STM_VERSION);
 
     auto& controller = m_scene_manager.get_controller();
     m_scene_manager.push_scene(std::make_unique<TilemapEditor>(controller));
