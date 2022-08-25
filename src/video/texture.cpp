@@ -30,7 +30,7 @@ Texture::Texture(Renderer& renderer, const std::string file) :
 
   if (!surface)
   {
-    throw std::runtime_error("Can't load image '" + file + "':"
+    throw std::runtime_error("Can't load image '" + file + "': "
                              + std::string(SDL_GetError()));
   }
 
@@ -40,7 +40,7 @@ Texture::Texture(Renderer& renderer, const std::string file) :
 
   if (!m_sdl_texture)
   {
-    throw std::runtime_error("Can't create texture from image '" + file + "':"
+    throw std::runtime_error("Can't create texture from image '" + file + "': "
                              + std::string(SDL_GetError()));
   }
 
@@ -61,7 +61,7 @@ Texture::Texture(Renderer& renderer, const Size& size) :
 {
   if (!m_sdl_texture)
   {
-    throw std::runtime_error("Can't create texture:"
+    throw std::runtime_error("Can't create texture: "
                              + std::string(SDL_GetError()));
   }
 }
@@ -74,7 +74,7 @@ Texture::Texture(Renderer& renderer, SDL_Surface* surface, bool free_surface) :
 {
   if (!surface)
   {
-    throw std::runtime_error("Can't create texture from null surface:"
+    throw std::runtime_error("Can't create texture from null surface: "
                              + std::string(SDL_GetError()));
   }
 
@@ -86,7 +86,7 @@ Texture::Texture(Renderer& renderer, SDL_Surface* surface, bool free_surface) :
 
   if (!m_sdl_texture)
   {
-    throw std::runtime_error("Can't create texture from surface:"
+    throw std::runtime_error("Can't create texture from surface: "
                              + std::string(SDL_GetError()));
   }
 

@@ -23,7 +23,7 @@ Window::Window() :
 {
   if (!m_sdl_window)
   {
-    throw std::runtime_error("Can't create window:"
+    throw std::runtime_error("Can't create window: "
                              + std::string(SDL_GetError()));
   }
 }

@@ -23,7 +23,7 @@ Font::Font(const std::string file, int size) :
 {
   if (!m_font)
   {
-    throw std::runtime_error("Can't load font '" + file + "':"
+    throw std::runtime_error("Can't load font '" + file + "': "
                              + std::string(SDL_GetError()));
   }
 }
