@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=SuperTux Meltdown
+Icon=stmeltdown
+Exec=stmeltdown
+Terminal=false
+StartupNotify=false
+Categories=Game;ArcadeGame;
+Keywords=game;arcade;platform;tux;supertux;

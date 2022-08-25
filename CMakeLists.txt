@@ -14,7 +14,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-project(STMELTDOWN)
+project(stmeltdown)
 
 cmake_minimum_required(VERSION 3.0)
 
@@ -46,3 +46,22 @@ target_include_directories(stmeltdown PUBLIC ${SDL2_IMAGE_INCLUDE_DIRS})
 find_package(SDL2_ttf REQUIRED)
 target_link_libraries(stmeltdown PUBLIC ${SDL2_TTF_LIBRARIES})
 target_include_directories(stmeltdown PUBLIC ${SDL2_TTF_INCLUDE_DIRS})
+
+# Installation
+
+install(TARGETS stmeltdown)
+install(DIRECTORY data/ DESTINATION share/stmeltdown)
+install(FILES mk/install/stmeltdown.desktop DESTINATION share/applications)
+install(FILES mk/install/stmeltdown.svg
+        DESTINATION share/icons/hicolor/scalable/apps)
+
+# Packaging
+
+file(STRINGS .gitignore STM_IGNORE REGEX "^[^#]")
+string(REGEX REPLACE "\\." "\\\\\\\\." STM_IGNORE_ESCAPED "${STM_IGNORE}")
+string(REGEX REPLACE "\\*" ".*" STM_IGNORE_ESCAPED "${STM_IGNORE_ESCAPED}")
+string(REGEX REPLACE "\\?" ".?" STM_IGNORE_ESCAPED "${STM_IGNORE_ESCAPED}")
+message(STATUS "${STM_IGNORE_ESCAPED}")
+set(CPACK_SOURCE_IGNORE_FILES "${STM_IGNORE_ESCAPED};\\\\.git/")
+
+include(CPack)
