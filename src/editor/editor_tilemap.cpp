@@ -44,7 +44,8 @@ EditorTilemap::EditorTilemap(const std::string& data_folder) :
   m_tilebox(*this, g_tiles, data_folder),
   m_tilemap_offset(0.0f, 0.0f),
   m_data_folder(data_folder),
-  m_tile_id(g_tile_null)
+  m_tile_id(g_tile_null),
+  m_mouse_pos()
 {
   m_tilemap.resize(5);
 
@@ -70,8 +71,7 @@ EditorTilemap::event(const SDL_Event& event)
             float x = static_cast<float>(event.button.x);
             float y = static_cast<float>(event.button.y);
 
-            Vector world_pos = m_camera.apply_transform(Vector(x, y));
-            Vector tile_coord = (world_pos / g_tile_size.vector()).floor();
+            Vector tile_coord = screen_to_tilemap(Vector(x, y));
 
             resize_tilemap_to(tile_coord);
 
@@ -84,6 +84,10 @@ EditorTilemap::event(const SDL_Event& event)
         default:
           break;
       }
+      break;
+
+    case SDL_MOUSEMOTION:
+      m_mouse_pos = Vector(event.motion.x, event.motion.y);
       break;
 
     default:
@@ -102,51 +106,61 @@ EditorTilemap::draw(DrawingContext& context) const
   context.draw_filled_rect(context.target_size, Color(0.1f, 0.2f, 0.4f),
                            Blend::NONE);
 
-  context.push_transform();
-  m_camera.apply_transform(context);
-
-  if (m_tilemap.size() == 0 || m_tilemap.at(0).size() == 0)
-    return;
-
-  context.get_transform().move(-m_tilemap_offset * g_tile_size.vector());
-
-  // Tiles
-  for (int y = 0.0f; y < m_tilemap.size(); y++)
+  if (m_tilemap.size() != 0 && m_tilemap.at(0).size() != 0)
   {
-    for (float x = 0.0f; x < m_tilemap.at(y).size(); x++)
+    context.push_transform();
+    m_camera.apply_transform(context);
+
+    context.get_transform().move(-m_tilemap_offset * g_tile_size.vector());
+
+    // Tiles
+    for (int y = 0.0f; y < m_tilemap.size(); y++)
     {
-      // This does not use g_tile_null because other tiles may need to be empty
-      if (g_tiles[m_tilemap.at(y).at(x)].empty())
-        continue;
+      for (float x = 0.0f; x < m_tilemap.at(y).size(); x++)
+      {
+        // This does not use g_tile_null because other tiles may need to be
+        // empty
+        if (g_tiles[m_tilemap.at(y).at(x)].empty())
+          continue;
 
-      Rect tile_rect(Vector(g_tile_size) * Vector(x, y), g_tile_size);
+        Rect tile_rect(Vector(g_tile_size) * Vector(x, y), g_tile_size);
 
-      std::string texture = m_data_folder + g_tiles.at(m_tilemap.at(y).at(x));
+        std::string texture = m_data_folder + g_tiles.at(m_tilemap.at(y).at(x));
 
-      context.draw_texture(texture, {}, tile_rect, Color(1.0f, 1.0f, 1.0f),
-                           Blend::BLEND);
+        context.draw_texture(texture, {}, tile_rect, Color(1.0f, 1.0f, 1.0f),
+                            Blend::BLEND);
+      }
     }
+
+    // Grid
+    if (m_tilemap.size() > 0)
+    {
+      for (float x = 0.0f; x <= m_tilemap.at(0).size(); x++)
+      {
+        context.draw_line(Vector(x * 32.0f, 0.0f),
+                          Vector(x * 32.0f, m_tilemap.size() * 32.0f),
+                          Color(1.0f, 1.0f, 1.0f, 0.5f), Blend::BLEND);
+      }
+
+      for (int y = 0.0f; y <= m_tilemap.size(); y++)
+      {
+        context.draw_line(Vector(0.0f, y * 32.0f),
+                          Vector(m_tilemap.at(0).size() * 32.0f, y * 32.0f),
+                          Color(1.0f, 1.0f, 1.0f, 0.5f), Blend::BLEND);
+      }
+    }
+
+    context.pop_transform();
   }
 
-  // Grid
-  if (m_tilemap.size() > 0)
+  if (m_tile_id < g_tiles.size() && !g_tiles[m_tile_id].empty())
   {
-    for (float x = 0.0f; x <= m_tilemap.at(0).size(); x++)
-    {
-      context.draw_line(Vector(x * 32.0f, 0.0f),
-                        Vector(x * 32.0f, m_tilemap.size() * 32.0f),
-                        Color(1.0f, 1.0f, 1.0f, 0.5f), Blend::BLEND);
-    }
+    Rect pos(tilemap_to_screen(screen_to_tilemap(m_mouse_pos)),
+             g_tile_size * m_camera.get_zoom());
 
-    for (int y = 0.0f; y <= m_tilemap.size(); y++)
-    {
-      context.draw_line(Vector(0.0f, y * 32.0f),
-                        Vector(m_tilemap.at(0).size() * 32.0f, y * 32.0f),
-                        Color(1.0f, 1.0f, 1.0f, 0.5f), Blend::BLEND);
-    }
+    context.draw_texture(m_data_folder + g_tiles[m_tile_id], Rect(), pos,
+                         Color(1.0f, 1.0f, 1.0f,  0.5f), Blend::BLEND);
   }
-
-  context.pop_transform();
 
   m_tilebox.draw(context);
 
@@ -299,4 +313,20 @@ EditorTilemap::resize_tilemap_to(const Vector& tilemap_point)
   }
 
   m_tilemap_offset += Vector((x < 0) ? -x : 0, (y < 0) ? -y : 0);
+}
+
+/** Does NOT take tilemap offset in consideration. */
+Vector
+EditorTilemap::screen_to_tilemap(const Vector& screen_point) const
+{
+  return (m_camera.apply_transform(screen_point) / g_tile_size.vector())
+          .floor();
+}
+
+/** Does NOT take tilemap offset in consideration. */
+Vector
+EditorTilemap::tilemap_to_screen(const Vector& tilemap_point) const
+{
+  return tilemap_point * g_tile_size.vector() * m_camera.get_zoom()
+         + m_camera.get_pos();
 }

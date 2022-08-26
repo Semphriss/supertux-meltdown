@@ -40,6 +40,9 @@ public:
   void set_tile_id(size_t id);
   void resize_tilemap_to(const Vector& tilemap_point);
 
+  Vector screen_to_tilemap(const Vector& screen_point) const;
+  Vector tilemap_to_screen(const Vector& tilemap_point) const;
+
 private:
   std::vector<std::vector<int>> m_tilemap;
   EditorCamera m_camera;
@@ -47,6 +50,7 @@ private:
   Vector m_tilemap_offset;
   std::string m_data_folder;
   size_t m_tile_id;
+  Vector m_mouse_pos;
 
 private:
   EditorTilemap(const EditorTilemap&) = delete;
