@@ -14,7 +14,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "scenes/tilemap_editor.hpp"
+#include "editor/editor_tilemap.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -31,18 +31,17 @@ static const std::vector<std::string> g_tiles = {
   "/images/tiles/brick.png"
 };
 
+// g_tile_null should probably be called g_tile_default, the code allows it to
+// point to a non-null tile (g_tiles[g_tile_null] is allowed to be non-empty)
 static const int g_tile_null = 0;
 
 static const Size g_tile_size(32.0f, 32.0f);
 
-TilemapEditor::TilemapEditor(SceneController& scene_controller) :
-  Scene(scene_controller),
+EditorTilemap::EditorTilemap(const std::string& data_folder) :
   m_tilemap(),
-  m_camera(0.0f, 0.0f),
-  m_moving_camera(false),
-  m_zoom(1.0f),
-  m_mouse_pos(),
-  m_tilemap_offset(0.0f, 0.0f)
+  m_camera(),
+  m_tilemap_offset(0.0f, 0.0f),
+  m_data_folder(data_folder)
 {
   m_tilemap.resize(5);
 
@@ -51,8 +50,10 @@ TilemapEditor::TilemapEditor(SceneController& scene_controller) :
 }
 
 void
-TilemapEditor::event(const SDL_Event& event)
+EditorTilemap::event(const SDL_Event& event)
 {
+  m_camera.event(event);
+
   switch (event.type)
   {
     case SDL_MOUSEBUTTONDOWN:
@@ -63,83 +64,19 @@ TilemapEditor::event(const SDL_Event& event)
             float x = static_cast<float>(event.button.x);
             float y = static_cast<float>(event.button.y);
 
-            int tile_x = std::floor((x - m_camera.x) / (32.0f * m_zoom));
-            int tile_y = std::floor((y - m_camera.y) / (32.0f * m_zoom));
+            Vector world_pos = m_camera.apply_transform(Vector(x, y));
+            Vector tile_coord = (world_pos / g_tile_size.vector()).floor();
 
-            resize_tilemap_to(Vector(tile_x, tile_y));
+            resize_tilemap_to(tile_coord);
 
-            tile_x += m_tilemap_offset.x;
-            tile_y += m_tilemap_offset.y;
+            tile_coord += m_tilemap_offset;
 
-            ++m_tilemap.at(tile_y).at(tile_x) %= g_tiles.size();
+            ++m_tilemap.at(tile_coord.y).at(tile_coord.x) %= g_tiles.size();
           }
           break;
 
-        case SDL_BUTTON_RIGHT:
-          m_moving_camera = true;
-          break;
-
         default:
           break;
-      }
-      break;
-
-    case SDL_MOUSEBUTTONUP:
-      switch (event.button.button)
-      {
-        case SDL_BUTTON_RIGHT:
-          m_moving_camera = false;
-          break;
-
-        default:
-          break;
-      }
-      break;
-
-    case SDL_MOUSEMOTION:
-      m_mouse_pos = Vector(event.motion.x, event.motion.y);
-      if (m_moving_camera)
-      {
-        m_camera += Vector(event.motion.xrel, event.motion.yrel);
-      }
-      break;
-
-    case SDL_MOUSEWHEEL:
-      {
-        float m_old_zoom = m_zoom;
-        m_zoom += static_cast<float>(event.wheel.y) / 8.0f;
-        m_zoom = Math::clamp(m_zoom, 0.5f, 2.0f);
-        m_camera = m_mouse_pos - (m_mouse_pos - m_camera) * m_zoom / m_old_zoom;
-      }
-      break;
-
-    case SDL_KEYDOWN:
-      if (event.key.keysym.mod & KMOD_CTRL)
-      {
-        switch (event.key.keysym.sym)
-        {
-          case SDLK_s:
-            try
-            {
-              save(m_scene_controller.get_data_folder() + "/levels/level.bmp");
-            }
-            catch (const std::exception& e)
-            {
-              std::cerr << e.what() << std::endl;
-            }
-            break;
-
-          case SDLK_o:
-            try
-            {
-              load(m_scene_controller.get_data_folder() + "/levels/level.bmp");
-            }
-            catch (const std::exception& e)
-            {
-              std::cerr << e.what() << std::endl;
-            }
-            break;
-        }
       }
       break;
 
@@ -149,19 +86,18 @@ TilemapEditor::event(const SDL_Event& event)
 }
 
 void
-TilemapEditor::update(float dt_sec)
+EditorTilemap::update(float dt_sec)
 {
 }
 
 void
-TilemapEditor::draw(DrawingContext& context) const
+EditorTilemap::draw(DrawingContext& context) const
 {
   context.draw_filled_rect(context.target_size, Color(0.1f, 0.2f, 0.4f),
                            Blend::NONE);
 
   context.push_transform();
-  context.get_transform().move(m_camera);
-  context.get_transform().scale(Size(m_zoom, m_zoom));
+  m_camera.apply_transform(context);
 
   if (m_tilemap.size() == 0 || m_tilemap.at(0).size() == 0)
     return;
@@ -173,13 +109,13 @@ TilemapEditor::draw(DrawingContext& context) const
   {
     for (float x = 0.0f; x < m_tilemap.at(y).size(); x++)
     {
+      // This does not use g_tile_null because other tiles may need to be empty
       if (g_tiles[m_tilemap.at(y).at(x)].empty())
         continue;
 
       Rect tile_rect(Vector(g_tile_size) * Vector(x, y), g_tile_size);
 
-      std::string texture = m_scene_controller.get_data_folder()
-                          + g_tiles[m_tilemap.at(y).at(x)];
+      std::string texture = m_data_folder + g_tiles.at(m_tilemap.at(y).at(x));
 
       context.draw_texture(texture, {}, tile_rect, Color(1.0f, 1.0f, 1.0f),
                            Blend::BLEND);
@@ -207,16 +143,15 @@ TilemapEditor::draw(DrawingContext& context) const
   context.pop_transform();
 
   context.draw_text("Press Ctrl+S to save and Ctrl+O to load",
-                    m_scene_controller.get_data_folder()
-                     + "/fonts/SuperTux-Medium.ttf", 12,
+                    m_data_folder + "/fonts/SuperTux-Medium.ttf", 12,
                     TextAlign::TOP_LEFT, Rect(context.target_size).grown(-8.0f),
                     Color(1.0f, 1.0f, 1.0f), Blend::BLEND);
 }
 
 void
-TilemapEditor::load(const std::string& file)
+EditorTilemap::load_tilemap(const std::string& file)
 {
-  auto* surface = SDL_LoadBMP(file.c_str());
+  auto* surface = SDL_LoadBMP((m_data_folder + file).c_str());
 
   if (!surface)
   {
@@ -264,7 +199,7 @@ TilemapEditor::load(const std::string& file)
 }
 
 void
-TilemapEditor::save(const std::string& file) const
+EditorTilemap::save_tilemap(const std::string& file) const
 {
   auto h = m_tilemap.size(), w = h ? m_tilemap.at(0).size() : 0;
   auto* surface = SDL_CreateRGBSurfaceWithFormat(0, w, h, 32,
@@ -288,12 +223,12 @@ TilemapEditor::save(const std::string& file) const
     }
   }
 
-  SDL_SaveBMP(surface, file.c_str());
+  SDL_SaveBMP(surface, (m_data_folder + file).c_str());
   SDL_FreeSurface(surface);
 }
 
 void
-TilemapEditor::resize_tilemap_to(const Vector& tilemap_point)
+EditorTilemap::resize_tilemap_to(const Vector& tilemap_point)
 {
   int x = static_cast<int>(tilemap_point.x + m_tilemap_offset.x);
   int y = static_cast<int>(tilemap_point.y + m_tilemap_offset.y);

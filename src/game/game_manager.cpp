@@ -25,7 +25,7 @@
 #include "SDL2/SDL_ttf.h"
 
 #include "tests.hpp"
-#include "scenes/tilemap_editor.hpp"
+#include "scenes/level_editor.hpp"
 #include "video/drawing_context.hpp"
 #include "video/window.hpp"
 
@@ -114,7 +114,7 @@ GameManager::run(int argc, char** argv)
     w.set_title("SuperTux Meltdown " STM_VERSION);
 
     auto& controller = m_scene_manager.get_controller();
-    m_scene_manager.push_scene(std::make_unique<TilemapEditor>(controller));
+    m_scene_manager.push_scene(std::make_unique<LevelEditor>(controller));
 
     while(!m_scene_manager.empty())
     {

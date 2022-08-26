@@ -14,42 +14,33 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef HEADER_STM_SCENES_TILEMAPEDITOR_HPP
-#define HEADER_STM_SCENES_TILEMAPEDITOR_HPP
+#ifndef HEADER_STM_SCENES_LEVELEDITOR_HPP
+#define HEADER_STM_SCENES_LEVELEDITOR_HPP
 
 #include "scenes/scene.hpp"
 
-#include <vector>
+#include "editor/editor_tilemap.hpp"
 
-#include "util/vector.hpp"
-
-class TilemapEditor final :
+class LevelEditor final :
   public Scene
 {
 public:
-  TilemapEditor(SceneController& scene_controller);
-  virtual ~TilemapEditor() override = default;
+  LevelEditor(SceneController& scene_controller);
+  virtual ~LevelEditor() override = default;
 
   virtual void event(const SDL_Event& event) override;
   virtual void update(float dt_sec) override;
   virtual void draw(DrawingContext& context) const override;
 
-  void load(const std::string& file);
-  void save(const std::string& file) const;
-
-  void resize_tilemap_to(const Vector& tilemap_point);
+  void load();
+  void save() const;
 
 private:
-  std::vector<std::vector<int>> m_tilemap;
-  Vector m_camera;
-  bool m_moving_camera;
-  float m_zoom;
-  Vector m_mouse_pos;
-  Vector m_tilemap_offset;
+  EditorTilemap m_tilemap;
 
 private:
-  TilemapEditor(const TilemapEditor&) = delete;
-  TilemapEditor& operator=(const TilemapEditor&) = delete;
+  LevelEditor(const LevelEditor&) = delete;
+  LevelEditor& operator=(const LevelEditor&) = delete;
 };
 
 #endif
