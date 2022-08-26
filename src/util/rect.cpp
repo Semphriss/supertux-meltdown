@@ -313,7 +313,7 @@ Rect::flipped(bool h, bool v) const
 bool
 Rect::contains(const Vector& point) const
 {
-  return point.x >= x1 && point.x <= x2 && point.y >= y1 && point.y <= y2;
+  return point.x >= x1 && point.x < x2 && point.y >= y1 && point.y < y2;
 }
 
 std::pair<Vector, Vector>

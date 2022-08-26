@@ -22,6 +22,7 @@
 #include <stdexcept>
 #include <string>
 
+#include "SDL_events.h"
 #include "util/math.hpp"
 #include "video/drawing_context.hpp"
 
@@ -40,8 +41,10 @@ static const Size g_tile_size(32.0f, 32.0f);
 EditorTilemap::EditorTilemap(const std::string& data_folder) :
   m_tilemap(),
   m_camera(),
+  m_tilebox(*this, g_tiles, data_folder),
   m_tilemap_offset(0.0f, 0.0f),
-  m_data_folder(data_folder)
+  m_data_folder(data_folder),
+  m_tile_id(g_tile_null)
 {
   m_tilemap.resize(5);
 
@@ -52,6 +55,9 @@ EditorTilemap::EditorTilemap(const std::string& data_folder) :
 void
 EditorTilemap::event(const SDL_Event& event)
 {
+  if (m_tilebox.event(event))
+    return;
+
   m_camera.event(event);
 
   switch (event.type)
@@ -71,7 +77,7 @@ EditorTilemap::event(const SDL_Event& event)
 
             tile_coord += m_tilemap_offset;
 
-            ++m_tilemap.at(tile_coord.y).at(tile_coord.x) %= g_tiles.size();
+            m_tilemap.at(tile_coord.y).at(tile_coord.x) = m_tile_id;
           }
           break;
 
@@ -142,10 +148,13 @@ EditorTilemap::draw(DrawingContext& context) const
 
   context.pop_transform();
 
+  m_tilebox.draw(context);
+
+  /** @todo de-hardcode the tilebox width here */
   context.draw_text("Press Ctrl+S to save and Ctrl+O to load",
                     m_data_folder + "/fonts/SuperTux-Medium.ttf", 12,
-                    TextAlign::TOP_LEFT, Rect(context.target_size).grown(-8.0f),
-                    Color(1.0f, 1.0f, 1.0f), Blend::BLEND);
+                    TextAlign::TOP_LEFT, Rect(context.target_size).with_x1(128)
+                    .grown(-8.0f), Color(1.0f, 1.0f, 1.0f), Blend::BLEND);
 }
 
 void
@@ -225,6 +234,14 @@ EditorTilemap::save_tilemap(const std::string& file) const
 
   SDL_SaveBMP(surface, (m_data_folder + file).c_str());
   SDL_FreeSurface(surface);
+}
+
+void
+EditorTilemap::set_tile_id(size_t id)
+{
+  /** @todo Should this code check that id < g_tiles.size(), or should the
+            caller do it? */
+  m_tile_id = id;
 }
 
 void

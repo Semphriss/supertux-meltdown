@@ -14,43 +14,37 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef HEADER_STM_SCENES_EDITORTILEMAP_HPP
-#define HEADER_STM_SCENES_EDITORTILEMAP_HPP
+#ifndef HEADER_STM_SCENES_EDITORTILEBOX_HPP
+#define HEADER_STM_SCENES_EDITORTILEBOX_HPP
 
+#include <string>
 #include <vector>
 
-#include "editor/editor_camera.hpp"
-#include "editor/editor_tilebox.hpp"
-#include "util/vector.hpp"
 #include "video/drawing_context.hpp"
 
-class EditorTilemap final
+class EditorTilemap;
+
+class EditorTilebox final
 {
 public:
-  /** @todo move the file paths to a module dedicated to FS ops */
-  EditorTilemap(const std::string& data_folder);
+  EditorTilebox(EditorTilemap& parent,
+                const std::vector<std::string>& tileset,
+                const std::string& data_folder);
 
-  void event(const SDL_Event& event);
+  bool event(const SDL_Event& event);
   void update(float dt_sec);
   void draw(DrawingContext& context) const;
 
-  void load_tilemap(const std::string& file);
-  void save_tilemap(const std::string& file) const;
-
-  void set_tile_id(size_t id);
-  void resize_tilemap_to(const Vector& tilemap_point);
-
 private:
-  std::vector<std::vector<int>> m_tilemap;
-  EditorCamera m_camera;
-  EditorTilebox m_tilebox;
-  Vector m_tilemap_offset;
+  EditorTilemap& m_parent;
+  const std::vector<std::string>& m_tileset;
   std::string m_data_folder;
-  size_t m_tile_id;
+  Vector m_mouse_pos;
+  bool m_mouse_down;
 
 private:
-  EditorTilemap(const EditorTilemap&) = delete;
-  EditorTilemap& operator=(const EditorTilemap&) = delete;
+  EditorTilebox(const EditorTilebox&) = delete;
+  EditorTilebox& operator=(const EditorTilebox&) = delete;
 };
 
 #endif
