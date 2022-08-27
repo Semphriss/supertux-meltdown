@@ -20,6 +20,7 @@
 #include <iostream>
 #include <memory>
 
+#include "physfs.h"
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_image.h"
 #include "SDL2/SDL_ttf.h"
@@ -34,8 +35,7 @@
 #endif
 
 GameManager::GameManager() :
-  m_scene_manager(this),
-  m_data_folder("../data")
+  m_scene_manager(this)
 {
 }
 
@@ -51,16 +51,32 @@ GameManager::run(int argc, char** argv)
   if (!IMG_Init(IMG_INIT_PNG))
   {
     std::cerr << "Could not init SDL_image: " << IMG_GetError() << std::endl;
+    SDL_Quit();
     return 1;
   }
 
   if (TTF_Init())
   {
     std::cerr << "Could not init SDL_ttf: " << TTF_GetError() << std::endl;
+    IMG_Quit();
+    SDL_Quit();
+    return 1;
+  }
+
+  if (!PHYSFS_init(argv[0]))
+  {
+    std::cerr << "Could not init PhysFS: "
+              << PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()) << std::endl;
+    TTF_Quit();
+    IMG_Quit();
+    SDL_Quit();
     return 1;
   }
 
   SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "2");
+
+  std::string data_folder = std::string(PHYSFS_getBaseDir()) + ".."
+                          + PHYSFS_getDirSeparator() + "data";
 
   for (int i = 1; i < argc; i++)
   {
@@ -74,7 +90,7 @@ GameManager::run(int argc, char** argv)
         return 1;
       }
 
-      m_data_folder = std::string(argv[i]);
+      data_folder = argv[i];
     }
     else if (arg == "--help")
     {
@@ -103,6 +119,13 @@ GameManager::run(int argc, char** argv)
       return 1;
     }
   }
+
+  auto user_dir = PHYSFS_getPrefDir("SuperTux", "stmeltdown");
+  auto base_dir = data_folder.c_str();
+
+  PHYSFS_mount(user_dir, NULL, true);
+  PHYSFS_mount(base_dir, NULL, true);
+  PHYSFS_setWriteDir(user_dir);
 
   try
   {
@@ -177,15 +200,15 @@ GameManager::run(int argc, char** argv)
     std::cerr << "Fatal error (unknown type)" << std::endl;
   }
 
+  if (!PHYSFS_deinit())
+  {
+    std::cerr << "Problem when closing PhysFS: "
+              << PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()) << std::endl;
+  }
+
   TTF_Quit();
   IMG_Quit();
   SDL_Quit();
 
   return 0;
-}
-
-std::string
-GameManager::get_data_folder()
-{
-  return m_data_folder;
 }

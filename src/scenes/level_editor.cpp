@@ -20,7 +20,7 @@
 
 LevelEditor::LevelEditor(SceneController& scene_controller) :
   Scene(scene_controller),
-  m_tilemap(scene_controller.get_data_folder())
+  m_tilemap()
 {
 }
 

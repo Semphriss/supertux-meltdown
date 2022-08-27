@@ -14,25 +14,15 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef HEADER_STM_GAME_GAMEMANAGER_HPP
-#define HEADER_STM_GAME_GAMEMANAGER_HPP
+#ifndef HEADER_STM_UTIL_FS_HPP
+#define HEADER_STM_UTIL_FS_HPP
 
-#include "game/scene_manager.hpp"
+#include <string>
 
-class GameManager final
+class FS final
 {
 public:
-  GameManager();
-  ~GameManager() = default;
-
-  int run(int argc, char** argv);
-
-private:
-  SceneManager m_scene_manager;
-
-private:
-  GameManager(const GameManager&) = delete;
-  GameManager& operator=(const GameManager&) = delete;
+  static std::string path(const std::string& file);
 };
 
 #endif

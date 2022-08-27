@@ -27,8 +27,7 @@
 class EditorTilemap final
 {
 public:
-  /** @todo move the file paths to a module dedicated to FS ops */
-  EditorTilemap(const std::string& data_folder);
+  EditorTilemap();
 
   void event(const SDL_Event& event);
   void update(float dt_sec);
@@ -48,7 +47,6 @@ private:
   EditorCamera m_camera;
   EditorTilebox m_tilebox;
   Vector m_tilemap_offset;
-  std::string m_data_folder;
   size_t m_tile_id;
   Vector m_mouse_pos;
 

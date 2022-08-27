@@ -28,8 +28,7 @@ class EditorTilebox final
 {
 public:
   EditorTilebox(EditorTilemap& parent,
-                const std::vector<std::string>& tileset,
-                const std::string& data_folder);
+                const std::vector<std::string>& tileset);
 
   bool event(const SDL_Event& event);
   void update(float dt_sec);
@@ -38,7 +37,6 @@ public:
 private:
   EditorTilemap& m_parent;
   const std::vector<std::string>& m_tileset;
-  std::string m_data_folder;
   Vector m_mouse_pos;
   bool m_mouse_down;
 

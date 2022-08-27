@@ -47,6 +47,10 @@ find_package(SDL2_ttf REQUIRED)
 target_link_libraries(stmeltdown PUBLIC ${SDL2_TTF_LIBRARIES})
 target_include_directories(stmeltdown PUBLIC ${SDL2_TTF_INCLUDE_DIRS})
 
+find_package(PhysFS REQUIRED)
+target_link_libraries(stmeltdown PUBLIC ${PHYSFS_LIBRARY})
+target_include_directories(stmeltdown PUBLIC ${PHYSFS_INCLUDE_DIRS})
+
 # Installation
 
 install(TARGETS stmeltdown)

@@ -22,14 +22,14 @@
 #include <stdexcept>
 #include <string>
 
-#include "SDL_events.h"
+#include "util/fs.hpp"
 #include "util/math.hpp"
 #include "video/drawing_context.hpp"
 
 static const std::vector<std::string> g_tiles = {
   "",
-  "/images/tiles/block.png",
-  "/images/tiles/brick.png"
+  "images/tiles/block.png",
+  "images/tiles/brick.png"
 };
 
 // g_tile_null should probably be called g_tile_default, the code allows it to
@@ -38,12 +38,11 @@ static const int g_tile_null = 0;
 
 static const Size g_tile_size(32.0f, 32.0f);
 
-EditorTilemap::EditorTilemap(const std::string& data_folder) :
+EditorTilemap::EditorTilemap() :
   m_tilemap(),
   m_camera(),
-  m_tilebox(*this, g_tiles, data_folder),
+  m_tilebox(*this, g_tiles),
   m_tilemap_offset(0.0f, 0.0f),
-  m_data_folder(data_folder),
   m_tile_id(g_tile_null),
   m_mouse_pos()
 {
@@ -125,7 +124,7 @@ EditorTilemap::draw(DrawingContext& context) const
 
         Rect tile_rect(Vector(g_tile_size) * Vector(x, y), g_tile_size);
 
-        std::string texture = m_data_folder + g_tiles.at(m_tilemap.at(y).at(x));
+        std::string texture = FS::path(g_tiles.at(m_tilemap.at(y).at(x)));
 
         context.draw_texture(texture, {}, tile_rect, Color(1.0f, 1.0f, 1.0f),
                             Blend::BLEND);
@@ -158,7 +157,7 @@ EditorTilemap::draw(DrawingContext& context) const
     Rect pos(tilemap_to_screen(screen_to_tilemap(m_mouse_pos)),
              g_tile_size * m_camera.get_zoom());
 
-    context.draw_texture(m_data_folder + g_tiles[m_tile_id], Rect(), pos,
+    context.draw_texture(FS::path(g_tiles[m_tile_id]), Rect(), pos,
                          Color(1.0f, 1.0f, 1.0f,  0.5f), Blend::BLEND);
   }
 
@@ -166,7 +165,7 @@ EditorTilemap::draw(DrawingContext& context) const
 
   /** @todo de-hardcode the tilebox width here */
   context.draw_text("Press Ctrl+S to save and Ctrl+O to load",
-                    m_data_folder + "/fonts/SuperTux-Medium.ttf", 12,
+                    FS::path("fonts/SuperTux-Medium.ttf"), 12,
                     TextAlign::TOP_LEFT, Rect(context.target_size).with_x1(128)
                     .grown(-8.0f), Color(1.0f, 1.0f, 1.0f), Blend::BLEND);
 }
@@ -174,7 +173,7 @@ EditorTilemap::draw(DrawingContext& context) const
 void
 EditorTilemap::load_tilemap(const std::string& file)
 {
-  auto* surface = SDL_LoadBMP((m_data_folder + file).c_str());
+  auto* surface = SDL_LoadBMP(file.c_str());
 
   if (!surface)
   {
@@ -246,7 +245,7 @@ EditorTilemap::save_tilemap(const std::string& file) const
     }
   }
 
-  SDL_SaveBMP(surface, (m_data_folder + file).c_str());
+  SDL_SaveBMP(surface, file.c_str());
   SDL_FreeSurface(surface);
 }
 

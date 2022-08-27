@@ -81,10 +81,3 @@ SceneManager::draw(DrawingContext& context) const
   if (!m_scenes.empty())
     m_scenes.back()->draw(context);
 }
-
-
-std::string
-SceneManager::fetch_data_folder() const
-{
-  return m_game_manager->get_data_folder();
-}

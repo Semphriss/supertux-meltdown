@@ -17,6 +17,7 @@
 #include "editor/editor_tilebox.hpp"
 
 #include "editor/editor_tilemap.hpp"
+#include "util/fs.hpp"
 
 // Is allowed to differ from src/editor/editor_tilemap.cpp's g_tile_size
 static const Size g_tile_size(32.0f, 32.0f);
@@ -24,11 +25,9 @@ static const Size g_tile_size(32.0f, 32.0f);
 static const int TILEBOX_WIDTH = std::ceil(g_tile_size.w * 4);
 
 EditorTilebox::EditorTilebox(EditorTilemap& parent,
-                             const std::vector<std::string>& tileset,
-                             const std::string& data_folder) :
+                             const std::vector<std::string>& tileset) :
   m_parent(parent),
   m_tileset(tileset),
-  m_data_folder(data_folder),
   m_mouse_pos(),
   m_mouse_down(false)
 {
@@ -98,7 +97,7 @@ EditorTilebox::draw(DrawingContext& context) const
 
     if (!tile.empty())
     {
-      context.draw_texture(m_data_folder + tile, Rect(), pos,
+      context.draw_texture(FS::path(tile), Rect(), pos,
                            Color(1.0f, 1.0f, 1.0f), Blend::BLEND);
     }
 

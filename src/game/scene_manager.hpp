@@ -43,8 +43,6 @@ public:
   void update(float dt_sec);
   void draw(DrawingContext& context) const;
 
-  std::string fetch_data_folder() const;
-
 private:
   DefaultSceneController m_controller;
   GameManager* const m_game_manager;
