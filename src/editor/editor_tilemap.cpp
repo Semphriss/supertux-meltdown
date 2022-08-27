@@ -124,10 +124,8 @@ EditorTilemap::draw(DrawingContext& context) const
 
         Rect tile_rect(Vector(g_tile_size) * Vector(x, y), g_tile_size);
 
-        std::string texture = FS::path(g_tiles.at(m_tilemap.at(y).at(x)));
-
-        context.draw_texture(texture, {}, tile_rect, Color(1.0f, 1.0f, 1.0f),
-                            Blend::BLEND);
+        context.draw_texture(g_tiles.at(m_tilemap.at(y).at(x)), true, {},
+                             tile_rect, Color(1.0f, 1.0f, 1.0f), Blend::BLEND);
       }
     }
 
@@ -157,7 +155,7 @@ EditorTilemap::draw(DrawingContext& context) const
     Rect pos(tilemap_to_screen(screen_to_tilemap(m_mouse_pos)),
              g_tile_size * m_camera.get_zoom());
 
-    context.draw_texture(FS::path(g_tiles[m_tile_id]), Rect(), pos,
+    context.draw_texture(g_tiles[m_tile_id], true, Rect(), pos,
                          Color(1.0f, 1.0f, 1.0f,  0.5f), Blend::BLEND);
   }
 
@@ -165,9 +163,9 @@ EditorTilemap::draw(DrawingContext& context) const
 
   /** @todo de-hardcode the tilebox width here */
   context.draw_text("Press Ctrl+S to save and Ctrl+O to load",
-                    FS::path("fonts/SuperTux-Medium.ttf"), 12,
-                    TextAlign::TOP_LEFT, Rect(context.target_size).with_x1(128)
-                    .grown(-8.0f), Color(1.0f, 1.0f, 1.0f), Blend::BLEND);
+                    "fonts/SuperTux-Medium.ttf", true, 12, TextAlign::TOP_LEFT,
+                    Rect(context.target_size).with_x1(128).grown(-8.0f),
+                    Color(1.0f, 1.0f, 1.0f), Blend::BLEND);
 }
 
 void

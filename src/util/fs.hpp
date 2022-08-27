@@ -19,10 +19,21 @@
 
 #include <string>
 
+#include <SDL.h>
+
 class FS final
 {
 public:
-  static std::string path(const std::string& file);
+  enum class OP
+  {
+    APPEND,
+    READ,
+    WRITE
+  };
+
+public:
+  /** The pointer must be freed by the caller. */
+  static SDL_RWops* get_rwops(const std::string& file, OP operation);
 };
 
 #endif

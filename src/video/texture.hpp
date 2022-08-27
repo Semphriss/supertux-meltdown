@@ -28,7 +28,7 @@ class Renderer;
 class Texture final
 {
 public:
-  Texture(Renderer& renderer, const std::string file);
+  Texture(Renderer& renderer, const std::string& file, bool physfs);
   Texture(Renderer& renderer, const Size& size);
   Texture(Renderer& renderer, SDL_Surface* surface, bool free_surface);
   ~Texture();

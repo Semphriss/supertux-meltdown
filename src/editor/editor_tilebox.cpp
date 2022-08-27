@@ -97,7 +97,7 @@ EditorTilebox::draw(DrawingContext& context) const
 
     if (!tile.empty())
     {
-      context.draw_texture(FS::path(tile), Rect(), pos,
+      context.draw_texture(tile, true, Rect(), pos,
                            Color(1.0f, 1.0f, 1.0f), Blend::BLEND);
     }
 

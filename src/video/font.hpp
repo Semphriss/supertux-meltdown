@@ -27,7 +27,7 @@
 class Font final
 {
 public:
-  Font(const std::string file, int size);
+  Font(const std::string& file, bool physfs, int size);
   ~Font();
 
   std::unique_ptr<Texture> draw_text(Renderer& renderer,

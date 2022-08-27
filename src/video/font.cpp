@@ -18,9 +18,20 @@
 
 #include <memory>
 
-Font::Font(const std::string file, int size) :
-  m_font(TTF_OpenFont(file.c_str(), size))
+#include "util/fs.hpp"
+
+Font::Font(const std::string& file, bool physfs, int size) :
+  m_font()
 {
+  if (physfs)
+  {
+    m_font = TTF_OpenFontRW(FS::get_rwops(file, FS::OP::READ), true, size);
+  }
+  else
+  {
+    m_font = TTF_OpenFont(file.c_str(), size);
+  }
+
   if (!m_font)
   {
     throw std::runtime_error("Can't load font '" + file + "': "

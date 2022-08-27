@@ -26,14 +26,16 @@ DrawingContext::RenderCache::RenderCache(Renderer& renderer) :
 }
 
 Texture&
-DrawingContext::RenderCache::get_texture(const std::string& texture)
+DrawingContext::RenderCache::get_texture(const std::string& texture,
+                                         bool physfs)
 {
-  auto it = m_textures.find(texture);
+  std::string id = (physfs ? "1-" : "0-") + texture;
+  auto it = m_textures.find(id);
 
   if (it == m_textures.end())
   {
-    auto t = std::make_unique<Texture>(m_renderer, texture);
-    it = m_textures.emplace(texture, std::move(t)).first;
+    auto t = std::make_unique<Texture>(m_renderer, texture, physfs);
+    it = m_textures.emplace(id, std::move(t)).first;
   }
 
   return *(it->second);
@@ -69,10 +71,12 @@ DrawingContext::LineRequest::draw(Renderer& renderer) const
 }
 
 DrawingContext::TextureRequest::TextureRequest(const std::string& texture,
-                                               const Rect& src, const Rect& dst,
+                                               bool physfs, const Rect& src,
+                                               const Rect& dst,
                                                const Color& color, Blend blend,
                                                DrawingContext& context) :
   m_texture(texture),
+  m_physfs(physfs),
   m_src(src),
   m_dst(dst),
   m_color(color),
@@ -84,7 +88,8 @@ DrawingContext::TextureRequest::TextureRequest(const std::string& texture,
 void
 DrawingContext::TextureRequest::draw(Renderer& renderer) const
 {
-  auto& texture = m_context.get_render_cache(&renderer).get_texture(m_texture);
+  auto& texture = m_context.get_render_cache(&renderer).get_texture(m_texture,
+                                                                    m_physfs);
   Rect src = m_src.is_null() ? texture.get_size() : m_src;
 
   renderer.draw_texture(texture, src, m_dst, m_color, m_blend);
@@ -258,28 +263,32 @@ DrawingContext::draw_line(const Vector& p1, const Vector& p2,
 }
 
 void
-DrawingContext::draw_texture(const std::string& texture, const Rect& src,
-                             const Rect& dst, const Color& color, Blend blend)
+DrawingContext::draw_texture(const std::string& texture, bool physfs,
+                             const Rect& src, const Rect& dst,
+                             const Color& color, Blend blend)
 {
   Rect dst_ = dst * get_transform().m_scale + get_transform().m_offset;
-  auto req = std::make_unique<TextureRequest>(texture, src, dst_, color, blend,
-                                              *this);
+  auto req = std::make_unique<TextureRequest>(texture, physfs, src, dst_, color,
+                                              blend, *this);
 
   m_requests.push_back(std::move(req));
 }
 
 void
 DrawingContext::draw_text(const std::string& text, const std::string& font,
-                          int size, TextAlign align, const Rect& dst,
-                          const Color& color, Blend blend, bool outline)
+                          bool physfs, int size, TextAlign align,
+                          const Rect& dst, const Color& color, Blend blend,
+                          bool outline)
 {
-  std::string key = font + " (" + std::to_string(size) + ")";
+  std::string key = (physfs ? "1-" : "0-") + font + " (" + std::to_string(size)
+                  + ")";
 
   auto it = m_font_cache.find(key);
 
   if (it == m_font_cache.end())
   {
-    it = m_font_cache.emplace(key, std::make_unique<Font>(font, size)).first;
+    auto fontinfo = std::make_unique<Font>(font, physfs, size);
+    it = m_font_cache.emplace(key, std::move(fontinfo)).first;
   }
 
   auto& font_cache = *(it->second);

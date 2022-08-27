@@ -18,15 +18,25 @@
 
 #include "SDL2/SDL_image.h"
 
+#include "util/fs.hpp"
 #include "video/renderer.hpp"
 
-Texture::Texture(Renderer& renderer, const std::string file) :
+Texture::Texture(Renderer& renderer, const std::string& file, bool physfs) :
   m_renderer(renderer),
   m_sdl_texture(),
   m_drawable(false),
   m_cached_size()
 {
-  SDL_Surface* surface = IMG_Load(file.c_str());
+  SDL_Surface* surface = nullptr;
+  
+  if (physfs)
+  {
+    surface = IMG_Load_RW(FS::get_rwops(file, FS::OP::READ), true);
+  }
+  else
+  {
+    surface = IMG_Load(file.c_str());
+  }
 
   if (!surface)
   {

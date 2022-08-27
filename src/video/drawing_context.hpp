@@ -53,7 +53,7 @@ private:
     RenderCache(Renderer& renderer);
     ~RenderCache() = default;
 
-    Texture& get_texture(const std::string& texture);
+    Texture& get_texture(const std::string& texture, bool physfs);
 
   private:
     Renderer& m_renderer;
@@ -121,14 +121,16 @@ private:
     public Request
   {
   public:
-    TextureRequest(const std::string& texture, const Rect& src, const Rect& dst,
-                   const Color& color, Blend blend, DrawingContext& context);
+    TextureRequest(const std::string& texture, bool physfs, const Rect& src,
+                   const Rect& dst, const Color& color, Blend blend,
+                   DrawingContext& context);
     virtual ~TextureRequest() = default;
 
     virtual void draw(Renderer& renderer) const override;
 
   private:
     const std::string m_texture;
+    const bool m_physfs;
     const Rect m_src;
     const Rect m_dst;
     const Color m_color;
@@ -197,10 +199,10 @@ public:
   void draw_filled_rect(const Rect& rect, const Color& color, Blend blend);
   void draw_line(const Vector& p1, const Vector& p2, const Color& color,
                  Blend blend);
-  void draw_texture(const std::string& texture, const Rect& src,
+  void draw_texture(const std::string& texture, bool physfs, const Rect& src,
                     const Rect& dst, const Color& color, Blend blend);
-  void draw_text(const std::string& text, const std::string& font, int size,
-                 TextAlign align, const Rect& dst, const Color& color,
+  void draw_text(const std::string& text, const std::string& font, bool physfs,
+                 int size, TextAlign align, const Rect& dst, const Color& color,
                  Blend blend, bool outline = true);
 
   // This function is usually called from the dtor of the Renderer, but can

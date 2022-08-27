@@ -20,37 +20,92 @@
 
 #include "physfs.h"
 
-// Note: This won't work if the file is in an archive.
-std::string
-FS::path(const std::string& file)
+SDL_RWops*
+FS::get_rwops(const std::string& file, OP operation)
 {
-  std::string path = file;
-  std::string separator = PHYSFS_getDirSeparator();
+  SDL_RWops* ops = new SDL_RWops;
 
-  if (separator != "/")
+  ops->size = [] (SDL_RWops* ops)
   {
-    size_t pos = 0;
-    while ((pos = path.find("/", pos)) != std::string::npos)
-    {
-      path.replace(pos, 1, separator);
-      pos += separator.length();
+    auto* file = static_cast<PHYSFS_file*>(ops->hidden.unknown.data1);
+    return static_cast<Sint64>(PHYSFS_fileLength(file));
+  };
+
+  ops->seek = [] (SDL_RWops* ops, Sint64 offset, int whence)
+  {
+    auto* file = static_cast<PHYSFS_file*>(ops->hidden.unknown.data1);
+
+    int success = 0;
+    switch (whence) {
+      case SEEK_SET:
+        success = PHYSFS_seek(file, offset);
+        break;
+
+      case SEEK_CUR:
+        success = PHYSFS_seek(file, offset + PHYSFS_tell(file));
+        break;
+
+      case SEEK_END:
+        success = PHYSFS_seek(file, offset + PHYSFS_fileLength(file) + offset);
+        break;
+      
+      default:
+        return static_cast<Sint64>(-1);
+        break;
     }
+
+    if (!success)
+      // TODO: Get the PHYSFS error and log it somewhere
+      return static_cast<Sint64>(-1);
+
+    return static_cast<Sint64>(PHYSFS_tell(file));
+  };
+
+  ops->read = [] (SDL_RWops *ops, void *data, size_t size, size_t num)
+  {
+    auto* file = static_cast<PHYSFS_file*>(ops->hidden.unknown.data1);
+
+    auto read = PHYSFS_readBytes(file, data, size * num);
+
+    if (read < 0)
+      // TODO: Get the PHYSFS error and log it somewhere
+      return static_cast<size_t>(0);
+
+    return static_cast<size_t>(read / size);
+  };
+
+  ops->write = [] (SDL_RWops *ops, const void *data, size_t size, size_t num)
+  {
+    auto* file = static_cast<PHYSFS_file*>(ops->hidden.unknown.data1);
+
+    auto written = PHYSFS_writeBytes(file, data, size * num);
+
+    return static_cast<size_t>(written / size);
+  };
+
+  ops->close = [] (SDL_RWops *ops)
+  {
+    auto* file = static_cast<PHYSFS_file*>(ops->hidden.unknown.data1);
+
+    return PHYSFS_close(file);
+  };
+
+  ops->type = SDL_RWOPS_UNKNOWN;
+
+  switch(operation)
+  {
+    case OP::APPEND:
+      ops->hidden.unknown.data1 = PHYSFS_openAppend(file.c_str());
+      break;
+
+    case OP::READ:
+      ops->hidden.unknown.data1 = PHYSFS_openRead(file.c_str());
+      break;
+
+    case OP::WRITE:
+      ops->hidden.unknown.data1 = PHYSFS_openWrite(file.c_str());
+      break;
   }
 
-  const char* dir = PHYSFS_getRealDir(file.c_str());
-
-  if (!dir)
-  {
-    std::string dirlist = "";
-    char **dirs;
-
-    for (dirs = PHYSFS_getSearchPath(); *dirs != NULL; dirs++)
-    {
-      dirlist += std::string(*dirs) + ";";
-    }
-
-    throw std::runtime_error("File '" + file + "' not found in: " + dirlist);
-  }
-
-  return std::string(dir) + separator + path;
+  return ops;
 }

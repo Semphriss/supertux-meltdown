@@ -38,7 +38,7 @@ MainMenu::update(float dt_sec)
 void
 MainMenu::draw(DrawingContext& context) const
 {
-  context.draw_texture("../data/images/background.png", {}, context.target_size,
+  context.draw_texture("images/background.png", true, {}, context.target_size,
                        Color(1.0f, 1.0f, 1.0f), Blend::BLEND);
 
   Rect dst(context.target_size);
@@ -47,7 +47,7 @@ MainMenu::draw(DrawingContext& context) const
                     "This game comes with ABSOLUTELY NO WARRANTY. This is free "
                     "software, and you are welcome to redistribute it under "
                     "certain conditions; see the license file for details.",
-                    "../data/fonts/SuperTux-Medium.ttf", 12,
+                    "fonts/SuperTux-Medium.ttf", true, 12,
                     TextAlign::BOT_RIGHT, dst, Color(1.0f, 1.0f, 1.0f),
                     Blend::BLEND);
 }
