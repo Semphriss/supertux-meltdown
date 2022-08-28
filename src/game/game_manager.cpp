@@ -105,8 +105,7 @@ GameManager::run(int argc, char** argv)
     }
     else if (arg == "--test")
     {
-      run_tests(argc, argv);
-      return 0;
+      return run_tests(argc, argv);
     }
     else if (arg == "--version")
     {
