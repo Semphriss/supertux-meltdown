@@ -14,8 +14,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef HEADER_STM_SCENES_EDITORCAMERA_HPP
-#define HEADER_STM_SCENES_EDITORCAMERA_HPP
+#ifndef HEADER_STM_EDITOR_EDITORCAMERA_HPP
+#define HEADER_STM_EDITOR_EDITORCAMERA_HPP
 
 #include "video/drawing_context.hpp"
 

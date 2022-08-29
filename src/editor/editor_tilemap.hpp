@@ -14,8 +14,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef HEADER_STM_SCENES_EDITORTILEMAP_HPP
-#define HEADER_STM_SCENES_EDITORTILEMAP_HPP
+#ifndef HEADER_STM_EDITOR_EDITORTILEMAP_HPP
+#define HEADER_STM_EDITOR_EDITORTILEMAP_HPP
 
 #include <vector>
 
