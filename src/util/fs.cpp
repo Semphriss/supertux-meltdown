@@ -103,8 +103,20 @@ FS::get_rwops(const std::string& file, OP operation)
       break;
 
     case OP::WRITE:
+      if (!PHYSFS_mkdir(file.substr(0, file.find_last_of('/')).c_str()))
+      {
+        throw std::runtime_error("Could not mkdir for '" + file + "': "
+                            + PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+      }
+
       ops->hidden.unknown.data1 = PHYSFS_openWrite(file.c_str());
       break;
+  }
+
+  if (!ops->hidden.unknown.data1)
+  {
+    throw std::runtime_error("Could not open file '" + file + "': "
+                            + PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
   }
 
   return ops;

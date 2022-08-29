@@ -244,7 +244,7 @@ EditorTilemap::save_tilemap(const std::string& file) const
     }
   }
 
-  SDL_SaveBMP_RW(surface, FS::get_rwops(file.c_str(), FS::OP::READ), true);
+  SDL_SaveBMP_RW(surface, FS::get_rwops(file.c_str(), FS::OP::WRITE), true);
   SDL_FreeSurface(surface);
 }
 
