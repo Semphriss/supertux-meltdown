@@ -171,7 +171,8 @@ EditorTilemap::draw(DrawingContext& context) const
 void
 EditorTilemap::load_tilemap(const std::string& file)
 {
-  auto* surface = SDL_LoadBMP(file.c_str());
+  auto* surface = SDL_LoadBMP_RW(FS::get_rwops(file.c_str(), FS::OP::READ),
+                                 true);
 
   if (!surface)
   {
@@ -243,7 +244,7 @@ EditorTilemap::save_tilemap(const std::string& file) const
     }
   }
 
-  SDL_SaveBMP(surface, file.c_str());
+  SDL_SaveBMP_RW(surface, FS::get_rwops(file.c_str(), FS::OP::READ), true);
   SDL_FreeSurface(surface);
 }
 
