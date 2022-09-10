@@ -18,6 +18,10 @@ project(stmeltdown)
 
 cmake_minimum_required(VERSION 3.0)
 
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 file(GLOB_RECURSE STM_FILES src/*.cpp tests/*.cpp)
 add_executable(stmeltdown ${STM_FILES})
 target_include_directories(stmeltdown PUBLIC src/ tests/)
@@ -53,7 +57,7 @@ target_include_directories(stmeltdown PUBLIC ${PHYSFS_INCLUDE_DIRS})
 
 # Installation
 
-install(TARGETS stmeltdown)
+install(TARGETS stmeltdown DESTINATION bin)
 install(DIRECTORY data/ DESTINATION share/stmeltdown)
 install(FILES mk/install/stmeltdown.desktop DESTINATION share/applications)
 install(FILES mk/install/stmeltdown.svg

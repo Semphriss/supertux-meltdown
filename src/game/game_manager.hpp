@@ -17,6 +17,8 @@
 #ifndef HEADER_STM_GAME_GAMEMANAGER_HPP
 #define HEADER_STM_GAME_GAMEMANAGER_HPP
 
+#include <string>
+
 #include "game/scene_manager.hpp"
 
 class GameManager final
@@ -28,7 +30,17 @@ public:
   int run(int argc, char** argv);
 
 private:
+  bool init(const char* arg0);
+  bool parse_cli_args(int argc, char** argv);
+  bool finish_setup();
+  int launch_game();
+  void main_loop();
+  bool deinit();
+
+private:
   SceneManager m_scene_manager;
+  int m_return_code;
+  std::string m_arg_data_folder;
 
 private:
   GameManager(const GameManager&) = delete;

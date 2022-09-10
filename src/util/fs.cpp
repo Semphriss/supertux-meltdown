@@ -16,6 +16,8 @@
 
 #include "util/fs.hpp"
 
+#include <cstring>
+#include <iostream>
 #include <stdexcept>
 
 #include "physfs.h"
@@ -23,15 +25,15 @@
 SDL_RWops*
 FS::get_rwops(const std::string& file, OP operation)
 {
-  SDL_RWops* ops = new SDL_RWops;
+  auto ops = std::make_unique<SDL_RWops>();
 
-  ops->size = [] (SDL_RWops* ops)
+  ops->size = [] (SDL_RWops* ops) -> Sint64
   {
     auto* file = static_cast<PHYSFS_file*>(ops->hidden.unknown.data1);
     return static_cast<Sint64>(PHYSFS_fileLength(file));
   };
 
-  ops->seek = [] (SDL_RWops* ops, Sint64 offset, int whence)
+  ops->seek = [] (SDL_RWops* ops, Sint64 offset, int whence) -> Sint64
   {
     auto* file = static_cast<PHYSFS_file*>(ops->hidden.unknown.data1);
 
@@ -48,46 +50,101 @@ FS::get_rwops(const std::string& file, OP operation)
       case SEEK_END:
         success = PHYSFS_seek(file, offset + PHYSFS_fileLength(file) + offset);
         break;
-      
+
       default:
         return static_cast<Sint64>(-1);
         break;
     }
 
     if (!success)
-      // TODO: Get the PHYSFS error and log it somewhere
+    {
+      std::cerr << "Problem when seeking in file '" << ops->hidden.unknown.data2
+                << "': " << get_physfs_err() << std::endl;
       return static_cast<Sint64>(-1);
+    }
 
     return static_cast<Sint64>(PHYSFS_tell(file));
   };
 
-  ops->read = [] (SDL_RWops *ops, void *data, size_t size, size_t num)
+  ops->read = [] (SDL_RWops *ops, void *data, size_t size, size_t num) -> size_t
   {
     auto* file = static_cast<PHYSFS_file*>(ops->hidden.unknown.data1);
 
+#if PHYSFS_VER_MAJOR > 2 || PHYSFS_VER_MAJOR == 2 && PHYSFS_VER_MINOR >= 1
     auto read = PHYSFS_readBytes(file, data, size * num);
 
     if (read < 0)
-      // TODO: Get the PHYSFS error and log it somewhere
+    {
+      std::cerr << "Problem when reading from file '"
+                << ops->hidden.unknown.data2 << "': " << get_physfs_err()
+                << std::endl;
       return static_cast<size_t>(0);
+    }
 
     return static_cast<size_t>(read / size);
+#else
+    auto read = PHYSFS_read(file, data, size, num);
+
+    if (read < 0)
+    {
+      std::cerr << "Problem when reading from file '"
+                << ops->hidden.unknown.data2 << "': " << get_physfs_err()
+                << std::endl;
+      return static_cast<size_t>(0);
+    }
+
+    return static_cast<size_t>(read);
+#endif
   };
 
   ops->write = [] (SDL_RWops *ops, const void *data, size_t size, size_t num)
+                   -> size_t
   {
     auto* file = static_cast<PHYSFS_file*>(ops->hidden.unknown.data1);
 
+#if PHYSFS_VER_MAJOR > 2 || PHYSFS_VER_MAJOR == 2 && PHYSFS_VER_MINOR >= 1
     auto written = PHYSFS_writeBytes(file, data, size * num);
 
+    if (written < 0)
+    {
+      std::cerr << "Problem when writing to file: " << get_physfs_err()
+                << std::endl;
+      return static_cast<size_t>(0);
+    }
+
     return static_cast<size_t>(written / size);
+#else
+    auto written = PHYSFS_write(file, data, size, num);
+
+    if (written < 0)
+    {
+      std::cerr << "Problem when writing to file: " << get_physfs_err()
+                << std::endl;
+      return static_cast<size_t>(0);
+    }
+
+    return static_cast<size_t>(written);
+#endif
   };
 
-  ops->close = [] (SDL_RWops *ops)
+  ops->close = [] (SDL_RWops *ops) -> int
   {
     auto* file = static_cast<PHYSFS_file*>(ops->hidden.unknown.data1);
 
-    return PHYSFS_close(file);
+    int success = PHYSFS_close(file);
+
+    if (success)
+    {
+      free(ops->hidden.unknown.data2);
+      delete ops;
+      return 0;
+    }
+    else
+    {
+      std::cerr << "Problem when writing to file: " << get_physfs_err()
+                << std::endl;
+      return -1;
+    }
   };
 
   ops->type = SDL_RWOPS_UNKNOWN;
@@ -106,7 +163,7 @@ FS::get_rwops(const std::string& file, OP operation)
       if (!PHYSFS_mkdir(file.substr(0, file.find_last_of('/')).c_str()))
       {
         throw std::runtime_error("Could not mkdir for '" + file + "': "
-                            + PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+                            + get_physfs_err());
       }
 
       ops->hidden.unknown.data1 = PHYSFS_openWrite(file.c_str());
@@ -116,8 +173,23 @@ FS::get_rwops(const std::string& file, OP operation)
   if (!ops->hidden.unknown.data1)
   {
     throw std::runtime_error("Could not open file '" + file + "': "
-                            + PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+                            + get_physfs_err());
   }
 
-  return ops;
+  // Need to do it the C way, can't just grab file.c_str directly because the
+  // C++ string will probably be destroyed before the file is closed.
+  // Keep at the very end to avoid having early returns cause a memory leak.
+  ops->hidden.unknown.data2 = strdup(file.c_str());
+
+  return ops.release();
+}
+
+std::string
+FS::get_physfs_err()
+{
+#if PHYSFS_VER_MAJOR > 2 || PHYSFS_VER_MAJOR == 2 && PHYSFS_VER_MINOR >= 1
+  return PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode());
+#else
+  return PHYSFS_getLastError();
+#endif
 }

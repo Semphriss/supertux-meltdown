@@ -22,6 +22,7 @@
 #include <stdexcept>
 #include <string>
 
+#include "SDL_pixels.h"
 #include "util/fs.hpp"
 #include "util/math.hpp"
 #include "video/drawing_context.hpp"
@@ -223,12 +224,31 @@ void
 EditorTilemap::save_tilemap(const std::string& file) const
 {
   auto h = m_tilemap.size(), w = h ? m_tilemap.at(0).size() : 0;
-  auto* surface = SDL_CreateRGBSurfaceWithFormat(0, w, h, 32,
-                                                 SDL_PIXELFORMAT_ARGB8888);
+
+  auto format = SDL_PIXELFORMAT_ARGB8888;
+#if SDL_VERSION_ATLEAST(2, 0, 5)
+  auto* surface = SDL_CreateRGBSurfaceWithFormat(0, w, h, 32, format);
+#else
+  SDL_Surface* surface;
+
+  {
+    Uint32 r, g, b, a;
+    int bpp; // Unused, but required by SDL
+    auto success = SDL_PixelFormatEnumToMasks(format, &bpp, &r, &g, &b, &a);
+
+    if (success == SDL_FALSE)
+    {
+      throw std::runtime_error("Can't obtain image format info: "
+                               + std::string(SDL_GetError()));
+    }
+
+    surface = SDL_CreateRGBSurface(0, w, h, 32, r, g, b, a);
+  }
+#endif
 
   if (!surface)
   {
-    throw std::runtime_error("Can't create image surface: '"
+    throw std::runtime_error("Can't create image surface: "
                              + std::string(SDL_GetError()));
   }
 

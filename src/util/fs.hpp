@@ -17,6 +17,7 @@
 #ifndef HEADER_STM_UTIL_FS_HPP
 #define HEADER_STM_UTIL_FS_HPP
 
+#include <memory>
 #include <string>
 
 #include <SDL.h>
@@ -34,6 +35,7 @@ public:
 public:
   /** The pointer must be freed by the caller. */
   static SDL_RWops* get_rwops(const std::string& file, OP operation);
+  static std::string get_physfs_err();
 };
 
 #endif

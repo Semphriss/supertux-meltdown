@@ -25,6 +25,13 @@
 #include "video/texture.hpp"
 #include "video/window.hpp"
 
+#if ! SDL_VERSION_ATLEAST(2, 0, 10)
+#define SDL_FRect SDL_Rect
+#define SDL_RenderFillRectF SDL_RenderFillRect
+#define SDL_RenderDrawLineF SDL_RenderDrawLine
+#define SDL_RenderCopyExF SDL_RenderCopyEx
+#endif
+
 Renderer::Renderer(const Window& window) :
   m_sdl_renderer(SDL_CreateRenderer(window.get_sdl_window(), -1, 0))
 {
