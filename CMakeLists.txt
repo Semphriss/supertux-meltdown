@@ -26,6 +26,7 @@ file(GLOB_RECURSE STM_FILES src/*.cpp tests/*.cpp)
 add_executable(stmeltdown ${STM_FILES})
 target_include_directories(stmeltdown PUBLIC src/ tests/)
 
+# Equivalent of -DSTM_VERSION="$(git describe --tags --always)"
 # This presumes Git exists and is in the PATH, which may or may not be true
 execute_process(COMMAND git describe --tags --always
                 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
@@ -37,6 +38,7 @@ else()
   target_compile_definitions(stmeltdown PUBLIC -DSTM_VERSION="${STM_VERSION}")
 endif()
 
+# Find and link libraries and include directories
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/mk/cmake)
 
 find_package(SDL2 REQUIRED)
@@ -56,15 +58,21 @@ target_link_libraries(stmeltdown PUBLIC ${PHYSFS_LIBRARY})
 target_include_directories(stmeltdown PUBLIC ${PHYSFS_INCLUDE_DIRS})
 
 # Installation
+# ============
 
+# Required
 install(TARGETS stmeltdown DESTINATION bin)
 install(DIRECTORY data/ DESTINATION share/stmeltdown)
+
+# Optional
 install(FILES mk/install/stmeltdown.desktop DESTINATION share/applications)
 install(FILES mk/install/stmeltdown.svg
         DESTINATION share/icons/hicolor/scalable/apps)
 
 # Packaging
+# =========
 
+# Source (cpack --config CPackSourceConfig.cmake -G ZIP)
 file(STRINGS .gitignore STM_IGNORE REGEX "^[^#]")
 string(REGEX REPLACE "\\." "\\\\\\\\." STM_IGNORE_ESCAPED "${STM_IGNORE}")
 string(REGEX REPLACE "\\*" ".*" STM_IGNORE_ESCAPED "${STM_IGNORE_ESCAPED}")
