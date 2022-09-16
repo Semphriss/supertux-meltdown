@@ -209,6 +209,8 @@ public:
   // safely be called at any time.
   void unbind(Renderer* renderer);
 
+  void reset();
+
   RenderCache& get_render_cache(Renderer* renderer);
 
 public:

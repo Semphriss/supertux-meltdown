@@ -319,3 +319,12 @@ DrawingContext::get_render_cache(Renderer* renderer)
 
   return *(it->second);
 }
+
+void
+DrawingContext::reset()
+{
+  m_renderer_caches.clear();
+  m_font_cache.clear();
+  m_requests.clear();
+  m_transforms.clear();
+}

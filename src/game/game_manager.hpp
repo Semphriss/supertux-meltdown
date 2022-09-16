@@ -17,9 +17,12 @@
 #ifndef HEADER_STM_GAME_GAMEMANAGER_HPP
 #define HEADER_STM_GAME_GAMEMANAGER_HPP
 
+#include <chrono>
 #include <string>
 
 #include "game/scene_manager.hpp"
+#include "video/drawing_context.hpp"
+#include "video/window.hpp"
 
 class GameManager final
 {
@@ -35,12 +38,22 @@ private:
   bool finish_setup();
   int launch_game();
   void main_loop();
+  void single_loop();
   bool deinit();
 
 private:
   SceneManager m_scene_manager;
   int m_return_code;
   std::string m_arg_data_folder;
+  std::unique_ptr<Window> m_window;
+  DrawingContext m_context;
+  // https://en.cppreference.com/w/cpp/chrono/steady_clock says:
+  //   "This clock [...] is most suitable for measuring intervals."
+  // std::chrono::high_resolution_clock is merely an alias to another clock,
+  // which may or may not be steady_clock, and which can have huge jumps if
+  // the user changes their computer time, including back in time. See the
+  // notes: https://en.cppreference.com/w/cpp/chrono/high_resolution_clock
+  std::chrono::steady_clock::time_point m_last_time;
 
 private:
   GameManager(const GameManager&) = delete;

@@ -38,7 +38,10 @@
 GameManager::GameManager() :
   m_scene_manager(this),
   m_return_code(1),
-  m_arg_data_folder()
+  m_arg_data_folder(),
+  m_window(),
+  m_context(),
+  m_last_time()
 {
 }
 
@@ -209,6 +212,37 @@ GameManager::finish_setup()
               << "\nThe game will continue in read-only mode." << std::endl;
   }
 
+  try
+  {
+    m_window = std::make_unique<Window>();
+    m_last_time = std::chrono::steady_clock::now();
+
+    m_window->set_title("SuperTux Meltdown " STM_VERSION);
+
+    auto& controller = m_scene_manager.get_controller();
+    m_scene_manager.push_scene(std::make_unique<LevelEditor>(controller));
+  }
+  catch(const std::exception& e)
+  {
+    std::cerr << "Fatal error: " << e.what() << std::endl;
+    return false;
+  }
+  catch(const std::string& s)
+  {
+    std::cerr << "Fatal error: " << s << std::endl;
+    return false;
+  }
+  catch(const char* s)
+  {
+    std::cerr << "Fatal error: " << s << std::endl;
+    return false;
+  }
+  catch(...)
+  {
+    std::cerr << "Fatal error (unknown type)" << std::endl;
+    return false;
+  }
+
   return true;
 }
 
@@ -246,59 +280,48 @@ GameManager::launch_game()
 void
 GameManager::main_loop()
 {
-  Window w;
-  Renderer& r = w.get_renderer();
-  DrawingContext dc;
-  auto last_time = std::chrono::steady_clock::now();
-
-  w.set_title("SuperTux Meltdown " STM_VERSION);
-
-  auto& controller = m_scene_manager.get_controller();
-  m_scene_manager.push_scene(std::make_unique<LevelEditor>(controller));
-
   while(!m_scene_manager.empty())
+    single_loop();
+}
+
+void
+GameManager::single_loop()
+{
+  SDL_Event e;
+  while (SDL_PollEvent(&e) && !m_scene_manager.empty())
   {
-    SDL_Event e;
-    while (SDL_PollEvent(&e) && !m_scene_manager.empty())
+    m_scene_manager.event(e);
+
+    if (e.type == SDL_QUIT)
     {
-      m_scene_manager.event(e);
-
-      if (e.type == SDL_QUIT)
-      {
-        m_scene_manager.quit();
-        break;
-      }
+      m_scene_manager.quit();
+      return;
     }
-
-    if (m_scene_manager.empty())
-      break;
-
-    // https://en.cppreference.com/w/cpp/chrono/steady_clock says:
-    //   "This clock [...] is most suitable for measuring intervals."
-    // std::chrono::high_resolution_clock is merely an alias to another clock,
-    // which may or may not be steady_clock, and which can have huge jumps if
-    // the user changes their computer time, including back in time. See the
-    // notes: https://en.cppreference.com/w/cpp/chrono/high_resolution_clock
-    auto time = std::chrono::steady_clock::now();
-    float diff = static_cast<float>((time - last_time).count())
-                  * static_cast<float>(decltype(time)::period::num)
-                  / static_cast<float>(decltype(time)::period::den);
-    last_time = time;
-
-    m_scene_manager.update(0.01f);
-
-    if (m_scene_manager.empty())
-      break;
-
-    dc.target_size = w.get_size();
-
-    m_scene_manager.draw(dc);
-
-    dc.render(r);
-    dc.clear();
-
-    SDL_Delay(10);
   }
+
+  if (m_scene_manager.empty())
+    return;
+
+  auto time = std::chrono::steady_clock::now();
+  float diff = static_cast<float>((time - m_last_time).count())
+                * static_cast<float>(decltype(time)::period::num)
+                / static_cast<float>(decltype(time)::period::den);
+  m_last_time = time;
+
+  m_scene_manager.update(0.01f);
+
+  if (m_scene_manager.empty())
+    return;
+
+  m_context.target_size = m_window->get_size();
+
+  m_scene_manager.draw(m_context);
+
+
+  m_context.render(m_window->get_renderer());
+  m_context.clear();
+
+  SDL_Delay(10);
 }
 
 bool
@@ -306,14 +329,17 @@ GameManager::deinit()
 {
   bool success = true;
 
+  m_window = nullptr;
+  m_context.reset();
+
   if (!PHYSFS_deinit())
   {
     std::cerr << "Problem when closing PhysFS: " << FS::get_physfs_err()
               << std::endl;
     m_return_code = 1;
 
-    success = false;
     // No early return here, must deinit the other libraries no matter what.
+    success = false;
   }
 
   TTF_Quit();
