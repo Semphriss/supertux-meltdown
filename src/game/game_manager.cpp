@@ -130,7 +130,7 @@ GameManager::parse_cli_args(int argc, char** argv)
   {
     std::string arg(argv[i]);
 
-    if (arg == "--data")
+    if (arg == "-d" || arg == "--data")
     {
       if (++i >= argc)
       {
@@ -141,24 +141,24 @@ GameManager::parse_cli_args(int argc, char** argv)
 
       m_arg_data_folder = argv[i];
     }
-    else if (arg == "--help")
+    else if (arg == "-h" || arg == "--help")
     {
       std::cout << "Usage: stmeltdown [OPTIONS...]\n\n"
                 << "Options:\n"
-                << "  --data [PATH]   Change the data folder\n"
-                << "  --help          Show this help text and exit\n"
-                << "  --test          Run the test suite\n"
-                << "  --version       Show version info and exit\n"
+                << "  -d, --data [PATH]   Change the data folder\n"
+                << "  -h, --help          Show this help text and exit\n"
+                << "  -t, --test          Run the test suite\n"
+                << "  -v, --version       Show version info and exit\n"
                 << std::flush;
       m_return_code = 0;
       return false;
     }
-    else if (arg == "--test")
+    else if (arg == "-t" || arg == "--test")
     {
       m_return_code = run_tests(argc, argv);
       return false;
     }
-    else if (arg == "--version")
+    else if (arg == "-v" || arg == "--version")
     {
       std::cout << "stmeltdown " STM_VERSION << std::endl;
       m_return_code = 0;
