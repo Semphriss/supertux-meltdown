@@ -41,6 +41,8 @@ private:
   void single_loop();
   bool deinit();
 
+  template<typename F> bool generic_try(F func);
+
 private:
   SceneManager m_scene_manager;
   int m_return_code;

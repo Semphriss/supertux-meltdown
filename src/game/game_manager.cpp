@@ -212,69 +212,25 @@ GameManager::finish_setup()
               << "\nThe game will continue in read-only mode." << std::endl;
   }
 
-  try
-  {
-    m_window = std::make_unique<Window>();
-    m_last_time = std::chrono::steady_clock::now();
+  return generic_try([this] {
+    this->m_window = std::make_unique<Window>();
+    this->m_last_time = std::chrono::steady_clock::now();
 
-    m_window->set_title("SuperTux Meltdown " STM_VERSION);
+    this->m_window->set_title("SuperTux Meltdown " STM_VERSION);
 
-    auto& controller = m_scene_manager.get_controller();
-    m_scene_manager.push_scene(std::make_unique<LevelEditor>(controller));
-  }
-  catch(const std::exception& e)
-  {
-    std::cerr << "Fatal error: " << e.what() << std::endl;
-    return false;
-  }
-  catch(const std::string& s)
-  {
-    std::cerr << "Fatal error: " << s << std::endl;
-    return false;
-  }
-  catch(const char* s)
-  {
-    std::cerr << "Fatal error: " << s << std::endl;
-    return false;
-  }
-  catch(...)
-  {
-    std::cerr << "Fatal error (unknown type)" << std::endl;
-    return false;
-  }
-
-  return true;
+    auto& controller = this->m_scene_manager.get_controller();
+    this->m_scene_manager.push_scene(std::make_unique<LevelEditor>(controller));
+  });
 }
 
 int
 GameManager::launch_game()
 {
-  try
-  {
-    main_loop();
-  }
-  catch(const std::exception& e)
-  {
-    std::cerr << "Fatal error: " << e.what() << std::endl;
-    return 1;
-  }
-  catch(const std::string& s)
-  {
-    std::cerr << "Fatal error: " << s << std::endl;
-    return 1;
-  }
-  catch(const char* s)
-  {
-    std::cerr << "Fatal error: " << s << std::endl;
-    return 1;
-  }
-  catch(...)
-  {
-    std::cerr << "Fatal error (unknown type)" << std::endl;
-    return 1;
-  }
+  bool success = generic_try([this] {
+    this->main_loop();
+  });
 
-  return 0;
+  return success ? 0 : 1;
 }
 
 void
@@ -347,4 +303,38 @@ GameManager::deinit()
   SDL_Quit();
 
   return success;
+}
+
+// Since all calls to this function are within this compilation unit, there is
+// no need to expose the body to the header file.
+template<typename F>
+bool
+GameManager::generic_try(F func)
+{
+  try
+  {
+    func();
+  }
+  catch(const std::exception& e)
+  {
+    std::cerr << "Fatal error: " << e.what() << std::endl;
+    return false;
+  }
+  catch(const std::string& s)
+  {
+    std::cerr << "Fatal error: " << s << std::endl;
+    return false;
+  }
+  catch(const char* s)
+  {
+    std::cerr << "Fatal error: " << s << std::endl;
+    return false;
+  }
+  catch(...)
+  {
+    std::cerr << "Fatal error (unknown type)" << std::endl;
+    return false;
+  }
+
+  return true;
 }
