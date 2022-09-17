@@ -68,6 +68,7 @@ int run_tests(int argc, char** argv)
   std::ostream* out = &std::cout;
   bool fail_fast = false;
 
+  /** @todo Do something with those undocumented arguments */
   for (int i = 1; i < argc; i++)
   {
     std::string arg(argv[i]);
@@ -85,7 +86,7 @@ int run_tests(int argc, char** argv)
     {
       fail_fast = true;
     }
-    else if (arg != "--test")
+    else if (arg != "-t" && arg != "--test")
     {
       std::cerr << "Unrecognized option: " << arg << std::endl;
       return 2;
