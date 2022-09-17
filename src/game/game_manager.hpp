@@ -36,8 +36,8 @@ private:
   bool init(const char* arg0);
   bool parse_cli_args(int argc, char** argv);
   bool finish_setup();
-  int launch_game();
-  void main_loop();
+  bool recover();
+  bool main_loop();
   void single_loop();
   bool deinit();
 

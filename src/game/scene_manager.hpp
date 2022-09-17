@@ -35,6 +35,11 @@ public:
   void pop_scene();
 
   SceneController& get_controller();
+
+  // Note: The scene stack may be edited by code other than the currently active
+  // scene, such as by the GameManager. Any scene may be added or removed from
+  // the stack at any moment, including scenes that aren't on top of the stack.
+  // No code from the scenes should rely on any specific layout.
   const std::vector<std::unique_ptr<Scene>>& get_scene_stack() const;
   bool empty() const;
   void quit();

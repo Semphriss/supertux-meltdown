@@ -35,6 +35,8 @@
 #define STM_VERSION "unknown"
 #endif
 
+#define STARTING_SCENE LevelEditor
+
 GameManager::GameManager() :
   m_scene_manager(this),
   m_return_code(1),
@@ -63,7 +65,16 @@ GameManager::run(int argc, char** argv)
     return m_return_code;
   }
 
-  m_return_code = launch_game();
+  m_return_code = 0;
+
+  while (!main_loop())
+  {
+    if (!recover())
+    {
+      m_return_code = 1;
+      break;
+    }
+  }
 
   if (!deinit() && m_return_code == 0)
     m_return_code = 1;
@@ -219,25 +230,85 @@ GameManager::finish_setup()
     this->m_window->set_title("SuperTux Meltdown " STM_VERSION);
 
     auto& controller = this->m_scene_manager.get_controller();
-    this->m_scene_manager.push_scene(std::make_unique<LevelEditor>(controller));
+    this->m_scene_manager.push_scene(std::make_unique<STARTING_SCENE>(controller));
   });
 }
 
-int
-GameManager::launch_game()
+bool
+GameManager::recover()
 {
-  bool success = generic_try([this] {
-    this->main_loop();
-  });
+  /** @todo Tell the user a crash just happened and that the game may be
+      unstable; advise closing and re-opening the game ASAP */
 
-  return success ? 0 : 1;
+  std::cerr << "Recovering..." << std::endl;
+
+  std::cerr << "Attempting to run another loop for unique bugs" << std::endl;
+
+  if (generic_try([this] { this->single_loop(); }))
+  {
+    std::cerr << "Recover seems successful." << std::endl;
+    return true;
+  }
+
+  std::cerr << "Attempting to reset data..." << std::endl;
+
+  m_window = std::make_unique<Window>();
+  m_window->set_title("SuperTux Meltdown " STM_VERSION);
+  m_context.reset();
+
+  if (generic_try([this] { this->single_loop(); }))
+  {
+    std::cerr << "Recover seems successful." << std::endl;
+    return true;
+  }
+
+  /** @todo Try to recover by asking all scenes to backup their data and create
+      new scenes from that backup data. */
+
+  // Keep all non-destructive methods first, then try to recover by destructive
+  // means from the least destructive to the most.
+
+  if (m_scene_manager.get_scene_stack().size() > 1)
+  {
+    std::cerr << "Attempting to pop topmost scene..." << std::endl;
+
+    m_scene_manager.pop_scene();
+
+    if (generic_try([this] { this->single_loop(); }))
+    {
+      std::cerr << "Recover seems successful." << std::endl;
+      return true;
+    }
+  }
+  else
+  {
+    std::cerr << "Not trying to pop topmost scene, there is only 1 scene"
+              << std::endl;
+  }
+
+  std::cerr << "Attempting to remove all scenes..." << std::endl;
+
+  m_scene_manager.quit();
+  auto& ctrl = m_scene_manager.get_controller();
+  m_scene_manager.push_scene(std::make_unique<STARTING_SCENE>(ctrl));
+
+  if (generic_try([this] { this->single_loop(); }))
+  {
+    std::cerr << "Recover seems successful." << std::endl;
+    return true;
+  }
+
+  std::cerr << "Failed to recover." << std::endl;
+  return false;
 }
 
-void
+bool
 GameManager::main_loop()
 {
-  while(!m_scene_manager.empty())
-    single_loop();
+  return generic_try([this] {
+    while(!this->m_scene_manager.empty())
+      this->single_loop();
+  });
 }
 
 void
