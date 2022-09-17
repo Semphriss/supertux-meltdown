@@ -68,6 +68,9 @@ install(DIRECTORY data/ DESTINATION share/stmeltdown)
 install(FILES mk/install/stmeltdown.desktop DESTINATION share/applications)
 install(FILES mk/install/stmeltdown.svg
         DESTINATION share/icons/hicolor/scalable/apps)
+install(FILES mk/unix/bash_completion.sh
+        DESTINATION share/bash-completion/completions/stmeltdown)
+install(FILES mk/unix/man DESTINATION share/man/stmeltdown.6)
 
 # Packaging
 # =========
