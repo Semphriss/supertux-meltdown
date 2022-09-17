@@ -28,7 +28,7 @@ Texture::Texture(Renderer& renderer, const std::string& file, bool physfs) :
   m_cached_size()
 {
   SDL_Surface* surface = nullptr;
-  
+
   if (physfs)
   {
     surface = IMG_Load_RW(FS::get_rwops(file, FS::OP::READ), true);
