@@ -20,6 +20,9 @@
 #include <iostream>
 #include <memory>
 
+#ifdef EMSCRIPTEN
+#include "emscripten.h"
+#endif
 #include "physfs.h"
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_image.h"
@@ -36,6 +39,16 @@
 #endif
 
 #define STARTING_SCENE LevelEditor
+
+#ifdef EMSCRIPTEN
+GameManager* GameManager::s_game_manager = nullptr;
+
+void
+GameManager::emscripten_loop()
+{
+  s_game_manager->single_loop();
+}
+#endif
 
 GameManager::GameManager() :
   m_scene_manager(this),
@@ -236,10 +249,16 @@ GameManager::init(const char* arg0)
 bool
 GameManager::main_loop()
 {
+#ifdef EMSCRIPTEN
+  s_game_manager = this;
+  emscripten_set_main_loop([] { GameManager::emscripten_loop(); }, 0, true);
+  return true;
+#else
   return generic_try([this] {
     while(!this->m_scene_manager.empty())
       this->single_loop();
   });
+#endif
 }
 
 void

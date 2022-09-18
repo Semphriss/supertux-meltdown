@@ -39,23 +39,48 @@ else()
 endif()
 
 # Find and link libraries and include directories
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/mk/cmake)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
+  set(USE_FLAGS "-sUSE_SDL=2 -sUSE_SDL_IMAGE=2 -sUSE_SDL_TTF=2")
+  set(USE_FLAGS "${USE_FLAGS} -sSDL2_IMAGE_FORMATS='[\"png\"]'")
+  set(USE_FLAGS "${USE_FLAGS} -sNO_DISABLE_EXCEPTION_CATCHING")
+  set(USE_LINK_FLAGS "--preload-file ${CMAKE_CURRENT_SOURCE_DIR}/data/@/data")
+  set(USE_LINK_FLAGS "${USE_LINK_FLAGS} --use-preload-plugin")
 
-find_package(SDL2 REQUIRED)
-target_link_libraries(stmeltdown PUBLIC ${SDL2_LIBRARIES})
-target_include_directories(stmeltdown PUBLIC ${SDL2_INCLUDE_DIRS})
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${USE_FLAGS}")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${USE_FLAGS}")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${USE_FLAGS}")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${USE_LINK_FLAGS}")
 
-find_package(SDL2_image REQUIRED)
-target_link_libraries(stmeltdown PUBLIC ${SDL2_IMAGE_LIBRARIES})
-target_include_directories(stmeltdown PUBLIC ${SDL2_IMAGE_INCLUDE_DIRS})
+  set(CMAKE_EXECUTABLE_SUFFIX .html)
 
-find_package(SDL2_ttf REQUIRED)
-target_link_libraries(stmeltdown PUBLIC ${SDL2_TTF_LIBRARIES})
-target_include_directories(stmeltdown PUBLIC ${SDL2_TTF_INCLUDE_DIRS})
+  # PhysFS needs to be built manually
+  set(PHYSFS_EMSCRIPTEN ${CMAKE_BINARY_DIR}/physfs/buildbot/physfs-emscripten/)
+  if(NOT EXISTS ${PHYSFS_EMSCRIPTEN})
+    message(FATAL_ERROR "Please run ../mk/emscripten/build-physfs.sh before "
+                        "running CMake.")
+  endif()
 
-find_package(PhysFS REQUIRED)
-target_link_libraries(stmeltdown PUBLIC ${PHYSFS_LIBRARY})
-target_include_directories(stmeltdown PUBLIC ${PHYSFS_INCLUDE_DIRS})
+  target_include_directories(stmeltdown PUBLIC ${PHYSFS_EMSCRIPTEN})
+  target_link_libraries(stmeltdown PUBLIC ${PHYSFS_EMSCRIPTEN}/libphysfs.a)
+else()
+  set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/mk/cmake)
+
+  find_package(SDL2 REQUIRED)
+  target_link_libraries(stmeltdown PUBLIC ${SDL2_LIBRARIES})
+  target_include_directories(stmeltdown PUBLIC ${SDL2_INCLUDE_DIRS})
+
+  find_package(SDL2_image REQUIRED)
+  target_link_libraries(stmeltdown PUBLIC ${SDL2_IMAGE_LIBRARIES})
+  target_include_directories(stmeltdown PUBLIC ${SDL2_IMAGE_INCLUDE_DIRS})
+
+  find_package(SDL2_ttf REQUIRED)
+  target_link_libraries(stmeltdown PUBLIC ${SDL2_TTF_LIBRARIES})
+  target_include_directories(stmeltdown PUBLIC ${SDL2_TTF_INCLUDE_DIRS})
+
+  find_package(PhysFS REQUIRED)
+  target_link_libraries(stmeltdown PUBLIC ${PHYSFS_LIBRARY})
+  target_include_directories(stmeltdown PUBLIC ${PHYSFS_INCLUDE_DIRS})
+endif()
 
 # Installation
 # ============

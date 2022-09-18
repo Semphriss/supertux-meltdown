@@ -26,6 +26,14 @@
 
 class GameManager final
 {
+#ifdef EMSCRIPTEN
+private:
+  static GameManager* s_game_manager;
+
+public:
+  static void emscripten_loop();
+#endif
+
 public:
   GameManager();
   ~GameManager() = default;
