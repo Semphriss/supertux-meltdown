@@ -33,13 +33,12 @@ public:
   int run(int argc, char** argv);
 
 private:
-  bool init(const char* arg0);
   bool parse_cli_args(int argc, char** argv);
-  bool finish_setup();
-  bool recover();
+  bool init(const char* arg0);
   bool main_loop();
   void single_loop();
   bool deinit();
+  bool recover();
 
   template<typename F> bool generic_try(F func);
 

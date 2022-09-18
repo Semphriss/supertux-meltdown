@@ -40,7 +40,7 @@
 GameManager::GameManager() :
   m_scene_manager(this),
   m_return_code(1),
-  m_arg_data_folder(),
+  m_arg_data_folder(""),
   m_window(),
   m_context(),
   m_last_time()
@@ -50,20 +50,11 @@ GameManager::GameManager() :
 int
 GameManager::run(int argc, char** argv)
 {
+  if (!parse_cli_args(argc, argv))
+    return m_return_code;
+
   if (!init(argv[0]))
     return m_return_code;
-
-  if (!parse_cli_args(argc, argv))
-  {
-    deinit();
-    return m_return_code;
-  }
-
-  if (!finish_setup())
-  {
-    deinit();
-    return m_return_code;
-  }
 
   m_return_code = 0;
 
@@ -83,49 +74,8 @@ GameManager::run(int argc, char** argv)
 }
 
 bool
-GameManager::init(const char* arg0)
-{
-  if (SDL_Init(SDL_INIT_VIDEO))
-  {
-    std::cerr << "Could not init SDL: " << SDL_GetError() << std::endl;
-    return false;
-  }
-
-  if (!IMG_Init(IMG_INIT_PNG))
-  {
-    std::cerr << "Could not init SDL_image: " << IMG_GetError() << std::endl;
-    SDL_Quit();
-    return false;
-  }
-
-  if (TTF_Init())
-  {
-    std::cerr << "Could not init SDL_ttf: " << TTF_GetError() << std::endl;
-    IMG_Quit();
-    SDL_Quit();
-    return false;
-  }
-
-  if (!PHYSFS_init(arg0))
-  {
-    std::cerr << "Could not init PhysFS: " << FS::get_physfs_err() << std::endl;
-    TTF_Quit();
-    IMG_Quit();
-    SDL_Quit();
-    return false;
-  }
-
-  SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "2");
-
-  return true;
-}
-
-bool
 GameManager::parse_cli_args(int argc, char** argv)
 {
-  m_arg_data_folder = std::string(PHYSFS_getBaseDir()) + ".."
-                    + PHYSFS_getDirSeparator() + "data";
-
   for (int i = 1; i < argc; i++)
   {
     std::string arg(argv[i]);
@@ -176,8 +126,51 @@ GameManager::parse_cli_args(int argc, char** argv)
 }
 
 bool
-GameManager::finish_setup()
+GameManager::init(const char* arg0)
 {
+  if (SDL_Init(SDL_INIT_VIDEO))
+  {
+    std::cerr << "Could not init SDL: " << SDL_GetError() << std::endl;
+    return false;
+  }
+
+  if (!IMG_Init(IMG_INIT_PNG))
+  {
+    std::cerr << "Could not init SDL_image: " << IMG_GetError() << std::endl;
+    SDL_Quit();
+    return false;
+  }
+
+  if (TTF_Init())
+  {
+    std::cerr << "Could not init SDL_ttf: " << TTF_GetError() << std::endl;
+    IMG_Quit();
+    SDL_Quit();
+    return false;
+  }
+
+  if (!PHYSFS_init(arg0))
+  {
+    std::cerr << "Could not init PhysFS: " << FS::get_physfs_err() << std::endl;
+    TTF_Quit();
+    IMG_Quit();
+    SDL_Quit();
+    return false;
+  }
+
+  if (SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "2") == SDL_FALSE)
+  {
+    std::cerr << "Couldn't set SDL graphic quality: " << SDL_GetError()
+              << std::endl;
+  }
+
+  if (m_arg_data_folder.empty())
+  {
+    // None of the PhysFS functions below may error and/or return null
+    m_arg_data_folder = std::string(PHYSFS_getBaseDir()) + ".."
+                      + PHYSFS_getDirSeparator() + "data";
+  }
+
   auto base_dir = m_arg_data_folder.c_str();
 
 #if PHYSFS_VER_MAJOR > 2 || PHYSFS_VER_MAJOR == 2 && PHYSFS_VER_MINOR >= 1
@@ -196,20 +189,6 @@ GameManager::finish_setup()
   const char* user_dir = udir.c_str();
 #endif
 
-  if (!user_dir)
-  {
-    std::cerr << "Cannot get user dir, PhysFS error: " << FS::get_physfs_err()
-              << "\nThe game will most likely crash if this isn't expected - "
-              << "continuing anyways." << std::endl;
-  }
-
-  if (!PHYSFS_mount(user_dir, NULL, true))
-  {
-    std::cerr << "Couldn't mount user directory: " << FS::get_physfs_err()
-              << "\nThe game will most likely crash if this isn't expected - "
-              << "continuing anyways." << std::endl;
-  }
-
   if (!PHYSFS_mount(base_dir, NULL, true))
   {
     std::cerr << "Couldn't mount base directory: " << FS::get_physfs_err()
@@ -217,13 +196,25 @@ GameManager::finish_setup()
               << "continuing anyways." << std::endl;
   }
 
-  if (!PHYSFS_setWriteDir(user_dir))
+  if (!user_dir)
   {
-    std::cerr << "Couldn't set write directory: " << FS::get_physfs_err()
-              << "\nThe game will continue in read-only mode." << std::endl;
+    std::cerr << "Cannot get user data directory (Continuing read-only): "
+                << FS::get_physfs_err() << std::endl;
+  }
+  else if (!PHYSFS_mount(user_dir, NULL, true))
+  {
+    std::cerr << "Couldn't mount user directory '" << user_dir
+              << "' (continuing in read-only mode): " << FS::get_physfs_err()
+              << std::endl;
+  }
+  else if (!PHYSFS_setWriteDir(user_dir))
+  {
+    std::cerr << "Couldn't set write directory '" << user_dir
+              << "' (continuing in read-only mode): " << FS::get_physfs_err()
+              << FS::get_physfs_err() << std::endl;
   }
 
-  return generic_try([this] {
+  bool inited = generic_try([this] {
     this->m_window = std::make_unique<Window>();
     this->m_last_time = std::chrono::steady_clock::now();
 
@@ -232,74 +223,14 @@ GameManager::finish_setup()
     auto& controller = this->m_scene_manager.get_controller();
     this->m_scene_manager.push_scene(std::make_unique<STARTING_SCENE>(controller));
   });
-}
 
-bool
-GameManager::recover()
-{
-  /** @todo Tell the user a crash just happened and that the game may be
-      unstable; advise closing and re-opening the game ASAP */
-
-  std::cerr << "Recovering..." << std::endl;
-
-  std::cerr << "Attempting to run another loop for unique bugs" << std::endl;
-
-  if (generic_try([this] { this->single_loop(); }))
+  if (!inited)
   {
-    std::cerr << "Recover seems successful." << std::endl;
-    return true;
+    deinit();
+    return false;
   }
 
-  std::cerr << "Attempting to reset data..." << std::endl;
-
-  m_window = std::make_unique<Window>();
-  m_window->set_title("SuperTux Meltdown " STM_VERSION);
-  m_context.reset();
-
-  if (generic_try([this] { this->single_loop(); }))
-  {
-    std::cerr << "Recover seems successful." << std::endl;
-    return true;
-  }
-
-  /** @todo Try to recover by asking all scenes to backup their data and create
-      new scenes from that backup data. */
-
-  // Keep all non-destructive methods first, then try to recover by destructive
-  // means from the least destructive to the most.
-
-  if (m_scene_manager.get_scene_stack().size() > 1)
-  {
-    std::cerr << "Attempting to pop topmost scene..." << std::endl;
-
-    m_scene_manager.pop_scene();
-
-    if (generic_try([this] { this->single_loop(); }))
-    {
-      std::cerr << "Recover seems successful." << std::endl;
-      return true;
-    }
-  }
-  else
-  {
-    std::cerr << "Not trying to pop topmost scene, there is only 1 scene"
-              << std::endl;
-  }
-
-  std::cerr << "Attempting to remove all scenes..." << std::endl;
-
-  m_scene_manager.quit();
-  auto& ctrl = m_scene_manager.get_controller();
-  m_scene_manager.push_scene(std::make_unique<STARTING_SCENE>(ctrl));
-
-  if (generic_try([this] { this->single_loop(); }))
-  {
-    std::cerr << "Recover seems successful." << std::endl;
-    return true;
-  }
-
-  std::cerr << "Failed to recover." << std::endl;
-  return false;
+  return true;
 }
 
 bool
@@ -374,6 +305,74 @@ GameManager::deinit()
   SDL_Quit();
 
   return success;
+}
+
+bool
+GameManager::recover()
+{
+  /** @todo Tell the user a crash just happened and that the game may be
+      unstable; advise closing and re-opening the game ASAP */
+
+  std::cerr << "Recovering..." << std::endl;
+
+  std::cerr << "Attempting to run another loop for unique bugs" << std::endl;
+
+  if (generic_try([this] { this->single_loop(); }))
+  {
+    std::cerr << "Recover seems successful." << std::endl;
+    return true;
+  }
+
+  std::cerr << "Attempting to reset data..." << std::endl;
+
+  m_window = std::make_unique<Window>();
+  m_window->set_title("SuperTux Meltdown " STM_VERSION);
+  m_context.reset();
+
+  if (generic_try([this] { this->single_loop(); }))
+  {
+    std::cerr << "Recover seems successful." << std::endl;
+    return true;
+  }
+
+  /** @todo Try to recover by asking all scenes to backup their data and create
+      new scenes from that backup data. */
+
+  // Keep all non-destructive methods first, then try to recover by destructive
+  // means from the least destructive to the most.
+
+  if (m_scene_manager.get_scene_stack().size() > 1)
+  {
+    std::cerr << "Attempting to pop topmost scene..." << std::endl;
+
+    m_scene_manager.pop_scene();
+
+    if (generic_try([this] { this->single_loop(); }))
+    {
+      std::cerr << "Recover seems successful." << std::endl;
+      return true;
+    }
+  }
+  else
+  {
+    std::cerr << "Not trying to pop topmost scene, there is only 1 scene"
+              << std::endl;
+  }
+
+  std::cerr << "Attempting to remove all scenes..." << std::endl;
+
+  m_scene_manager.quit();
+  auto& ctrl = m_scene_manager.get_controller();
+  m_scene_manager.push_scene(std::make_unique<STARTING_SCENE>(ctrl));
+
+  if (generic_try([this] { this->single_loop(); }))
+  {
+    std::cerr << "Recover seems successful." << std::endl;
+    return true;
+  }
+
+  std::cerr << "Failed to recover." << std::endl;
+  return false;
 }
 
 // Since all calls to this function are within this compilation unit, there is
