@@ -4,6 +4,13 @@ set -e
 
 cd "$(dirname "$0")"/../..
 
+for cmd in cmake make wget; do
+  if ! command -v "$cmd" &> /dev/null; then
+    echo "Command '$cmd' missing; cannot run." >&2
+    exit 1
+  fi
+done
+
 mkdir -p build.appimage/
 cd build.appimage/
 

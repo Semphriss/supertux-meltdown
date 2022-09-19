@@ -4,6 +4,12 @@ set -e
 
 cd "$(dirname "$0")"/../..
 
+for cmd in git doxygen; do
+  if ! command -v "$cmd" &> /dev/null; then
+    echo "Command '$cmd' missing; cannot run." >&2
+  fi
+done
+
 VERSION="$(git describe --tags --always)"
 
 if ! echo "$VERSION" | grep -xiE "[a-z0-9\\._\\-]+" &> /dev/null; then

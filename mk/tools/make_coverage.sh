@@ -2,12 +2,14 @@
 
 set -e
 
-if ! command -v lcov &> /dev/null || ! command -v genhtml &> /dev/null; then
-  echo "lcov not found, not running script" >&2
-  exit 1
-fi
-
 cd "$(dirname "$0")"/../..
+
+for cmd in cmake make lcov genhtml; do
+  if ! command -v "$cmd" &> /dev/null; then
+    echo "Command '$cmd' missing; cannot run." >&2
+    exit 1
+  fi
+done
 
 mkdir -p build.cov
 rm -rf build.cov
