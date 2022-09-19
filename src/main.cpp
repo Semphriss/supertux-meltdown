@@ -14,9 +14,22 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <memory>
+
 #include "game/game_manager.hpp"
+
+#ifdef EMSCRIPTEN
+// unique_ptr allows lazy loading
+static std::unique_ptr<GameManager> g_game_manager = nullptr;
+#endif
 
 int main(int argc, char** argv)
 {
+#ifdef EMSCRIPTEN
+  // The GameManager must survive after main() returned
+  g_game_manager = std::make_unique<GameManager>();
+  return g_game_manager->run(argc, argv);
+#else
   return GameManager().run(argc, argv);
+#endif
 }
