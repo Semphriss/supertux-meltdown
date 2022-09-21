@@ -55,7 +55,7 @@ g_tests(const std::string& name, void (*func)())
   return tests;
 }
 
-int run_tests(int argc, char** argv)
+int run_tests(int argc, const char* const* argv)
 {
   std::string color_pass = "\033[32m",
               color_fail = "\033[31m",

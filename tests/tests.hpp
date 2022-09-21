@@ -28,7 +28,7 @@
 std::map<std::string, void(*)()>&
 g_tests(const std::string& name = "", void (*func)() = nullptr);
 
-int run_tests(int argc, char** argv);
+int run_tests(int argc, const char* const* argv);
 
 #define TEST(func)                                                             \
   void func();                                                                 \

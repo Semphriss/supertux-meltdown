@@ -61,7 +61,7 @@ GameManager::GameManager() :
 }
 
 int
-GameManager::run(int argc, char** argv)
+GameManager::run(int argc, const char* const* argv)
 {
   if (!parse_cli_args(argc, argv))
     return m_return_code;
@@ -87,7 +87,7 @@ GameManager::run(int argc, char** argv)
 }
 
 bool
-GameManager::parse_cli_args(int argc, char** argv)
+GameManager::parse_cli_args(int argc, const char* const* argv)
 {
   for (int i = 1; i < argc; i++)
   {

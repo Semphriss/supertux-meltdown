@@ -38,10 +38,10 @@ public:
   GameManager();
   ~GameManager() = default;
 
-  int run(int argc, char** argv);
+  int run(int argc, const char* const* argv);
 
 private:
-  bool parse_cli_args(int argc, char** argv);
+  bool parse_cli_args(int argc, const char* const* argv);
   bool init(const char* arg0);
   bool main_loop();
   void single_loop();
