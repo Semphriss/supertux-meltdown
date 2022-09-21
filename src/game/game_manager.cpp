@@ -69,23 +69,33 @@ GameManager::run(int argc, const char* const* argv)
   if (!init(argv[0]))
     return m_return_code;
 
-  m_return_code = 0;
-
   while (!main_loop())
-  {
     if (!recover())
-    {
-      m_return_code = 1;
       break;
-    }
-  }
 
-  if (!deinit() && m_return_code == 0)
-    m_return_code = 1;
+  deinit();
 
   return m_return_code;
 }
 
+/**
+ * Parses a null-terminated list of null-terminated strings, and sets the
+ * appropriate values in the GameManager.
+ *
+ * This function may set `m_return_code` to any value. If false is returned,
+ * this is the error code that should be returned.
+ *
+ * @param argc The number of non-null args in argv. This must be included and
+ *             valid even though @p argv is null-terminated.
+ * @param argv A null-terminated list of null-terminated strings, representing
+ *             the arguments. No arguments may be null except the last one,
+ *             which must be null. Arguments may be empty, but empty arguments
+ *             may caue an error.
+ *
+ * @returns true if the program may continue, false if it should quit. Since
+ *          this function does not require `init()`, there is no need to call
+ *          `deinit()` if this function returns false.
+ */
 bool
 GameManager::parse_cli_args(int argc, const char* const* argv)
 {
@@ -138,6 +148,25 @@ GameManager::parse_cli_args(int argc, const char* const* argv)
   return true;
 }
 
+/**
+ * Loads the libraries, setup sane configuration and prepare resources. CLI
+ * arguments should be parsed before calling this function. It may be unsafe to
+ * use any part other class before this function is called or until `deinit()`
+ * is called. It is unsafe to call this function again without first calling
+ * `deinit()`.
+ *
+ * This function may set `m_return_code` to any value. If false is returned,
+ * this is the error code that should be returned.
+ *
+ * @param arg0 The value of argv[0]. Necessary to load PhysFS.
+ *
+ * @returns true if initialization is successful, false if a problem happened.
+ *          Since a problem may happen at any stage of initialization, this
+ *          function takes care of deinitializing the libraries if any problem
+ *          happens. If true is returned, deinit() should be called to close
+ *          the libraries. If false is returned, the libraries that were open
+ *          will already have been re-closed, if applicable.
+ */
 bool
 GameManager::init(const char* arg0)
 {
@@ -246,9 +275,21 @@ GameManager::init(const char* arg0)
   return true;
 }
 
+/**
+ * Runs the main loop. Expects the resources to be available and the game
+ * configuration to be in place.
+ *
+ * @note    This function may return early, or perform a dummy "throw". This is
+ *          necessary with Emscripten. Currently, it uses only the latter, but
+ *          a future update may use the former, or neither.
+ * @returns true if the game finished running normally, false if a problem
+ *          happened.
+ */
 bool
 GameManager::main_loop()
 {
+  m_return_code = 0;
+
 #ifdef EMSCRIPTEN
   s_game_manager = this;
   emscripten_set_main_loop([] { GameManager::emscripten_loop(); }, 0, true);
@@ -261,6 +302,15 @@ GameManager::main_loop()
 #endif
 }
 
+/**
+ * Performs a single game loop.
+ *
+ * This takes care of handling the events, calculating the delta time, and
+ * rendering on the window, by using the appropriate functions on the
+ * `m_scene_manager`.
+ *
+ * This may be called independently from `main_loop()`.
+ */
 void
 GameManager::single_loop()
 {
@@ -301,6 +351,21 @@ GameManager::single_loop()
   SDL_Delay(10);
 }
 
+/**
+ * Closes the libraries.
+ *
+ * This must be called if and only if `init()` has been called, when resources
+ * have been deinitialized and the dependencies are no longer needed.
+ *
+ * This must be called before calling `init()` a second time.
+ *
+ * This function may set `m_return_code` to any value. If false is returned,
+ * this is the error code that should be returned.
+ *
+ * @returns true if deinitialization was successful, false otherwise. If
+ *          false, the program is probably in a bad state and should close as
+ *          soon as possible.
+ */
 bool
 GameManager::deinit()
 {
@@ -326,6 +391,21 @@ GameManager::deinit()
   return success;
 }
 
+/**
+ * Attempts to recover the game after a problem happened.
+ *
+ * This function is relevant only if `main_loop()` returned false.
+ *
+ * This function may set `m_return_code` to any value. If false is returned,
+ * this is the error code that should be returned.
+ *
+ * @note This function is allowed to perform any operation on any part of the
+ *       game. Although destructive means are kept as last resort, anything may
+ *       change when this function is called, including changes to the scene
+ *       stack.
+ *
+ * @returns true if recovery was successful and the game may be resumed.
+ */
 bool
 GameManager::recover()
 {
@@ -391,9 +471,22 @@ GameManager::recover()
   }
 
   std::cerr << "Failed to recover." << std::endl;
+  m_return_code = 1;
   return false;
 }
 
+/**
+ * Attempts to recover the game after a problem happened.
+ *
+ * This function is relevant only if `main_loop()` returned false.
+ *
+ * This function may set `m_return_code` to any value. If false is returned,
+ * this is the error code that should be returned.
+ *
+ * @param func The function
+ *
+ * @returns true if @p func ran successfully; false if an exception was thrown.
+ */
 // Since all calls to this function are within this compilation unit, there is
 // no need to expose the body to the header file.
 template<typename F>
@@ -427,3 +520,4 @@ GameManager::generic_try(F func)
 
   return true;
 }
+

@@ -24,6 +24,12 @@
 #include "video/drawing_context.hpp"
 #include "video/window.hpp"
 
+/**
+ * The GameManager class handles the general execution of the game, including
+ * the management of resources, the interactions with the environment, the
+ * management of optionc and configuration, as well as managing the lifetime of
+ * all game elements.
+ */
 class GameManager final
 {
 #ifdef EMSCRIPTEN
