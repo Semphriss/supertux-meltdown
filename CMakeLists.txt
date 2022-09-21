@@ -54,13 +54,13 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
   set(CMAKE_EXECUTABLE_SUFFIX .html)
 
   # PhysFS needs to be built manually
-  set(PHYSFS_EMSCRIPTEN ${CMAKE_BINARY_DIR}/physfs/buildbot/physfs-emscripten/)
+  set(PHYSFS_EMSCRIPTEN ${CMAKE_BINARY_DIR}/physfs/build.wasm/)
   if(NOT EXISTS ${PHYSFS_EMSCRIPTEN})
     message(FATAL_ERROR "Please run ../mk/emscripten/build-physfs.sh before "
                         "running CMake.")
   endif()
 
-  target_include_directories(stmeltdown PUBLIC ${PHYSFS_EMSCRIPTEN})
+  target_include_directories(stmeltdown PUBLIC ${CMAKE_BINARY_DIR}/physfs/src)
   target_link_libraries(stmeltdown PUBLIC ${PHYSFS_EMSCRIPTEN}/libphysfs.a)
 else()
   set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/mk/cmake)

@@ -11,13 +11,17 @@ for cmd in cmake make zip; do
   fi
 done
 
-for cmd in emcmake emmake; do
-  if ! command -v "$cmd" &> /dev/null; then
-    echo "No command '$cmd'; did you run `source path/to/emsdk/emsdk_env.sh`?" \
-          >&2
-    exit 1
+if ! command -v "emcmake" &> /dev/null; then
+  if [ ! -d emsdk.tmp ]; then
+    echo "Emscripten not found, downloading" >&2
+    git clone https://github.com/emscripten-core/emsdk.git emsdk.tmp
+    cd emsdk.tmp
+    ./emsdk install latest
+    ./emsdk activate latest
+     cd ..
   fi
-done
+  source emsdk.tmp/emsdk_env.sh
+fi
 
 mkdir -p build.wasm/
 cd build.wasm/
