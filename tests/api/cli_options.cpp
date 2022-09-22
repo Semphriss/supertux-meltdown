@@ -16,11 +16,55 @@
 
 #include "tests.hpp"
 
+#include <stdexcept>
+
+#include "SDL.h"
+
 #include "game/game_manager.hpp"
 
 #ifndef STM_VERSION
 #define STM_VERSION "unknown"
 #endif
+
+TEST(API__cli_options__none)
+{
+  LogScanner log;
+
+  SDL_Event e;
+  e.type = SDL_QUIT;
+  int push = SDL_PushEvent(&e);
+
+  switch (push)
+  {
+    case -1:
+      throw std::runtime_error("Couldn't push SDL_QUIT: "
+                               + std::string(SDL_GetError()));
+      break;
+
+    case 0:
+      throw std::runtime_error("SDL_QUIT was filtered");
+      break;
+
+    case 1:
+      break;
+
+    default:
+      throw std::runtime_error("Invalid return code from SDL_PushEvent:"
+                               + std::to_string(push));
+      break;
+  }
+
+  const char* const args[] = {
+    arg0,
+    nullptr
+  };
+
+  int code = GameManager().run(sizeof(args) / sizeof(const char*) - 1, args);
+
+  EXPECT_EQ(code, 0);
+  EXPECT(log.get_out().str().empty());
+  EXPECT(log.get_err().str().empty());
+}
 
 TEST(API__cli_options__help)
 {
