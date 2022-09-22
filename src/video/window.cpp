@@ -16,7 +16,7 @@
 
 #include "video/window.hpp"
 
-#include <iostream>
+#include "util/log.hpp"
 
 Window::Window() :
   m_sdl_window(SDL_CreateWindow("", SDL_WINDOWPOS_UNDEFINED,
@@ -55,9 +55,10 @@ Window::get_opacity() const
   }
   return opacity;
 #else
-  std::cerr << "Cannot get Window opacity because it requires SDL >= 2.0.5"
-            << " and the compiled version is " << SDL_MAJOR_VERSION << "."
-            << SDL_MINOR_VERSION << "." << SDL_PATCHLEVEL << std::endl;
+  log_warning << "Cannot get Window opacity because it requires SDL >= 2.0.5"
+              << " and the compiled version is " << SDL_MAJOR_VERSION << "."
+              << SDL_MINOR_VERSION << "." << SDL_PATCHLEVEL << std::endl;
+  return 1.0f;
 #endif
 }
 
@@ -132,9 +133,9 @@ Window::set_opacity(float opacity)
     throw std::runtime_error("Could not set window opacity " + error);
   }
 #else
-  std::cerr << "Cannot set Window opacity because it requires SDL >= 2.0.5"
-            << " and the compiled version is " << SDL_MAJOR_VERSION << "."
-            << SDL_MINOR_VERSION << "." << SDL_PATCHLEVEL << std::endl;
+  log_warning << "Cannot set Window opacity because it requires SDL >= 2.0.5"
+              << " and the compiled version is " << SDL_MAJOR_VERSION << "."
+              << SDL_MINOR_VERSION << "." << SDL_PATCHLEVEL << std::endl;
 #endif
 }
 
@@ -153,9 +154,9 @@ Window::set_resizable(bool resizable)
 #if SDL_VERSION_ATLEAST(2, 0, 5)
   SDL_SetWindowResizable(m_sdl_window, resizable ? SDL_TRUE : SDL_FALSE);
 #else
-  std::cerr << "Cannot set Window resizable because it requires SDL >= 2.0.5"
-            << " and the compiled version is " << SDL_MAJOR_VERSION << "."
-            << SDL_MINOR_VERSION << "." << SDL_PATCHLEVEL << std::endl;
+  log_warning << "Cannot set Window resizable because it requires SDL >= 2.0.5"
+              << " and the compiled version is " << SDL_MAJOR_VERSION << "."
+              << SDL_MINOR_VERSION << "." << SDL_PATCHLEVEL << std::endl;
 #endif
 }
 

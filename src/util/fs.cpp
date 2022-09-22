@@ -17,10 +17,11 @@
 #include "util/fs.hpp"
 
 #include <cstring>
-#include <iostream>
 #include <stdexcept>
 
 #include "physfs.h"
+
+#include "util/log.hpp"
 
 SDL_RWops*
 FS::get_rwops(const std::string& file, OP operation)
@@ -58,8 +59,11 @@ FS::get_rwops(const std::string& file, OP operation)
 
     if (!success)
     {
-      std::cerr << "Problem when seeking in file '" << ops->hidden.unknown.data2
-                << "': " << get_physfs_err() << std::endl;
+      // It can't be determined here whether or not the file read problem is an
+      // error, a warning or an expected problem, so use the loewst level and
+      // let the other parts of the code detect and report problems
+      log_info << "Problem when seeking in file '" << ops->hidden.unknown.data2
+               << "': " << get_physfs_err() << std::endl;
       return static_cast<Sint64>(-1);
     }
 
@@ -75,9 +79,10 @@ FS::get_rwops(const std::string& file, OP operation)
 
     if (read < 0)
     {
-      std::cerr << "Problem when reading from file '"
-                << ops->hidden.unknown.data2 << "': " << get_physfs_err()
-                << std::endl;
+      // See note in ops->seek
+      log_info << "Problem when reading from file '"
+               << ops->hidden.unknown.data2 << "': " << get_physfs_err()
+               << std::endl;
       return static_cast<size_t>(0);
     }
 
@@ -87,9 +92,10 @@ FS::get_rwops(const std::string& file, OP operation)
 
     if (read < 0)
     {
-      std::cerr << "Problem when reading from file '"
-                << ops->hidden.unknown.data2 << "': " << get_physfs_err()
-                << std::endl;
+      // See note in ops->seek
+      log_info << "Problem when reading from file '"
+               << ops->hidden.unknown.data2 << "': " << get_physfs_err()
+               << std::endl;
       return static_cast<size_t>(0);
     }
 
@@ -107,8 +113,9 @@ FS::get_rwops(const std::string& file, OP operation)
 
     if (written < 0)
     {
-      std::cerr << "Problem when writing to file: " << get_physfs_err()
-                << std::endl;
+      // See note in ops->seek
+      log_info << "Problem when writing to file: " << get_physfs_err()
+               << std::endl;
       return static_cast<size_t>(0);
     }
 
@@ -118,8 +125,9 @@ FS::get_rwops(const std::string& file, OP operation)
 
     if (written < 0)
     {
-      std::cerr << "Problem when writing to file: " << get_physfs_err()
-                << std::endl;
+      // See note in ops->seek
+      log_info << "Problem when writing to file: " << get_physfs_err()
+               << std::endl;
       return static_cast<size_t>(0);
     }
 
@@ -141,8 +149,9 @@ FS::get_rwops(const std::string& file, OP operation)
     }
     else
     {
-      std::cerr << "Problem when writing to file: " << get_physfs_err()
-                << std::endl;
+      // See note in ops->seek
+      log_info << "Problem when writing to file: " << get_physfs_err()
+               << std::endl;
       return -1;
     }
   };

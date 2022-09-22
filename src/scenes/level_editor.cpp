@@ -16,7 +16,7 @@
 
 #include "scenes/level_editor.hpp"
 
-#include <iostream>
+#include "util/log.hpp"
 
 LevelEditor::LevelEditor(SceneController& scene_controller) :
   Scene(scene_controller),
@@ -43,7 +43,7 @@ LevelEditor::event(const SDL_Event& event)
             }
             catch (const std::exception& e)
             {
-              std::cerr << e.what() << std::endl;
+              log_error << e.what() << std::endl;
             }
             break;
 
@@ -54,7 +54,7 @@ LevelEditor::event(const SDL_Event& event)
             }
             catch (const std::exception& e)
             {
-              std::cerr << e.what() << std::endl;
+              log_error << e.what() << std::endl;
             }
             break;
         }

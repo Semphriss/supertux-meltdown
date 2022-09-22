@@ -31,6 +31,7 @@
 #include "tests.hpp"
 #include "scenes/level_editor.hpp"
 #include "util/fs.hpp"
+#include "util/log.hpp"
 #include "video/drawing_context.hpp"
 #include "video/window.hpp"
 
@@ -107,7 +108,7 @@ GameManager::parse_cli_args(int argc, const char* const* argv)
     {
       if (++i >= argc)
       {
-        std::cerr << "Missing path after '--data'" << std::endl;
+        log_fatal << "Missing path after '--data'" << std::endl;
         m_return_code = 1;
         return false;
       }
@@ -116,13 +117,13 @@ GameManager::parse_cli_args(int argc, const char* const* argv)
     }
     else if (arg == "-h" || arg == "--help")
     {
-      std::cout << "Usage: stmeltdown [OPTIONS...]\n\n"
-                << "Options:\n"
-                << "  -d, --data [PATH]   Change the data folder\n"
-                << "  -h, --help          Show this help text and exit\n"
-                << "  -t, --test          Run the test suite\n"
-                << "  -v, --version       Show version info and exit\n"
-                << std::flush;
+      console << "Usage: stmeltdown [OPTIONS...]\n\n"
+              << "Options:\n"
+              << "  -d, --data [PATH]   Change the data folder\n"
+              << "  -h, --help          Show this help text and exit\n"
+              << "  -t, --test          Run the test suite\n"
+              << "  -v, --version       Show version info and exit\n"
+              << std::flush;
       m_return_code = 0;
       return false;
     }
@@ -133,13 +134,13 @@ GameManager::parse_cli_args(int argc, const char* const* argv)
     }
     else if (arg == "-v" || arg == "--version")
     {
-      std::cout << "stmeltdown " STM_VERSION << std::endl;
+      console << "stmeltdown " STM_VERSION << std::endl;
       m_return_code = 0;
       return false;
     }
     else
     {
-      std::cerr << "Unknown option '" << arg << "'" << std::endl;
+      log_fatal << "Unknown option '" << arg << "'" << std::endl;
       m_return_code = 1;
       return false;
     }
@@ -172,20 +173,20 @@ GameManager::init(const char* arg0)
 {
   if (SDL_Init(SDL_INIT_VIDEO))
   {
-    std::cerr << "Could not init SDL: " << SDL_GetError() << std::endl;
+    log_fatal << "Could not init SDL: " << SDL_GetError() << std::endl;
     return false;
   }
 
   if (!IMG_Init(IMG_INIT_PNG))
   {
-    std::cerr << "Could not init SDL_image: " << IMG_GetError() << std::endl;
+    log_fatal << "Could not init SDL_image: " << IMG_GetError() << std::endl;
     SDL_Quit();
     return false;
   }
 
   if (TTF_Init())
   {
-    std::cerr << "Could not init SDL_ttf: " << TTF_GetError() << std::endl;
+    log_fatal << "Could not init SDL_ttf: " << TTF_GetError() << std::endl;
     IMG_Quit();
     SDL_Quit();
     return false;
@@ -193,7 +194,7 @@ GameManager::init(const char* arg0)
 
   if (!PHYSFS_init(arg0))
   {
-    std::cerr << "Could not init PhysFS: " << FS::get_physfs_err() << std::endl;
+    log_fatal << "Could not init PhysFS: " << FS::get_physfs_err() << std::endl;
     TTF_Quit();
     IMG_Quit();
     SDL_Quit();
@@ -202,7 +203,7 @@ GameManager::init(const char* arg0)
 
   if (SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "2") == SDL_FALSE)
   {
-    std::cerr << "Couldn't set SDL graphic quality: " << SDL_GetError()
+    log_fatal << "Couldn't set SDL graphic quality: " << SDL_GetError()
               << std::endl;
   }
 
@@ -218,12 +219,13 @@ GameManager::init(const char* arg0)
 #if PHYSFS_VER_MAJOR > 2 || PHYSFS_VER_MAJOR == 2 && PHYSFS_VER_MINOR >= 1
   const char* user_dir = PHYSFS_getPrefDir("SuperTux", "stmeltdown");
 #else
-  std::cerr << "SuperTux Meltdown was compiled against an old version of PhysFS"
-               " and will use `~/.stmeltdown` as default userdir." << std::endl;
+  log_warning << "SuperTux Meltdown was compiled against an old version of "
+              << "PhysFS and will use `~/.stmeltdown` as default userdir."
+              << std::endl;
 
   if (!PHYSFS_setWriteDir(PHYSFS_getUserDir()) || !PHYSFS_mkdir(".stmeltdown"))
   {
-    std::cerr << "Couldn't create user directory: " << FS::get_physfs_err()
+    log_error << "Couldn't create user directory: " << FS::get_physfs_err()
               << " (continuing anyways)" << std::endl;
   }
 
@@ -233,25 +235,25 @@ GameManager::init(const char* arg0)
 
   if (!PHYSFS_mount(base_dir, NULL, true))
   {
-    std::cerr << "Couldn't mount base directory: " << FS::get_physfs_err()
+    log_error << "Couldn't mount base directory: " << FS::get_physfs_err()
               << "\nThe game will most likely crash if this isn't expected - "
               << "continuing anyways." << std::endl;
   }
 
   if (!user_dir)
   {
-    std::cerr << "Cannot get user data directory (Continuing read-only): "
+    log_error << "Cannot get user data directory (Continuing read-only): "
                 << FS::get_physfs_err() << std::endl;
   }
   else if (!PHYSFS_mount(user_dir, NULL, true))
   {
-    std::cerr << "Couldn't mount user directory '" << user_dir
+    log_error << "Couldn't mount user directory '" << user_dir
               << "' (continuing in read-only mode): " << FS::get_physfs_err()
               << std::endl;
   }
   else if (!PHYSFS_setWriteDir(user_dir))
   {
-    std::cerr << "Couldn't set write directory '" << user_dir
+    log_error << "Couldn't set write directory '" << user_dir
               << "' (continuing in read-only mode): " << FS::get_physfs_err()
               << FS::get_physfs_err() << std::endl;
   }
@@ -268,6 +270,7 @@ GameManager::init(const char* arg0)
 
   if (!inited)
   {
+    log_fatal << "Couldn't load resources" << std::endl;
     deinit();
     return false;
   }
@@ -376,7 +379,7 @@ GameManager::deinit()
 
   if (!PHYSFS_deinit())
   {
-    std::cerr << "Problem when closing PhysFS: " << FS::get_physfs_err()
+    log_error << "Problem when closing PhysFS: " << FS::get_physfs_err()
               << std::endl;
     m_return_code = 1;
 
@@ -412,17 +415,17 @@ GameManager::recover()
   /** @todo Tell the user a crash just happened and that the game may be
       unstable; advise closing and re-opening the game ASAP */
 
-  std::cerr << "Recovering..." << std::endl;
+  log_info << "Recovering..." << std::endl;
 
-  std::cerr << "Attempting to run another loop for unique bugs" << std::endl;
+  log_debug << "Attempting to run another loop for unique bugs" << std::endl;
 
   if (generic_try([this] { this->single_loop(); }))
   {
-    std::cerr << "Recover seems successful." << std::endl;
+    log_info << "Recover seems successful." << std::endl;
     return true;
   }
 
-  std::cerr << "Attempting to reset data..." << std::endl;
+  log_debug << "Attempting to reset data..." << std::endl;
 
   m_window = std::make_unique<Window>();
   m_window->set_title("SuperTux Meltdown " STM_VERSION);
@@ -430,7 +433,7 @@ GameManager::recover()
 
   if (generic_try([this] { this->single_loop(); }))
   {
-    std::cerr << "Recover seems successful." << std::endl;
+    log_info << "Recover seems successful." << std::endl;
     return true;
   }
 
@@ -442,23 +445,23 @@ GameManager::recover()
 
   if (m_scene_manager.get_scene_stack().size() > 1)
   {
-    std::cerr << "Attempting to pop topmost scene..." << std::endl;
+    log_debug << "Attempting to pop topmost scene..." << std::endl;
 
     m_scene_manager.pop_scene();
 
     if (generic_try([this] { this->single_loop(); }))
     {
-      std::cerr << "Recover seems successful." << std::endl;
+      log_info << "Recover seems successful." << std::endl;
       return true;
     }
   }
   else
   {
-    std::cerr << "Not trying to pop topmost scene, there is only 1 scene"
+    log_debug << "Not trying to pop topmost scene, there is only 1 scene"
               << std::endl;
   }
 
-  std::cerr << "Attempting to remove all scenes..." << std::endl;
+  log_debug << "Attempting to remove all scenes..." << std::endl;
 
   m_scene_manager.quit();
   auto& ctrl = m_scene_manager.get_controller();
@@ -466,11 +469,11 @@ GameManager::recover()
 
   if (generic_try([this] { this->single_loop(); }))
   {
-    std::cerr << "Recover seems successful." << std::endl;
+    log_info << "Recover seems successful." << std::endl;
     return true;
   }
 
-  std::cerr << "Failed to recover." << std::endl;
+  log_fatal << "Failed to recover." << std::endl;
   m_return_code = 1;
   return false;
 }
@@ -499,22 +502,22 @@ GameManager::generic_try(F func)
   }
   catch(const std::exception& e)
   {
-    std::cerr << "Fatal error: " << e.what() << std::endl;
+    log_error << "Uncaught error: " << e.what() << std::endl;
     return false;
   }
   catch(const std::string& s)
   {
-    std::cerr << "Fatal error: " << s << std::endl;
+    log_error << "Uncaught error: " << s << std::endl;
     return false;
   }
   catch(const char* s)
   {
-    std::cerr << "Fatal error: " << s << std::endl;
+    log_error << "Uncaught error: " << s << std::endl;
     return false;
   }
   catch(...)
   {
-    std::cerr << "Fatal error (unknown type)" << std::endl;
+    log_error << "Uncaught error (unknown type)" << std::endl;
     return false;
   }
 
