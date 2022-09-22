@@ -25,6 +25,8 @@ public:
   EditorCamera();
 
   void event(const SDL_Event& event);
+  void update(float dt_sec);
+
   void apply_transform(DrawingContext& context) const;
   Vector apply_transform(const Vector& vector) const;
 
@@ -32,6 +34,8 @@ public:
   float get_zoom() const;
 
 private:
+  Vector m_current_pos;
+  float m_current_zoom;
   Vector m_pos;
   float m_zoom;
   bool m_moving;

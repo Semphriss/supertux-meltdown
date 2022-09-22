@@ -16,9 +16,17 @@
 
 #include "editor/editor_camera.hpp"
 
+#include <cmath>
+
 #include "util/math.hpp"
 
+// Will move as 1/(n^t) (invert exponential). t is time in seconds, this is n.
+// 1 is no movement at all. Infinity is instantaneous. <1 is bad.
+static const float CAM_EXPONENT = 8192.0f;
+
 EditorCamera::EditorCamera() :
+  m_current_pos(0.0f, 0.0f),
+  m_current_zoom(1.0f),
   m_pos(0.0f, 0.0f),
   m_zoom(1.0f),
   m_moving(false),
@@ -78,6 +86,28 @@ EditorCamera::event(const SDL_Event& event)
 }
 
 void
+EditorCamera::update(float dt_sec)
+{
+  // The advantage of using an invert exponential equation is that the remaining
+  // portion of the movement can be known without knowing the initial value.
+  //
+  // For example, if CAM_EXPONENT is 2, the time elapsed is 1 second, the
+  // initial value is 1 and the target value is 0, no matter if the current time
+  // is 0, 1, 2.5 or 392.58374, the new value can be obtained simply by dividing
+  // the current value by two.
+  //
+  // More generally, the new value is the current value, divided by CAM_EXPONENT
+  // to the power of the elapsed time in seconds.
+  //
+  // The code implements that concept, and adds the target point into the mix.
+
+  m_current_pos = (m_current_pos - m_pos) / std::pow(CAM_EXPONENT, dt_sec)
+                + m_pos;
+  m_current_zoom = (m_current_zoom - m_zoom) / std::pow(CAM_EXPONENT, dt_sec)
+                 + m_zoom;
+}
+
+void
 EditorCamera::apply_transform(DrawingContext& context) const
 {
   context.get_transform().move(get_pos());
@@ -87,17 +117,18 @@ EditorCamera::apply_transform(DrawingContext& context) const
 Vector
 EditorCamera::apply_transform(const Vector& vector) const
 {
-  return Vector((vector.x - m_pos.x) / m_zoom, (vector.y - m_pos.y) / m_zoom);
+  return Vector((vector.x - get_pos().x) / get_zoom(),
+                (vector.y - get_pos().y) / get_zoom());
 }
 
 const Vector&
 EditorCamera::get_pos() const
 {
-  return m_pos;
+  return m_current_pos;
 }
 
 float
 EditorCamera::get_zoom() const
 {
-  return m_zoom;
+  return m_current_zoom;
 }

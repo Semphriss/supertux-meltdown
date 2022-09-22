@@ -98,6 +98,7 @@ EditorTilemap::event(const SDL_Event& event)
 void
 EditorTilemap::update(float dt_sec)
 {
+  m_camera.update(dt_sec);
 }
 
 void
