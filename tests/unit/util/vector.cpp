@@ -23,7 +23,7 @@
 
 #include "util/size.hpp"
 
-TEST(Vector__ctor)
+TEST(UNIT__Vector__ctor)
 {
   Vector v1;
   EXPECT_FLT_EQ(v1.x, 0.0f);
@@ -38,7 +38,7 @@ TEST(Vector__ctor)
   EXPECT_FLT_EQ(v3.y, -8.75e2f);
 }
 
-TEST(Vector__size)
+TEST(UNIT__Vector__size)
 {
   EXPECT_FLT_EQ(Vector().size().w, Size().w);
   EXPECT_FLT_EQ(Vector().size().h, Size().h);
@@ -48,13 +48,13 @@ TEST(Vector__size)
                 Size(532.92f, 7537.765e-4f).h);
 }
 
-TEST(Vector__length)
+TEST(UNIT__Vector__length)
 {
   EXPECT_FLT_EQ(Vector().length(), 0.0f);
   EXPECT_FLT_EQ(Vector(532.92f, 34.1f).length(), 534.0098654519f);
 }
 
-TEST(Vector__floor)
+TEST(UNIT__Vector__floor)
 {
   EXPECT_FLT_EQ(Vector().floor().x, Vector().x);
   EXPECT_FLT_EQ(Vector().floor().y, Vector().y);
@@ -66,7 +66,7 @@ TEST(Vector__floor)
   EXPECT_FLT_EQ(Vector(-5.0f, 3.0f).floor().y, Vector(-5.0f, 3.0f).y);
 }
 
-TEST(Vector__round)
+TEST(UNIT__Vector__round)
 {
   EXPECT_FLT_EQ(Vector().round().x, Vector().x);
   EXPECT_FLT_EQ(Vector().round().y, Vector().y);
@@ -78,7 +78,7 @@ TEST(Vector__round)
   EXPECT_FLT_EQ(Vector(-5.0f, 3.0f).floor().y, Vector(-5.0f, 3.0f).y);
 }
 
-TEST(Vector__ceil)
+TEST(UNIT__Vector__ceil)
 {
   EXPECT_FLT_EQ(Vector().ceil().x, Vector().x);
   EXPECT_FLT_EQ(Vector().ceil().y, Vector().y);
@@ -90,7 +90,7 @@ TEST(Vector__ceil)
   EXPECT_FLT_EQ(Vector(-5.0f, 3.0f).ceil().y, Vector(-5.0f, 3.0f).y);
 }
 
-TEST(Vector__operator_negate)
+TEST(UNIT__Vector__operator_negate)
 {
   Vector v1(0.0f, 0.0f);
   EXPECT_FLT_EQ((-v1).x, -0.0f);
@@ -105,7 +105,7 @@ TEST(Vector__operator_negate)
   EXPECT_FLT_EQ((-v3).y, 1e-10f);
 }
 
-TEST(Vector__operator_plus)
+TEST(UNIT__Vector__operator_plus)
 {
   Vector v1(143.0f, -756.0f);
   Vector v2(12.0f, 54.0f);
@@ -114,7 +114,7 @@ TEST(Vector__operator_plus)
   EXPECT_FLT_EQ((v1 + v2).y, -756.0f + 54.0f);
 }
 
-TEST(Vector__operator_plus_equals)
+TEST(UNIT__Vector__operator_plus_equals)
 {
   Vector v1(143.0f, -756.0f);
   v1 += Vector(12.0f, 54.0f);
@@ -123,7 +123,7 @@ TEST(Vector__operator_plus_equals)
   EXPECT_FLT_EQ(v1.y, -756.0f + 54.0f);
 }
 
-TEST(Vector__operator_minus)
+TEST(UNIT__Vector__operator_minus)
 {
   Vector v1(143.0f, -756.0f);
   Vector v2(12.0f, 54.0f);
@@ -132,7 +132,7 @@ TEST(Vector__operator_minus)
   EXPECT_FLT_EQ((v1 - v2).y, -756.0f - 54.0f);
 }
 
-TEST(Vector__operator_minus_equals)
+TEST(UNIT__Vector__operator_minus_equals)
 {
   Vector v1(143.0f, -756.0f);
   v1 -= Vector(12.0f, 54.0f);
@@ -141,7 +141,7 @@ TEST(Vector__operator_minus_equals)
   EXPECT_FLT_EQ(v1.y, -756.0f - 54.0f);
 }
 
-TEST(Vector__operator_times__vector)
+TEST(UNIT__Vector__operator_times__vector)
 {
   Vector v1(143.0f, -756.0f);
   Vector v2(12.0f, 54.0f);
@@ -150,7 +150,7 @@ TEST(Vector__operator_times__vector)
   EXPECT_FLT_EQ((v1 * v2).y, -756.0f * 54.0f);
 }
 
-TEST(Vector__operator_times__float)
+TEST(UNIT__Vector__operator_times__float)
 {
   Vector v1(143.0f, -756.0f);
 
@@ -158,7 +158,7 @@ TEST(Vector__operator_times__float)
   EXPECT_FLT_EQ((v1 * -27.0f).y, -756.0f * -27.0f);
 }
 
-TEST(Vector__operator_times_equals__vector)
+TEST(UNIT__Vector__operator_times_equals__vector)
 {
   Vector v1(143.0f, -756.0f);
   v1 *= Vector(12.0f, 54.0f);
@@ -167,7 +167,7 @@ TEST(Vector__operator_times_equals__vector)
   EXPECT_FLT_EQ(v1.y, -756.0f * 54.0f);
 }
 
-TEST(Vector__operator_times_equals__float)
+TEST(UNIT__Vector__operator_times_equals__float)
 {
   Vector v1(143.0f, -756.0f);
   v1 *= -27.0f;
@@ -176,7 +176,7 @@ TEST(Vector__operator_times_equals__float)
   EXPECT_FLT_EQ(v1.y, -756.0f * -27.0f);
 }
 
-TEST(Vector__operator_divide__vector)
+TEST(UNIT__Vector__operator_divide__vector)
 {
   Vector v1(143.0f, -756.0f);
   Vector v2(12.0f, 54.0f);
@@ -185,7 +185,7 @@ TEST(Vector__operator_divide__vector)
   EXPECT_FLT_EQ((v1 / v2).y, -756.0f / 54.0f);
 }
 
-TEST(Vector__operator_divide__float)
+TEST(UNIT__Vector__operator_divide__float)
 {
   Vector v1(143.0f, -756.0f);
 
@@ -193,7 +193,7 @@ TEST(Vector__operator_divide__float)
   EXPECT_FLT_EQ((v1 / -27.0f).y, -756.0f / -27.0f);
 }
 
-TEST(Vector__operator_divide_equals__vector)
+TEST(UNIT__Vector__operator_divide_equals__vector)
 {
   Vector v1(143.0f, -756.0f);
   v1 /= Vector(12.0f, 54.0f);
@@ -202,7 +202,7 @@ TEST(Vector__operator_divide_equals__vector)
   EXPECT_FLT_EQ(v1.y, -756.0f / 54.0f);
 }
 
-TEST(Vector__operator_divide_equals__float)
+TEST(UNIT__Vector__operator_divide_equals__float)
 {
   Vector v1(143.0f, -756.0f);
   v1 /= -27.0f;
@@ -211,7 +211,7 @@ TEST(Vector__operator_divide_equals__float)
   EXPECT_FLT_EQ(v1.y, -756.0f / -27.0f);
 }
 
-TEST(Vector__operator_modulo__vector)
+TEST(UNIT__Vector__operator_modulo__vector)
 {
   Vector v1(143.0f, -756.0f);
   Vector v2(12.0f, 54.0f);
@@ -220,7 +220,7 @@ TEST(Vector__operator_modulo__vector)
   EXPECT_FLT_EQ((v1 % v2).y, fmodf(-756.0f, 54.0f));
 }
 
-TEST(Vector__operator_modulo__float)
+TEST(UNIT__Vector__operator_modulo__float)
 {
   Vector v1(143.0f, -756.0f);
 
@@ -228,7 +228,7 @@ TEST(Vector__operator_modulo__float)
   EXPECT_FLT_EQ((v1 % -27.0f).y, fmodf(-756.0f, -27.0f));
 }
 
-TEST(Vector__operator_modulo_equals__vector)
+TEST(UNIT__Vector__operator_modulo_equals__vector)
 {
   // If anybody thinks this test suite is useless because the functions are
   // "too simple" to be prone to mistakes, know that at the moment of writing
@@ -248,7 +248,7 @@ TEST(Vector__operator_modulo_equals__vector)
   EXPECT_FLT_EQ(v1.y, fmodf(-756.0f, 54.0f));
 }
 
-TEST(Vector__operator_modulo_equals__float)
+TEST(UNIT__Vector__operator_modulo_equals__float)
 {
   Vector v1(143.0f, -756.0f);
   v1 %= -27.0f;
@@ -257,7 +257,7 @@ TEST(Vector__operator_modulo_equals__float)
   EXPECT_FLT_EQ(v1.y, fmodf(-756.0f, -27.0f));
 }
 
-TEST(Vector__operator_equals)
+TEST(UNIT__Vector__operator_equals)
 {
   EXPECT(Vector() == Vector());
   EXPECT(Vector() == Vector(0.0f, 0.0f));
@@ -266,7 +266,7 @@ TEST(Vector__operator_equals)
   EXPECT(!(Vector(2.0f, 1.0f) == Vector(1.0f, 1.0f)));
 }
 
-TEST(Vector__operator_not_equals)
+TEST(UNIT__Vector__operator_not_equals)
 {
   EXPECT(!(Vector() != Vector()));
   EXPECT(!(Vector() != Vector(0.0f, 0.0f)));
@@ -275,7 +275,7 @@ TEST(Vector__operator_not_equals)
   EXPECT((Vector(2.0f, 1.0f) != Vector(1.0f, 1.0f)));
 }
 
-TEST(Vector__operator_printstream)
+TEST(UNIT__Vector__operator_printstream)
 {
   // There is no guarantee regarding what it will print, only that it won't
   // throw.

@@ -23,7 +23,7 @@
 
 #include "util/vector.hpp"
 
-TEST(Size__ctor)
+TEST(UNIT__Size__ctor)
 {
   Size s1;
   EXPECT_FLT_EQ(s1.w, 0.0f);
@@ -38,7 +38,7 @@ TEST(Size__ctor)
   EXPECT_FLT_EQ(s3.h, -8.75e2f);
 }
 
-TEST(Size__vector)
+TEST(UNIT__Size__vector)
 {
   EXPECT_FLT_EQ(Size().vector().x, Vector().x);
   EXPECT_FLT_EQ(Size().vector().y, Vector().y);
@@ -48,13 +48,13 @@ TEST(Size__vector)
                 Vector(532.92f, 7537.765e-4f).y);
 }
 
-TEST(Size__length)
+TEST(UNIT__Size__length)
 {
   EXPECT_FLT_EQ(Size().length(), 0.0f);
   EXPECT_FLT_EQ(Size(532.92f, 34.1f).length(), 534.0098654519f);
 }
 
-TEST(Size__floor)
+TEST(UNIT__Size__floor)
 {
   EXPECT_FLT_EQ(Size().floor().w, Size().w);
   EXPECT_FLT_EQ(Size().floor().h, Size().h);
@@ -66,7 +66,7 @@ TEST(Size__floor)
   EXPECT_FLT_EQ(Size(-5.0f, 3.0f).floor().h, Size(-5.0f, 3.0f).h);
 }
 
-TEST(Size__round)
+TEST(UNIT__Size__round)
 {
   EXPECT_FLT_EQ(Size().round().w, Size().w);
   EXPECT_FLT_EQ(Size().round().h, Size().h);
@@ -78,7 +78,7 @@ TEST(Size__round)
   EXPECT_FLT_EQ(Size(-5.0f, 3.0f).floor().h, Size(-5.0f, 3.0f).h);
 }
 
-TEST(Size__ceil)
+TEST(UNIT__Size__ceil)
 {
   EXPECT_FLT_EQ(Size().ceil().w, Size().w);
   EXPECT_FLT_EQ(Size().ceil().h, Size().h);
@@ -90,7 +90,7 @@ TEST(Size__ceil)
   EXPECT_FLT_EQ(Size(-5.0f, 3.0f).ceil().h, Size(-5.0f, 3.0f).h);
 }
 
-TEST(Size__operator_negate)
+TEST(UNIT__Size__operator_negate)
 {
   Size s1(0.0f, 0.0f);
   EXPECT_FLT_EQ((-s1).w, -0.0f);
@@ -105,7 +105,7 @@ TEST(Size__operator_negate)
   EXPECT_FLT_EQ((-s3).h, 1e-10f);
 }
 
-TEST(Size__operator_plus)
+TEST(UNIT__Size__operator_plus)
 {
   Size s1(143.0f, -756.0f);
   Size s2(12.0f, 54.0f);
@@ -114,7 +114,7 @@ TEST(Size__operator_plus)
   EXPECT_FLT_EQ((s1 + s2).h, -756.0f + 54.0f);
 }
 
-TEST(Size__operator_plus_equals)
+TEST(UNIT__Size__operator_plus_equals)
 {
   Size s1(143.0f, -756.0f);
   s1 += Size(12.0f, 54.0f);
@@ -123,7 +123,7 @@ TEST(Size__operator_plus_equals)
   EXPECT_FLT_EQ(s1.h, -756.0f + 54.0f);
 }
 
-TEST(Size__operator_minus)
+TEST(UNIT__Size__operator_minus)
 {
   Size s1(143.0f, -756.0f);
   Size s2(12.0f, 54.0f);
@@ -132,7 +132,7 @@ TEST(Size__operator_minus)
   EXPECT_FLT_EQ((s1 - s2).h, -756.0f - 54.0f);
 }
 
-TEST(Size__operator_minus_equals)
+TEST(UNIT__Size__operator_minus_equals)
 {
   Size s1(143.0f, -756.0f);
   s1 -= Size(12.0f, 54.0f);
@@ -141,7 +141,7 @@ TEST(Size__operator_minus_equals)
   EXPECT_FLT_EQ(s1.h, -756.0f - 54.0f);
 }
 
-TEST(Size__operator_times__size)
+TEST(UNIT__Size__operator_times__size)
 {
   Size s1(143.0f, -756.0f);
   Size s2(12.0f, 54.0f);
@@ -150,7 +150,7 @@ TEST(Size__operator_times__size)
   EXPECT_FLT_EQ((s1 * s2).h, -756.0f * 54.0f);
 }
 
-TEST(Size__operator_times__float)
+TEST(UNIT__Size__operator_times__float)
 {
   Size s1(143.0f, -756.0f);
 
@@ -158,7 +158,7 @@ TEST(Size__operator_times__float)
   EXPECT_FLT_EQ((s1 * -27.0f).h, -756.0f * -27.0f);
 }
 
-TEST(Size__operator_times_equals__size)
+TEST(UNIT__Size__operator_times_equals__size)
 {
   Size s1(143.0f, -756.0f);
   s1 *= Size(12.0f, 54.0f);
@@ -167,7 +167,7 @@ TEST(Size__operator_times_equals__size)
   EXPECT_FLT_EQ(s1.h, -756.0f * 54.0f);
 }
 
-TEST(Size__operator_times_equals__float)
+TEST(UNIT__Size__operator_times_equals__float)
 {
   Size s1(143.0f, -756.0f);
   s1 *= -27.0f;
@@ -176,7 +176,7 @@ TEST(Size__operator_times_equals__float)
   EXPECT_FLT_EQ(s1.h, -756.0f * -27.0f);
 }
 
-TEST(Size__operator_divide__size)
+TEST(UNIT__Size__operator_divide__size)
 {
   Size s1(143.0f, -756.0f);
   Size s2(12.0f, 54.0f);
@@ -185,7 +185,7 @@ TEST(Size__operator_divide__size)
   EXPECT_FLT_EQ((s1 / s2).h, -756.0f / 54.0f);
 }
 
-TEST(Size__operator_divide__float)
+TEST(UNIT__Size__operator_divide__float)
 {
   Size s1(143.0f, -756.0f);
 
@@ -193,7 +193,7 @@ TEST(Size__operator_divide__float)
   EXPECT_FLT_EQ((s1 / -27.0f).h, -756.0f / -27.0f);
 }
 
-TEST(Size__operator_divide_equals__size)
+TEST(UNIT__Size__operator_divide_equals__size)
 {
   Size s1(143.0f, -756.0f);
   s1 /= Size(12.0f, 54.0f);
@@ -202,7 +202,7 @@ TEST(Size__operator_divide_equals__size)
   EXPECT_FLT_EQ(s1.h, -756.0f / 54.0f);
 }
 
-TEST(Size__operator_divide_equals__float)
+TEST(UNIT__Size__operator_divide_equals__float)
 {
   Size s1(143.0f, -756.0f);
   s1 /= -27.0f;
@@ -211,7 +211,7 @@ TEST(Size__operator_divide_equals__float)
   EXPECT_FLT_EQ(s1.h, -756.0f / -27.0f);
 }
 
-TEST(Size__operator_modulo__size)
+TEST(UNIT__Size__operator_modulo__size)
 {
   Size s1(143.0f, -756.0f);
   Size s2(12.0f, 54.0f);
@@ -220,7 +220,7 @@ TEST(Size__operator_modulo__size)
   EXPECT_FLT_EQ((s1 % s2).h, fmodf(-756.0f, 54.0f));
 }
 
-TEST(Size__operator_modulo__float)
+TEST(UNIT__Size__operator_modulo__float)
 {
   Size s1(143.0f, -756.0f);
 
@@ -228,7 +228,7 @@ TEST(Size__operator_modulo__float)
   EXPECT_FLT_EQ((s1 % -27.0f).h, fmodf(-756.0f, -27.0f));
 }
 
-TEST(Size__operator_modulo_equals__size)
+TEST(UNIT__Size__operator_modulo_equals__size)
 {
   // If anybody thinks this test suite is useless because the functions are
   // "too simple" to be prone to mistakes, know that at the moment of writing
@@ -248,7 +248,7 @@ TEST(Size__operator_modulo_equals__size)
   EXPECT_FLT_EQ(s1.h, fmodf(-756.0f, 54.0f));
 }
 
-TEST(Size__operator_modulo_equals__float)
+TEST(UNIT__Size__operator_modulo_equals__float)
 {
   Size s1(143.0f, -756.0f);
   s1 %= -27.0f;
@@ -257,7 +257,7 @@ TEST(Size__operator_modulo_equals__float)
   EXPECT_FLT_EQ(s1.h, fmodf(-756.0f, -27.0f));
 }
 
-TEST(Size__operator_equals)
+TEST(UNIT__Size__operator_equals)
 {
   EXPECT(Size() == Size());
   EXPECT(Size() == Size(0.0f, 0.0f));
@@ -266,7 +266,7 @@ TEST(Size__operator_equals)
   EXPECT(!(Size(2.0f, 1.0f) == Size(1.0f, 1.0f)));
 }
 
-TEST(Size__operator_not_equals)
+TEST(UNIT__Size__operator_not_equals)
 {
   EXPECT(!(Size() != Size()));
   EXPECT(!(Size() != Size(0.0f, 0.0f)));
@@ -275,7 +275,7 @@ TEST(Size__operator_not_equals)
   EXPECT((Size(2.0f, 1.0f) != Size(1.0f, 1.0f)));
 }
 
-TEST(Size__operator_printstream)
+TEST(UNIT__Size__operator_printstream)
 {
   // There is no guarantee regarding what it will print, only that it won't
   // throw.

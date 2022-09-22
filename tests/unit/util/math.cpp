@@ -18,7 +18,7 @@
 
 #include "util/math.hpp"
 
-TEST(Math__clamp)
+TEST(UNIT__Math__clamp)
 {
   EXPECT_EQ(Math::clamp(0, -1, 1), 0);
   EXPECT_EQ(Math::clamp(-1, -1, 1), -1);

@@ -15,9 +15,12 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "tests.hpp"
+#include "util/log.hpp"
 
 #include <chrono>
 #include <iostream>
+
+const char* arg0 = nullptr;
 
 static std::string str_time(float t)
 {
@@ -67,6 +70,8 @@ int run_tests(int argc, const char* const* argv)
               color_reset = "\033[0m";
   std::ostream* out = &std::cout;
   bool fail_fast = false;
+
+  arg0 = argv[0];
 
   /** @todo Do something with those undocumented arguments */
   for (int i = 1; i < argc; i++)
@@ -178,4 +183,32 @@ int run_tests(int argc, const char* const* argv)
             "run." << std::endl;
 
   return failed != 0;
+}
+
+LogScanner::LogScanner() :
+  m_stream_out(),
+  m_stream_err(),
+  m_out(Log::s_out),
+  m_err(Log::s_err)
+{
+  Log::s_out = &m_stream_out;
+  Log::s_err = &m_stream_err;
+}
+
+LogScanner::~LogScanner()
+{
+  Log::s_out = m_out;
+  Log::s_out = m_err;
+}
+
+const std::stringstream&
+LogScanner::get_out() const
+{
+  return m_stream_out;
+}
+
+const std::stringstream&
+LogScanner::get_err() const
+{
+  return m_stream_err;
 }

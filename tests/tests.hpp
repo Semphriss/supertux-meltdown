@@ -25,6 +25,8 @@
 #include <utility>
 #include <vector>
 
+extern const char* arg0;
+
 std::map<std::string, void(*)()>&
 g_tests(const std::string& name = "", void (*func)() = nullptr);
 
@@ -56,6 +58,25 @@ private:
   const int m_line;
 };
 
+/**
+ * Eases the task of scanning the output by grabbing the stream.
+ */
+class LogScanner final
+{
+public:
+  LogScanner();
+  ~LogScanner();
+
+  const std::stringstream& get_out() const;
+  const std::stringstream& get_err() const;
+
+private:
+  std::stringstream m_stream_out;
+  std::stringstream m_stream_err;
+  std::ostream* m_out;
+  std::ostream* m_err;
+};
+
 #define ASSERT_FAIL(msg) throw AssertFail(msg, __FILE__, __LINE__)
 
 #define EXPECT(condition)                                                      \
@@ -79,6 +100,19 @@ private:
     }                                                                          \
   }
 
+
+#define EXPECT_NEQ(have, need)                                                 \
+  {                                                                            \
+    auto stm_have = have;                                                      \
+    auto stm_need = need;                                                      \
+    if (stm_have == stm_need)                                                  \
+    {                                                                          \
+      std::stringstream s;                                                     \
+      s << "Expected " #have " to not be " << stm_need << ", got " << stm_have;\
+      ASSERT_FAIL(s.str());                                                    \
+    }                                                                          \
+  }
+
 #define EXPECT_FLT_EQ_PRECISION(have, need, prec)                              \
   {                                                                            \
     auto stm_have = have;                                                      \
@@ -92,5 +126,19 @@ private:
     }                                                                          \
   }
 #define EXPECT_FLT_EQ(have, need) EXPECT_FLT_EQ_PRECISION(have, need, 0.001f)
+
+#define EXPECT_FLT_NEQ_PRECISION(have, need, prec)                             \
+  {                                                                            \
+    auto stm_have = have;                                                      \
+    auto stm_need = need;                                                      \
+    if (std::abs(stm_have - stm_need) <=                                       \
+        (std::abs(stm_have) + std::abs(stm_need)) * prec)                      \
+    {                                                                          \
+      std::stringstream s;                                                     \
+      s << "Expected " #have " to not be " << stm_need << ", got " << stm_have;\
+      ASSERT_FAIL(s.str());                                                    \
+    }                                                                          \
+  }
+#define EXPECT_FLT_NEQ(have, need) EXPECT_FLT_NEQ_PRECISION(have, need, 0.001f)
 
 #endif
