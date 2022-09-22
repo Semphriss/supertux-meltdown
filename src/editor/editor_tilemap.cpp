@@ -22,7 +22,6 @@
 #include <stdexcept>
 #include <string>
 
-#include "SDL_pixels.h"
 #include "util/fs.hpp"
 #include "util/math.hpp"
 #include "video/drawing_context.hpp"

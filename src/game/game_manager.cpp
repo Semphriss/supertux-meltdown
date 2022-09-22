@@ -264,8 +264,8 @@ GameManager::init(const char* arg0)
 
     this->m_window->set_title("SuperTux Meltdown " STM_VERSION);
 
-    auto& controller = this->m_scene_manager.get_controller();
-    this->m_scene_manager.push_scene(std::make_unique<STARTING_SCENE>(controller));
+    auto& ctrl = this->m_scene_manager.get_controller();
+    this->m_scene_manager.push_scene(std::make_unique<STARTING_SCENE>(ctrl));
   });
 
   if (!inited)
