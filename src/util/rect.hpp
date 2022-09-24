@@ -17,8 +17,8 @@
 #ifndef HEADER_STM_UTIL_RECT_HPP
 #define HEADER_STM_UTIL_RECT_HPP
 
-#include <utility>
 #include <ostream>
+#include <utility>
 
 class Size;
 class Vector;

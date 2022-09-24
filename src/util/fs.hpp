@@ -20,7 +20,7 @@
 #include <memory>
 #include <string>
 
-#include <SDL.h>
+#include "SDL2/SDL.h"
 
 class FS final
 {
