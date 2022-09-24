@@ -22,7 +22,16 @@
 
 // Will move as 1/(n^t) (invert exponential). t is time in seconds, this is n.
 // 1 is no movement at all. Infinity is instantaneous. <1 is bad.
-static const float CAM_EXPONENT = 8192.0f;
+//
+// For easy setting, this is calculated as 10^(2^val) where val is:
+// - 0: Heavy (super slow)
+// - 1: Dragging
+// - 2: Comfortable
+// - 3: Fast
+// - 4: Super fast
+// - 5: Transition barely noticeable
+// - 6: Instantaneous (same as no transition at all)
+static const float CAM_EXPONENT = std::pow(10.0f, std::pow(2.0f, 2.0f));
 
 EditorCamera::EditorCamera() :
   m_current_pos(0.0f, 0.0f),
