@@ -26,6 +26,8 @@
 #include "util/math.hpp"
 #include "video/drawing_context.hpp"
 
+typedef std::unique_ptr<SDL_Surface, void (&) (SDL_Surface*)> SurfPtr;
+
 static const std::vector<std::string> g_tiles = {
   "",
   "images/tiles/block.png",
@@ -172,17 +174,17 @@ EditorTilemap::draw(DrawingContext& context) const
 void
 EditorTilemap::load_tilemap(const std::string& file)
 {
-  auto* surface = SDL_LoadBMP_RW(FS::get_rwops(file.c_str(), FS::OP::READ),
-                                 true);
+  SurfPtr img(SDL_LoadBMP_RW(FS::get_rwops(file.c_str(), FS::OP::READ), true),
+               SDL_FreeSurface);
 
-  if (!surface)
+  if (!img)
   {
     throw std::runtime_error("Can't open BMP at '" + file + "': "
                             + std::string(SDL_GetError()));
   }
 
-  auto* data = SDL_ConvertSurfaceFormat(surface, SDL_PIXELFORMAT_ARGB8888, 0);
-  SDL_FreeSurface(surface);
+  SurfPtr data(SDL_ConvertSurfaceFormat(img.get(), SDL_PIXELFORMAT_ARGB8888, 0),
+               SDL_FreeSurface);
 
   if (!data)
   {
@@ -216,8 +218,6 @@ EditorTilemap::load_tilemap(const std::string& file)
       m_tilemap.at(y).at(x) = tile;
     }
   }
-
-  SDL_FreeSurface(data);
 }
 
 void
@@ -227,9 +227,10 @@ EditorTilemap::save_tilemap(const std::string& file) const
 
   auto format = SDL_PIXELFORMAT_ARGB8888;
 #if SDL_VERSION_ATLEAST(2, 0, 5)
-  auto* surface = SDL_CreateRGBSurfaceWithFormat(0, w, h, 32, format);
+  SurfPtr surface(SDL_CreateRGBSurfaceWithFormat(0, w, h, 32, format),
+                  SDL_FreeSurface);
 #else
-  SDL_Surface* surface;
+  SurfPtr surface(nullptr, SDL_FreeSurface);
 
   {
     Uint32 r, g, b, a;
@@ -242,7 +243,7 @@ EditorTilemap::save_tilemap(const std::string& file) const
                                + std::string(SDL_GetError()));
     }
 
-    surface = SDL_CreateRGBSurface(0, w, h, 32, r, g, b, a);
+    surface.reset(SDL_CreateRGBSurface(0, w, h, 32, r, g, b, a));
   }
 #endif
 
@@ -264,8 +265,8 @@ EditorTilemap::save_tilemap(const std::string& file) const
     }
   }
 
-  SDL_SaveBMP_RW(surface, FS::get_rwops(file.c_str(), FS::OP::WRITE), true);
-  SDL_FreeSurface(surface);
+  SDL_SaveBMP_RW(surface.get(), FS::get_rwops(file.c_str(), FS::OP::WRITE),
+                 true);
 }
 
 void
