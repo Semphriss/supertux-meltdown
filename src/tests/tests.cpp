@@ -14,11 +14,12 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "tests.hpp"
-#include "util/log.hpp"
+#include "tests/tests.hpp"
 
 #include <chrono>
 #include <iostream>
+
+#include "util/log.hpp"
 
 const char* arg0 = nullptr;
 

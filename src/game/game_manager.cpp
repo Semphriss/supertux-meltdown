@@ -28,8 +28,8 @@
 #include "SDL2/SDL_image.h"
 #include "SDL2/SDL_ttf.h"
 
-#include "tests.hpp"
 #include "scenes/level_editor.hpp"
+#include "tests/tests.hpp"
 #include "util/fs.hpp"
 #include "util/log.hpp"
 #include "video/drawing_context.hpp"
@@ -523,4 +523,3 @@ GameManager::generic_try(F func)
 
   return true;
 }
-

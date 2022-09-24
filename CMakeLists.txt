@@ -22,9 +22,9 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-file(GLOB_RECURSE STM_FILES src/*.cpp tests/*.cpp)
+file(GLOB_RECURSE STM_FILES src/*.cpp)
 add_executable(stmeltdown ${STM_FILES})
-target_include_directories(stmeltdown PUBLIC src/ tests/)
+target_include_directories(stmeltdown PUBLIC src/)
 
 # Equivalent of -DSTM_VERSION="$(git describe --tags --always)"
 # This presumes Git exists and is in the PATH, which may or may not be true
