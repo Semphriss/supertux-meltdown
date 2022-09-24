@@ -53,6 +53,10 @@ EditorCamera::event(const SDL_Event& event)
       {
         case SDL_BUTTON_RIGHT:
           m_moving = true;
+#if SDL_VERSION_ATLEAST(2, 0, 4)
+          // Return code ignored; it errors only if the feature is unsupported
+          SDL_CaptureMouse(SDL_TRUE);
+#endif
           break;
 
         default:
@@ -65,6 +69,10 @@ EditorCamera::event(const SDL_Event& event)
       {
         case SDL_BUTTON_RIGHT:
           m_moving = false;
+#if SDL_VERSION_ATLEAST(2, 0, 4)
+          // Return code ignored; it errors only if the feature is unsupported
+          SDL_CaptureMouse(SDL_FALSE);
+#endif
           break;
 
         default:
