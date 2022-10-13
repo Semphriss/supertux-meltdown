@@ -57,7 +57,8 @@ GameManager::GameManager() :
   m_arg_data_folder(""),
   m_window(),
   m_context(),
-  m_last_time()
+  m_last_time(),
+  m_delay(0.01f)
 {
 }
 
@@ -77,6 +78,12 @@ GameManager::run(int argc, const char* const* argv)
   deinit();
 
   return m_return_code;
+}
+
+void
+GameManager::set_delay(float delay)
+{
+  m_delay = delay;
 }
 
 /**
@@ -351,7 +358,7 @@ GameManager::single_loop()
   m_context.render(m_window->get_renderer());
   m_context.clear();
 
-  SDL_Delay(10);
+  SDL_Delay(static_cast<int>(m_delay * 1000.0f));
 }
 
 /**

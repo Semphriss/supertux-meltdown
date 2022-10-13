@@ -46,6 +46,8 @@ public:
 
   int run(int argc, const char* const* argv);
 
+  void set_delay(float delay);
+
 private:
   bool parse_cli_args(int argc, const char* const* argv);
   bool init(const char* arg0);
@@ -69,6 +71,7 @@ private:
   // the user changes their computer time, including back in time. See the
   // notes: https://en.cppreference.com/w/cpp/chrono/high_resolution_clock
   std::chrono::steady_clock::time_point m_last_time;
+  float m_delay;
 
 private:
   GameManager(const GameManager&) = delete;
