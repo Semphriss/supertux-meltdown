@@ -34,3 +34,9 @@ DefaultSceneController::pop_scene()
 {
   m_scene_manager.pop_scene();
 }
+
+void
+DefaultSceneController::set_delay(float delay)
+{
+  m_scene_manager.set_delay(delay);
+}

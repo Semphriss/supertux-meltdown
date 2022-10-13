@@ -33,6 +33,7 @@ public:
 
   virtual void push_scene(std::unique_ptr<Scene> scene) = 0;
   virtual void pop_scene() = 0;
+  virtual void set_delay(float delay) = 0;
 
 private:
   SceneController(const SceneController&) = delete;
@@ -48,6 +49,7 @@ public:
 
   virtual void push_scene(std::unique_ptr<Scene> scene) override;
   virtual void pop_scene() override;
+  virtual void set_delay(float delay) override;
 
 private:
   SceneManager& m_scene_manager;
