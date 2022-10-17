@@ -16,10 +16,13 @@
 
 #include "game/scene_controller.hpp"
 
+#include "game/game_manager.hpp"
 #include "game/scene_manager.hpp"
 
-DefaultSceneController::DefaultSceneController(SceneManager& scene_manager) :
-  m_scene_manager(scene_manager)
+DefaultSceneController::DefaultSceneController(SceneManager& scene_manager,
+                                               GameManager* game_manager) :
+  m_scene_manager(scene_manager),
+  m_game_manager(game_manager)
 {
 }
 
@@ -38,5 +41,6 @@ DefaultSceneController::pop_scene()
 void
 DefaultSceneController::set_delay(float delay)
 {
-  m_scene_manager.set_delay(delay);
+  if (m_game_manager)
+    m_game_manager->set_delay(delay);
 }

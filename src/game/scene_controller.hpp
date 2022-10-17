@@ -20,7 +20,7 @@
 #include <memory>
 
 class Scene;
-
+class GameManager;
 class SceneManager;
 
 // Allows interactions between the scene and the controller. Helps de-coupling
@@ -44,7 +44,8 @@ class DefaultSceneController :
   public SceneController
 {
 public:
-  DefaultSceneController(SceneManager& scene_manager);
+  DefaultSceneController(SceneManager& scene_manager,
+                         GameManager* game_manager);
   virtual ~DefaultSceneController() override = default;
 
   virtual void push_scene(std::unique_ptr<Scene> scene) override;
@@ -53,6 +54,7 @@ public:
 
 private:
   SceneManager& m_scene_manager;
+  GameManager* m_game_manager;
 
 private:
   DefaultSceneController(const DefaultSceneController&) = delete;

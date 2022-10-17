@@ -48,11 +48,8 @@ public:
   void update(float dt_sec);
   void draw(DrawingContext& context) const;
 
-  void set_delay(float delay);
-
 private:
   DefaultSceneController m_controller;
-  GameManager* const m_game_manager;
   std::vector<std::unique_ptr<Scene>> m_scenes;
 
 private:

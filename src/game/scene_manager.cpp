@@ -19,8 +19,7 @@
 #include "game/game_manager.hpp"
 
 SceneManager::SceneManager(GameManager* game_manager) :
-  m_controller(*this),
-  m_game_manager(game_manager),
+  m_controller(*this, game_manager),
   m_scenes()
 {
 }
@@ -80,11 +79,4 @@ SceneManager::draw(DrawingContext& context) const
 {
   if (!m_scenes.empty())
     m_scenes.back()->draw(context);
-}
-
-void
-SceneManager::set_delay(float delay)
-{
-  if (m_game_manager)
-    m_game_manager->set_delay(delay);
 }
