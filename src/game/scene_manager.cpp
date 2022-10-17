@@ -16,6 +16,8 @@
 
 #include "game/scene_manager.hpp"
 
+#include <stdexcept>
+
 #include "game/game_manager.hpp"
 
 SceneManager::SceneManager(GameManager* game_manager) :
@@ -33,6 +35,9 @@ SceneManager::push_scene(std::unique_ptr<Scene> scene)
 void
 SceneManager::pop_scene()
 {
+  if (m_scenes.size() < 1)
+    throw std::runtime_error("Cannot pop scene: stack empty");
+
   m_scenes.pop_back();
 }
 

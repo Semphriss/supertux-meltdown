@@ -17,7 +17,6 @@
 #ifndef HEADER_STM_TESTS_TESTS_HPP
 #define HEADER_STM_TESTS_TESTS_HPP
 
-#include <functional>
 #include <map>
 #include <sstream>
 #include <stdexcept>
@@ -140,5 +139,19 @@ private:
     }                                                                          \
   }
 #define EXPECT_FLT_NEQ(have, need) EXPECT_FLT_NEQ_PRECISION(have, need, 0.001f)
+
+#define EXPECT_THROW(expression)                                               \
+  {                                                                            \
+    try                                                                        \
+    {                                                                          \
+      {                                                                        \
+        expression;                                                            \
+      }                                                                        \
+      ASSERT_FAIL("Expected '" #expression "' to throw");                      \
+    }                                                                          \
+    catch(...)                                                                 \
+    {                                                                          \
+    }                                                                          \
+  }
 
 #endif
