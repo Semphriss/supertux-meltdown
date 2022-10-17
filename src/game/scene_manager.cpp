@@ -19,7 +19,7 @@
 #include "game/game_manager.hpp"
 
 SceneManager::SceneManager(GameManager* game_manager) :
-  m_controller(*this, game_manager),
+  m_controller(this, game_manager),
   m_scenes()
 {
 }

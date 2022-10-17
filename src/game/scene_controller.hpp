@@ -31,9 +31,9 @@ public:
   SceneController() = default;
   virtual ~SceneController() = default;
 
-  virtual void push_scene(std::unique_ptr<Scene> scene) = 0;
-  virtual void pop_scene() = 0;
-  virtual void set_delay(float delay) = 0;
+  virtual bool push_scene(std::unique_ptr<Scene> scene) = 0;
+  virtual bool pop_scene() = 0;
+  virtual bool set_delay(float delay) = 0;
 
 private:
   SceneController(const SceneController&) = delete;
@@ -44,16 +44,16 @@ class DefaultSceneController :
   public SceneController
 {
 public:
-  DefaultSceneController(SceneManager& scene_manager,
+  DefaultSceneController(SceneManager* scene_manager,
                          GameManager* game_manager);
   virtual ~DefaultSceneController() override = default;
 
-  virtual void push_scene(std::unique_ptr<Scene> scene) override;
-  virtual void pop_scene() override;
-  virtual void set_delay(float delay) override;
+  virtual bool push_scene(std::unique_ptr<Scene> scene) override;
+  virtual bool pop_scene() override;
+  virtual bool set_delay(float delay) override;
 
 private:
-  SceneManager& m_scene_manager;
+  SceneManager* m_scene_manager;
   GameManager* m_game_manager;
 
 private:

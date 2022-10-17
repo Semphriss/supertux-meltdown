@@ -19,28 +19,38 @@
 #include "game/game_manager.hpp"
 #include "game/scene_manager.hpp"
 
-DefaultSceneController::DefaultSceneController(SceneManager& scene_manager,
+DefaultSceneController::DefaultSceneController(SceneManager* scene_manager,
                                                GameManager* game_manager) :
   m_scene_manager(scene_manager),
   m_game_manager(game_manager)
 {
 }
 
-void
+bool
 DefaultSceneController::push_scene(std::unique_ptr<Scene> scene)
 {
-  m_scene_manager.push_scene(std::move(scene));
+  if (m_scene_manager)
+    m_scene_manager->push_scene(std::move(scene));
+
+  // Technically, the double negation here is not needed, but only
+  // `return m_scene_manager;` could be confusing.
+  return !!m_scene_manager;
 }
 
-void
+bool
 DefaultSceneController::pop_scene()
 {
-  m_scene_manager.pop_scene();
+  if (m_scene_manager)
+    m_scene_manager->pop_scene();
+
+  return !!m_scene_manager;
 }
 
-void
+bool
 DefaultSceneController::set_delay(float delay)
 {
   if (m_game_manager)
     m_game_manager->set_delay(delay);
+
+  return !!m_game_manager;
 }
