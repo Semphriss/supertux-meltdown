@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>SuperTux Meltdown</title>
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        background: black;
+        font-family: sans-serif;
+        overflow: hidden;
+      }
+
+      #mainarea {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+      }
+
+      #loader {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+
+        color: white;
+        font-weight: bold;
+        background: #0007;
+        z-index: 10;
+      }
+
+      /* the canvas *must not* have any border or padding, or mouse coords will
+         be wrong */
+      canvas {
+        border: none;
+        background-color: black;
+      }
+
+      #output {
+        display: block;
+        position: absolute;
+        top: 100%;
+        left: 10%;
+        height: 180px;
+        width: 80%;
+        font-family: monospace;
+        color: white;
+        background: black;
+        border-radius: 8px;
+        border: none;
+        padding: 8px;
+        box-shadow: 0 0 8px #7777;
+        transform: translateY(-12px);
+        transition: transform 0.25s;
+        z-index: 20;
+        outline: none;
+      }
+
+      #output:hover {
+        transform: translateY(-180px);
+      }
+
+      #spinner {
+        height: 50px;
+        width: 50px;
+        margin: 0;
+        -webkit-animation: rotation .8s linear infinite;
+        -moz-animation: rotation .8s linear infinite;
+        -o-animation: rotation .8s linear infinite;
+        animation: rotation 0.8s linear infinite;
+        border: 6px solid #fff7;
+        border-top: 6px solid white;
+        border-radius: 100%;
+      }
+      @-webkit-keyframes rotation {
+        from {-webkit-transform: rotate(0deg);}
+        to {-webkit-transform: rotate(360deg);}
+      }
+      @-moz-keyframes rotation {
+        from {-moz-transform: rotate(0deg);}
+        to {-moz-transform: rotate(360deg);}
+      }
+      @-o-keyframes rotation {
+        from {-o-transform: rotate(0deg);}
+        to {-o-transform: rotate(360deg);}
+      }
+      @keyframes rotation {
+        from {transform: rotate(0deg);}
+        to {transform: rotate(360deg);}
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="loader">
+      <figure style="overflow:visible;" id="spinner"></figure>
+      <div style="height: 24px;"></div>
+      <div id="status">Downloading...</div>
+      <div>
+        <progress value="0" max="100" id="progress" hidden="1"></progress>  
+      </div>
+      <div style="height: 48px;"></div>
+    </div>
+    <div id="mainarea">
+      <canvas class="emscripten" id="canvas"
+              oncontextmenu="event.preventDefault()" tabindex=-1></canvas>
+    </div>
+    <textarea id="output" readonly="1"></textarea>
+    <script type='text/javascript'>
+      var statusElement = document.getElementById('status');
+      var progressElement = document.getElementById('progress');
+      var loaderElement = document.getElementById('loader');
+
+      var outputElement = document.getElementById('output');
+      outputElement.value = ''; // clear browser cache
+
+      var Module = {
+        preRun: [],
+        postRun: [],
+        print: function(text) {
+          if (arguments.length > 1)
+            text = Array.prototype.slice.call(arguments).join(' ');
+
+          console.log(text);
+
+          outputElement.value += text + "\n";
+          outputElement.scrollTop = outputElement.scrollHeight;
+        },
+        printErr: function(text) {
+          if (arguments.length > 1)
+            text = Array.prototype.slice.call(arguments).join(' ');
+
+          console.error(text);
+
+          outputElement.value += text + "\n";
+          outputElement.scrollTop = outputElement.scrollHeight;
+        },
+        canvas: (function() {
+          var canvas = document.getElementById('canvas');
+
+          // TODO: Do something when context is lost
+          // See http://www.khronos.org/registry/webgl/specs/latest/1.0/#5.15.2
+          canvas.addEventListener("webglcontextlost", function(e) {
+            alert('WebGL context lost. You will need to reload the page.');
+            e.preventDefault();
+          }, false);
+
+          return canvas;
+        })(),
+        setStatus: function(text) {
+          if (!Module.setStatus.last)
+            Module.setStatus.last = { time: Date.now(), text: '' };
+
+          if (text === Module.setStatus.last.text)
+            return;
+
+          var m = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
+
+          // if this is a progress update, skip it if too soon
+          var now = Date.now();
+          if (m && now - Module.setStatus.last.time < 30)
+            return;
+
+          Module.setStatus.last.time = now;
+          Module.setStatus.last.text = text;
+
+          if (m) {
+            text = m[1];
+            progressElement.value = parseInt(m[2])*100;
+            progressElement.max = parseInt(m[4])*100;
+            progressElement.hidden = false;
+            loaderElement.style.display = 'initial';
+          } else {
+            progressElement.value = null;
+            progressElement.max = null;
+            progressElement.hidden = true;
+            if (!text) loaderElement.style.display = 'none';
+          }
+          statusElement.innerHTML = text;
+        },
+        totalDependencies: 0,
+        monitorRunDependencies: function(left) {
+          this.totalDependencies = Math.max(this.totalDependencies, left);
+          var done = this.totalDependencies - left;
+          var progress = done + '/' + this.totalDependencies;
+          Module.setStatus(left ? 'Preparing... (' + progress + ')'
+                                : 'All downloads complete.');
+        }
+      };
+
+      Module.setStatus('Downloading...');
+
+      window.onerror = function() {
+        Module.setStatus('Exception thrown, see JavaScript console');
+        loaderElement.style.display = 'none';
+        Module.setStatus = function(text) {
+          if (text) console.error('[post-exception status] ' + text);
+        };
+      };
+    </script>
+    {{{ SCRIPT }}}
+  </body>
+</html>

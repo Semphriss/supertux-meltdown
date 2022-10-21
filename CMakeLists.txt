@@ -45,6 +45,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
   set(USE_FLAGS "${USE_FLAGS} -sNO_DISABLE_EXCEPTION_CATCHING")
   set(USE_LINK_FLAGS "--preload-file ${CMAKE_CURRENT_SOURCE_DIR}/data/@/data")
   set(USE_LINK_FLAGS "${USE_LINK_FLAGS} --use-preload-plugin")
+  set(USE_LINK_FLAGS "${USE_LINK_FLAGS} --shell-file ${CMAKE_CURRENT_SOURCE_DIR}/mk/emscripten/template.html")
 
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${USE_FLAGS}")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${USE_FLAGS}")
