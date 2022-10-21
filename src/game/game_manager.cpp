@@ -41,6 +41,9 @@
 
 #define STARTING_SCENE LevelEditor
 
+#define STRVER(X) (std::to_string((X).major) + "." + std::to_string((X).minor)\
+                  + "." + std::to_string((X).patch))
+
 #ifdef EMSCRIPTEN
 GameManager* GameManager::s_game_manager = nullptr;
 
@@ -178,6 +181,42 @@ GameManager::parse_cli_args(int argc, const char* const* argv)
 bool
 GameManager::init(const char* arg0)
 {
+  SDL_version compiled;
+  SDL_version linked;
+
+  SDL_VERSION(&compiled);
+  SDL_GetVersion(&linked);
+
+  log_debug << "SDL: Compiled " << STRVER(compiled) << ", linked "
+            << STRVER(linked) << std::endl;
+
+  SDL_version img_compiled;
+  const SDL_version* img_linked;
+
+  SDL_IMAGE_VERSION(&img_compiled);
+  img_linked = IMG_Linked_Version();
+
+  log_debug << "SDL_image: Compiled " << STRVER(img_compiled) << ", linked "
+            << STRVER(*img_linked) << std::endl;
+
+  SDL_version ttf_compiled;
+  const SDL_version* ttf_linked;
+
+  SDL_TTF_VERSION(&ttf_compiled);
+  ttf_linked = TTF_Linked_Version();
+
+  log_debug << "SDL_ttf: Compiled " << STRVER(ttf_compiled) << ", linked "
+            << STRVER(*ttf_linked) << std::endl;
+
+  PHYSFS_Version physfs_compiled;
+  PHYSFS_Version physfs_linked;
+
+  PHYSFS_VERSION(&physfs_compiled);
+  PHYSFS_getLinkedVersion(&physfs_linked);
+
+  log_debug << "PhysFS: Compiled " << STRVER(physfs_compiled) << ", linked "
+            << STRVER(physfs_linked) << std::endl;
+
   if (SDL_Init(SDL_INIT_VIDEO))
   {
     log_fatal << "Could not init SDL: " << SDL_GetError() << std::endl;
